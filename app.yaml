@@ -1,0 +1,16 @@
+runtime: nodejs20
+service: dine-deals
+instance_class: F1
+handlers:
+  # Serve all static files with url ending with a file extension
+  - url: /(.*\..+)$
+    static_files: dist/\1
+    upload: dist/(.*\..+)$
+  # Catch all GET requests to index.html
+  - url: /.*
+    static_files: dist/index.html
+    upload: dist/index.html
+    
+  # Error handler for other methods
+  - url: /.*
+    script: auto

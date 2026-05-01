@@ -1,0 +1,66 @@
+[
+  {
+    "id": "v1",
+    "vertical": "vehicles",
+    "title": "2023 Toyota Camry GLE",
+    "description": "Mint condition, single owner, full service history at Al Abdulghani. Low mileage and very clean interior.",
+    "providerId": "dealer1",
+    "providerType": "dealer",
+    "category": "Sedan",
+    "pricing": {
+      "originalPrice": 115000,
+      "discountedPrice": 108000,
+      "currency": "QAR"
+    },
+    "validity": {
+      "from": "2026-01-01",
+      "to": "2026-12-31"
+    },
+    "location": {
+      "city": "Doha",
+      "country": "Qatar"
+    },
+    "attributes": {
+      "make": "Toyota",
+      "model": "Camry",
+      "year": 2023,
+      "mileage": "15,000 km",
+      "color": "White",
+      "fuelType": "Petrol"
+    },
+    "imageUrl": "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&q=80&w=800",
+    "status": "active"
+  },
+  {
+    "id": "v2",
+    "vertical": "vehicles",
+    "title": "2022 Land Cruiser VXR",
+    "description": "Top of the line VXR model. Sunroof, leather seats, 360 camera, and premium sound system. Perfect for Qatar dunes.",
+    "providerId": "dealer1",
+    "providerType": "dealer",
+    "category": "SUV",
+    "pricing": {
+      "originalPrice": 320000,
+      "discountedPrice": 295000,
+      "currency": "QAR"
+    },
+    "validity": {
+      "from": "2026-01-01",
+      "to": "2026-12-31"
+    },
+    "location": {
+      "city": "Al Wakrah",
+      "country": "Qatar"
+    },
+    "attributes": {
+      "make": "Toyota",
+      "model": "Land Cruiser",
+      "year": 2022,
+      "mileage": "45,000 km",
+      "color": "Black",
+      "fuelType": "Petrol"
+    },
+    "imageUrl": "https://images.unsplash.com/photo-1594502184342-2e12f877aa73?auto=format&fit=crop&q=80&w=800",
+    "status": "active"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": 101,
+    "name": "Spice Garden",
+    "address": "West Bay, Doha",
+    "phone": "+974 4444 5555",
+    "rating": 4.5,
+    "cuisine": ["Indian", "Asian"],
+    "logoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=spicegarden",
+    "brandUrl": "/images/restaurants/restaurant-1.jpg",
+    "country": "Qatar"
+  },
+  {
+    "id": 102,
+    "name": "Pizza Fiesta",
+    "address": "Dubai Mall, Dubai",
+    "phone": "+971 4 333 4444",
+    "rating": 4.2,
+    "cuisine": ["Italian", "Fast Food"],
+    "logoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=pizzafiesta",
+    "brandUrl": "/images/restaurants/restaurant-10.jpg",
+    "country": "UAE"
+  },
+  {
+    "id": 103,
+    "name": "Urban Bar & Grill",
+    "address": "Pearl Qatar, Doha",
+    "phone": "+974 4455 6677",
+    "rating": 4.7,
+    "cuisine": ["Continental", "Fusion"],
+    "logoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=urbanbar",
+    "brandUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=urbanbar",
+    "country": "Qatar"
+  },
+  {
+    "id": 104,
+    "name": "Sushi Palace",
+    "address": "City Centre Doha",
+    "phone": "+974 4466 7788",
+    "rating": 4.6,
+    "cuisine": ["Japanese", "Asian"],
+    "logoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=sushipalace",
+    "brandUrl": "/images/restaurants/restaurant-4.jpg",
+    "country": "Qatar"
+  },
+  {
+    "id": 105,
+    "name": "Corporate Catering Co",
+    "address": "Business District, Doha",
+    "phone": "+974 4477 8899",
+    "rating": 4.3,
+    "cuisine": ["Multi-cuisine", "Catering"],
+    "logoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=catering",
+    "brandUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=catering",
+    "country": "Qatar"
+  },
+  {
+    "id": 106,
+    "name": "Family Dining House",
+    "address": "Marina Walk, Dubai",
+    "phone": "+971 4 555 6666",
+    "rating": 4.4,
+    "cuisine": ["Multi-cuisine", "Indian", "Chinese"],
+    "logoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=familydining",
+    "brandUrl": "/images/restaurants/restaurant-6.jpg",
+    "country": "UAE"
+  },
+  {
+    "id": 107,
+    "name": "Cinema Snacks",
+    "address": "Villaggio Mall, Doha",
+    "phone": "+974 4488 9900",
+    "rating": 4.1,
+    "cuisine": ["Snacks", "Fast Food"],
+    "logoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=cinema",
+    "brandUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=cinema",
+    "country": "Qatar"
+  },
+  {
+    "id": 108,
+    "name": "Elite Events Catering",
+    "address": "Al Barsha, Dubai",
+    "phone": "+971 4 666 7777",
+    "rating": 4.8,
+    "cuisine": ["Multi-cuisine", "Catering"],
+    "logoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=elite",
+    "brandUrl": "/images/restaurants/restaurant-8.jpg",
+    "country": "UAE"
+  }
+]

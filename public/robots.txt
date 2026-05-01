@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /manage-offers
+Disallow: /make-offer
+Disallow: /*?utm_*
+
+Sitemap: https://browseqatar.com/sitemap.xml
