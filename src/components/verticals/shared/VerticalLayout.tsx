@@ -42,20 +42,27 @@ const VerticalLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
+    <div className="min-h-screen bg-gray-50 pb-4">
       {/* Re-use main TopHeader for consistent branding/auth */}
-      <TopHeader
-        onSearch={handleSearch}
-        selectedCountry={selectedCountry}
-        onSelectCountry={setSelectedCountry}
-        onAddBusiness={() => {}} // TODO: Handle business enquiry for verticals
-        searchQuery={searchQuery}
-      />
+      <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
+        <TopHeader
+          onSearch={handleSearch}
+          selectedCountry={selectedCountry}
+          onSelectCountry={setSelectedCountry}
+          onAddBusiness={() => {}} // TODO: Handle business enquiry for verticals
+          searchQuery={searchQuery}
+        />
+      </div>
 
       {/* Vertical-specific header with navigation */}
       <VerticalHeader />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-0 pb-4">
+        {currentConfig && vertical !== 'restaurants' && (
+          <div className="mb-1 md:hidden flex items-center gap-2 px-1">
+            <h1 className="text-lg font-bold text-gray-900">{currentConfig.name}</h1>
+          </div>
+        )}
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -90,6 +97,23 @@ const VerticalLayout: React.FC = () => {
           </div>
         )}
       </main>
+
+      <footer className="bg-muted py-6 px-4 mt-2 pb-8">
+        <div className="container mx-auto text-center text-muted-foreground">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-3">
+            <p className="m-0">© {new Date().getFullYear()} BrowseQatar Offers Platform. All rights reserved.</p>
+            <span className="hidden md:inline text-muted-foreground mr-2">|</span>
+            <a href="/terms" className="text-sm text-gray-500 hover:text-blue-600 transition-colors md:mr-3 underline">
+              Terms & Conditions
+            </a>
+            <span className="hidden md:inline text-muted-foreground">|</span>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <img src={'/meraki.webp'} alt="Meraki AI" className="w-6 h-6 object-contain" />
+              <span>Powered by MerakiAi</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { SHOW_PRODUCTS, SHOW_COUPONS, SHOW_OFFERS } from "../config/appConfig";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import MenuOptions from "./MenuOptions";
 import { useVertical } from "../contexts/VerticalContext";
 
@@ -24,6 +24,7 @@ export default function TopHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchKey, setSearchKey] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentVertical, currentConfig } = useVertical();
 
   // single ref that wraps hamburger + menu area (mobile) and desktop menu area separately
@@ -86,7 +87,7 @@ export default function TopHeader({
                   className="w-13 h-11 object-contain shadow-sm"
                 />
                 <span className="sr-only">DineDeals</span>
-                {(!currentVertical || currentVertical === 'restaurants') && (
+                {currentVertical === 'restaurants' && location.pathname !== '/' && (
                   <span className="ml-3 inline-flex items-center gap-1 px-1 py-1 md:px-3 md:py-1 rounded-full brand-gradient-bg text-white font-semibold text-xs md:text-sm">
                     <img src="/images/chef.jpg" alt="chef" className="w-4 h-4 md:w-5 md:h-5 object-cover rounded waving-chef" />
                     <span className="brand-wave">Dine Offers</span>

@@ -392,6 +392,23 @@ function Home() {
           </div>
         </main>
 
+        <footer className="bg-muted py-6 px-4 mt-2 pb-8 border-t border-gray-200">
+          <div className="container mx-auto text-center text-muted-foreground">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-3">
+              <p className="m-0">© {new Date().getFullYear()} BrowseQatar Offers Platform. All rights reserved.</p>
+              <span className="hidden md:inline text-muted-foreground mr-2">|</span>
+              <a href="/terms" className="text-sm text-gray-500 hover:text-blue-600 transition-colors md:mr-3 underline">
+                Terms &amp; Conditions
+              </a>
+              <span className="hidden md:inline text-muted-foreground">|</span>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <img src={'/meraki.webp'} alt="Meraki AI" className="w-6 h-6 object-contain" />
+                <span>Powered by MerakiAi</span>
+              </div>
+            </div>
+          </div>
+        </footer>
+
         <EnquiryPopup open={enquiryOpen} onClose={() => setEnquiryOpen(false)} />
       </div>
     );

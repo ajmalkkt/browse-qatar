@@ -90,8 +90,12 @@ export class BaseVerticalService {
    * Get single listing by ID
    */
   async getById(id: string | number): Promise<Listing | null> {
-    // Usually getById is an endpoint like /offers/123
-    const url = `${this.config.apiUrl}${this.config.endpoints.list}/${id}`;
+    // If the list endpoint has a query param, we split it to append the ID to the base path
+    // e.g. /listings?vertical=vehicles -> /listings/123
+    const listEndpoint = this.config.endpoints.list;
+    const basePath = listEndpoint.split('?')[0];
+    const url = `${this.config.apiUrl}${basePath}/${id}`;
+    
     let data = await fetchJsonWithFallback(url);
     
     // If primary fails, we might need to find it in the fallback list

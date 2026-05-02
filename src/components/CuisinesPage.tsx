@@ -22,7 +22,7 @@ const CuisinesPage = () => {
 
             <div className="bg-white shadow-sm sticky top-0 z-50">
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+                    <Link to="/restaurants-offers" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
                         <ArrowLeft size={20} />
                     </Link>
                     <div className="flex items-center gap-2">
@@ -67,7 +67,7 @@ const CuisinesPage = () => {
                                 </p>
 
                                 <Link
-                                    to={`/?search=${encodeURIComponent(cuisine.name)}`}
+                                    to={`/restaurants-offers?search=${encodeURIComponent(cuisine.name)}`}
                                     className="w-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white font-bold py-2.5 rounded-xl text-center transition-all flex items-center justify-center gap-2"
                                 >
                                     View Offers

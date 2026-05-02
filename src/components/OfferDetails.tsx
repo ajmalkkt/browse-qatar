@@ -134,7 +134,7 @@ const OfferDetails = () => {
             {/* Header / Nav */}
             <div className="bg-white shadow-sm sticky top-0 z-10">
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+                    <Link to="/restaurants-offers" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
                         <ArrowLeft size={20} />
                         <span className="font-medium">Back</span>
                     </Link>
@@ -160,7 +160,7 @@ const OfferDetails = () => {
                 {/* Intro Card */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
                     <p className="text-gray-600 text-sm leading-relaxed">
-                        Discover the best dining deals in Qatar with <Link to="/" title="browseqatar.com" className="font-semibold text-blue-600 hover:underline">Browse Qatar</Link>.
+                        Discover the best dining deals in Qatar with <Link to="/restaurants-offers" title="browseqatar.com" className="font-semibold text-blue-600 hover:underline">Browse Qatar</Link>.
                         We bring you exclusive offers from top restaurants, cafes, and eateries.
                         Enjoy great food at unbeatable prices!
                     </p>

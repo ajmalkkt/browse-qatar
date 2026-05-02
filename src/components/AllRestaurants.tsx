@@ -75,9 +75,9 @@ export default function AllRestaurants() {
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-3 w-full md:w-auto">
                             <button
-                                onClick={() => navigate("/")}
+                                onClick={() => navigate("/restaurants-offers")}
                                 className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
-                                title="Back to Home"
+                                title="Back to Restaurants"
                             >
                                 <ArrowLeft size={20} />
                             </button>
@@ -125,7 +125,7 @@ export default function AllRestaurants() {
                             {currentItems.map((r) => (
                                 <div
                                     key={r.id}
-                                    onClick={() => navigate(`/?restaurant=${r.id}`)}
+                                    onClick={() => navigate(`/restaurants-offers?restaurant=${r.id}`)}
                                     className="bg-white rounded-xl shadow-sm border-2 border-gray-300 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group flex flex-col h-full"
                                 >
                                     <div className="h-20 bg-gray-50 relative overflow-hidden flex items-center justify-center p-1">

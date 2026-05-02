@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate, Navigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate, Link } from 'react-router-dom';
 import { useListingById } from '../../../hooks/useListing';
 import { useVertical } from '../../../hooks/useVertical';
 import { ChevronLeft, MapPin, Calendar, Tag, Share2, Heart, ExternalLink } from 'lucide-react';
@@ -20,56 +20,36 @@ const ListingDetail: React.FC = () => {
     return <Navigate to="/" replace />;
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex-1 flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      );
+    }
 
-  if (error || !listing) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Listing not found</h2>
-        <p className="text-gray-600 mb-6 text-center">
-          The listing you're looking for might have been removed or is temporarily unavailable.
-        </p>
-        <button 
-          onClick={() => navigate(`/${vertical}`)}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
-        >
-          Back to {currentConfig?.name || 'Category'}
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 pb-12">
-      {/* Quick Navigation Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition font-medium"
-          >
-            <ChevronLeft size={20} />
-            <span>Back</span>
-          </button>
-          
-          <div className="flex items-center gap-3">
-            <button className="p-2 text-gray-400 hover:text-red-500 transition">
-              <Heart size={24} />
-            </button>
-            <button className="p-2 text-gray-400 hover:text-blue-500 transition">
-              <Share2 size={24} />
+    if (error || !listing) {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center p-4 py-20">
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 max-w-md w-full text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Listing not found</h2>
+            <p className="text-gray-600 mb-6">
+              The listing you're looking for might have been removed or is temporarily unavailable.
+            </p>
+            <button 
+              onClick={() => navigate(`/${vertical}`)}
+              className="w-full bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md"
+            >
+              Back to {currentConfig?.name || 'Category'}
             </button>
           </div>
         </div>
-      </div>
+      );
+    }
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+    return (
+      <main className="container mx-auto px-4 py-8 max-w-6xl flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column: Visuals */}
           <div className="space-y-6">
@@ -118,7 +98,11 @@ const ListingDetail: React.FC = () => {
               <div className="flex flex-wrap gap-4 text-gray-600 text-sm">
                 <div className="flex items-center gap-1">
                   <MapPin size={18} className="text-gray-400" />
-                  <span>{listing.location.city}, {listing.location.country}</span>
+                  <span>
+                    {typeof listing.location === 'string' 
+                      ? listing.location 
+                      : `${listing.location?.city || ''}, ${listing.location?.country || ''}`.replace(/^, | , |^,/g, '')}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Tag size={18} className="text-gray-400" />
@@ -131,19 +115,19 @@ const ListingDetail: React.FC = () => {
                   <p className="text-sm text-gray-500 mb-1">Starting Price</p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-black text-blue-600">
-                      {listing.pricing.currency} {listing.pricing.discountedPrice}
+                      {listing.pricing?.currency || 'QR'} {listing.pricing?.discountedPrice || listing.discountedPrice || 0}
                     </span>
-                    {listing.pricing.originalPrice > listing.pricing.discountedPrice && (
+                    {(listing.pricing?.originalPrice || listing.originalPrice || 0) > (listing.pricing?.discountedPrice || listing.discountedPrice || 0) && (
                       <span className="text-lg text-gray-400 line-through font-medium">
-                        {listing.pricing.currency} {listing.pricing.originalPrice}
+                        {listing.pricing?.currency || 'QR'} {listing.pricing?.originalPrice || listing.originalPrice || 0}
                       </span>
                     )}
                   </div>
                 </div>
                 
-                {Number(listing.pricing?.originalPrice || 0) > Number(listing.pricing?.discountedPrice || 0) && (
+                {Number(listing.pricing?.originalPrice || listing.originalPrice || 0) > Number(listing.pricing?.discountedPrice || listing.discountedPrice || 0) && (
                   <div className="bg-green-100 text-green-700 px-4 py-2 rounded-xl font-bold">
-                    {Math.round((1 - Number(listing.pricing?.discountedPrice || 0) / Number(listing.pricing?.originalPrice || 1)) * 100)}% OFF
+                    {Math.round((1 - Number(listing.pricing?.discountedPrice || listing.discountedPrice || 0) / Number(listing.pricing?.originalPrice || listing.originalPrice || 1)) * 100)}% OFF
                   </div>
                 )}
               </div>
@@ -204,6 +188,56 @@ const ListingDetail: React.FC = () => {
           </div>
         </div>
       </main>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header / Nav */}
+      <div className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <Link to={`/${vertical}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <ChevronLeft size={20} />
+            <span className="font-medium">Back</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link to="/" className="hover:opacity-80 transition-opacity flex items-center">
+              <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-10 object-contain" />
+            </Link>
+            <Link to={`/${vertical}`} className="hover:opacity-80 transition-opacity hidden sm:flex items-center border-l-2 border-gray-200 pl-3">
+              <span className="font-bold text-[#8B1538]">
+                {currentConfig?.name || 'Listing Details'}
+              </span>
+            </Link>
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="p-2 text-gray-400 hover:text-red-500 transition rounded-full hover:bg-gray-100">
+              <Heart size={20} />
+            </button>
+            <button className="p-2 text-gray-400 hover:text-blue-500 transition rounded-full hover:bg-gray-100">
+              <Share2 size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {renderContent()}
+      <footer className="bg-muted py-6 px-4 mt-2 pb-8 border-t border-gray-200">
+        <div className="container mx-auto text-center text-muted-foreground">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-3">
+            <p className="m-0">© {new Date().getFullYear()} BrowseQatar Offers Platform. All rights reserved.</p>
+            <span className="hidden md:inline text-muted-foreground mr-2">|</span>
+            <a href="/terms" className="text-sm text-gray-500 hover:text-blue-600 transition-colors md:mr-3 underline">
+              Terms & Conditions
+            </a>
+            <span className="hidden md:inline text-muted-foreground">|</span>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <img src={'/meraki.webp'} alt="Meraki AI" className="w-6 h-6 object-contain" />
+              <span>Powered by MerakiAi</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

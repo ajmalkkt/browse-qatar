@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVertical } from '../../hooks/useVertical';
 import * as LucideIcons from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface VerticalNavProps {
   className?: string;
@@ -26,48 +27,57 @@ export default function VerticalNav({
   }
 
   return (
-    <div className={`flex items-center gap-2 md:gap-4 overflow-x-auto pb-2 px-2 md:px-0 ${className}`}>
-      {verticals.map((vertical) => {
-        // Get the icon component from lucide-react
-        const IconComponent = (LucideIcons as any)[vertical.icon];
-        const isActive = currentVertical === vertical.id;
+    <TooltipProvider delayDuration={300}>
+      <div className={`flex items-center gap-2 md:gap-4 overflow-x-auto pb-1 px-2 md:px-0 ${className}`}>
+        {verticals.map((vertical) => {
+          // Get the icon component from lucide-react
+          const IconComponent = (LucideIcons as any)[vertical.icon];
+          const isActive = currentVertical === vertical.id;
 
-        return (
-          <button
-            key={vertical.id}
-            onClick={() => {
-              switchVertical(vertical.id);
-              navigate(vertical.route);
-            }}
-            className={`
-              flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-lg
-              transition-all duration-200 whitespace-nowrap flex-shrink-0
-              ${isActive
-                ? 'bg-white shadow-md border-b-2'
-                : 'hover:bg-gray-50'
-              }
-            `}
-            style={isActive ? { borderBottomColor: vertical.color } : {}}
-            title={vertical.name}
-          >
-            {IconComponent && (
-              <IconComponent 
-                size={compact ? 16 : 18} 
-                style={isActive ? { color: vertical.color } : {}}
-              />
-            )}
-            {showLabels && !compact && (
-              <span 
-                className={`text-sm font-medium hidden md:inline ${
-                  isActive ? 'text-gray-900' : 'text-gray-600'
-                }`}
-              >
+          return (
+            <Tooltip key={vertical.id}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    switchVertical(vertical.id);
+                    navigate(vertical.route);
+                  }}
+                  className={`
+                    flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-lg
+                    transition-all duration-200 whitespace-nowrap flex-shrink-0
+                    ${isActive
+                      ? 'bg-white shadow-md border-b-2'
+                      : 'hover:bg-gray-50'
+                    }
+                  `}
+                  style={isActive ? { borderBottomColor: vertical.color } : {}}
+                  aria-label={vertical.name}
+                >
+                  {IconComponent && (
+                    <IconComponent 
+                      size={compact ? 16 : 18} 
+                      style={isActive ? { color: vertical.color } : {}}
+                    />
+                  )}
+                  {showLabels && !compact && (
+                    <span 
+                      className={`text-sm font-medium hidden md:inline ${
+                        isActive ? 'text-gray-900' : 'text-gray-600'
+                      }`}
+                    >
+                      {vertical.name}
+                    </span>
+                  )}
+                </button>
+              </TooltipTrigger>
+              {/* Only show tooltip on mobile (where label text is hidden) */}
+              <TooltipContent side="bottom" className="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg z-[100] md:hidden">
                 {vertical.name}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </div>
+    </TooltipProvider>
   );
 }

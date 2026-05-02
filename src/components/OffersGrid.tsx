@@ -207,9 +207,11 @@ const OfferCard: React.FC<OfferCardProps> = ({
               <span className="text-xs text-muted-foreground">
                 Valid till: {offer.validTo ? offer.validTo.split("T")[0] : ""}
               </span>
-              <span className="bg-muted text-xs px-2 py-1 rounded-full">
-                {offer.offerType}
-              </span>
+              {!(offer.originalPrice === offer.discountedPrice && offer.offerType === 'Discount') && (
+                <span className="bg-muted text-xs px-2 py-1 rounded-full">
+                  {offer.offerType}
+                </span>
+              )}
             </div>
           </div>
         )}
