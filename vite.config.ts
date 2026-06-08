@@ -1,7 +1,6 @@
 import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import { tempo } from "tempo-devtools/dist/vite";
 import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
@@ -12,7 +11,6 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    tempo(),
     visualizer({ open: false }), // This will open a chart in your browser on build
   ],
   build: {

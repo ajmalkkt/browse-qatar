@@ -20,6 +20,9 @@ import ListingDetail from "./components/verticals/shared/ListingDetail";
 import VerticalLayout from "./components/verticals/shared/VerticalLayout";
 import { VerticalProvider } from "./contexts/VerticalContext";
 import NotFound from "./components/NotFound";
+import Features from "./components/Feature";
+import FAQ from "./components/FAQ";
+import RestaurantDetails from "./components/RestaurantDetails";
 
 function App() {
   return (
@@ -34,6 +37,8 @@ function App() {
               <Route path="/offer/:id" element={<OfferDetails />} />
               <Route path="/admin" element={<ProtectedRoute><AdminImageManager /></ProtectedRoute>} />
               <Route path="/about" element={<About />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/faq" element={<FAQ />} />
               {/*<Route path="/login" element={<LoginPage />} /> */}
               <Route path="/make-offer" element={<AdminRoute><MakeOffer /></AdminRoute>} />
               <Route path="/admin-guide" element={<ProtectedRoute><AdminUserGuide /></ProtectedRoute>} />
@@ -41,6 +46,7 @@ function App() {
               <Route path="/manage-offers" element={<ProtectedRoute><ManageOffers /></ProtectedRoute>} />
               <Route path="/terms" element={<TermsAndConditions />} />
               <Route path="/all-restaurants" element={<AllRestaurants />} />
+              <Route path="/restaurant/:id" element={<RestaurantDetails />} />
               
               <Route path="/restaurants-offers" element={<Home />} />
               

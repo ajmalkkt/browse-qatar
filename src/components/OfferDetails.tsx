@@ -124,6 +124,7 @@ const OfferDetails = () => {
                 <title>{`${offer.title} at ${restaurant?.name || 'Restaurant'} - QR ${offer.discountedPrice} | Browse Qatar`}</title>
                 <meta name="description" content={`Enjoy ${offer.title} for only QR ${offer.discountedPrice} at ${restaurant?.name || 'our partner restaurant'}. Valid until ${new Date(offer.validTo).toLocaleDateString()}. Discover best dining deals on Browse Qatar.`} />
                 <link rel="canonical" href={`https://browseqatar.com/offer/${id}`} />
+                <link rel="alternate" type="text/markdown" href="/content/offers" />
                 <meta property="og:title" content={`${offer.title} - ${restaurant?.name || 'Dine Offer'}`} />
                 <meta property="og:description" content={`Special Offer: ${offer.title} for QR ${offer.discountedPrice}. Valid until ${new Date(offer.validTo).toLocaleDateString()}. Check it out on Browse Qatar!`} />
                 <meta property="og:image" content={offer.imageUrl.startsWith('http') ? offer.imageUrl : `${window.location.origin}${offer.imageUrl}`} />

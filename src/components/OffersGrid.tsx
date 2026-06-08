@@ -373,9 +373,7 @@ const OffersGrid = ({
             <React.Fragment key={offer.id}>
 
               {/* SEO Schema for Google */}
-              <script type="application/ld+json">
-                {JSON.stringify(generateOfferSchema(offer, restaurant))}
-              </script>
+              <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateOfferSchema(offer, restaurant)) }} />
               <OfferCard
                 key={offer.id}
                 offer={offer}

@@ -25,6 +25,7 @@ export default function AboutUs() {
         <title>About Us | Browse Qatar - Best Food Offers & Dining Deals</title>
         <meta name="description" content="Learn about Browse Qatar, your trusted platform to discover the best food offers, dining deals, and family buffet offers in Qatar while reducing food wastage." />
         <link rel="canonical" href="https://browseqatar.com/about" />
+        <link rel="alternate" type="text/markdown" href="/content/about" />
         <meta property="og:title" content="About Browse Qatar - No Waste... More Tasty!!!" />
         <meta property="og:description" content="Discover how Browse Qatar connects food lovers with the best dining deals in Doha while promoting sustainability." />
         <meta property="og:url" content="https://browseqatar.com/about" />

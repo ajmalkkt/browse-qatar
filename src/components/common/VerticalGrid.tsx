@@ -81,13 +81,8 @@ export default function VerticalGrid({
                   <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-[#FFF8E7]/20"></div>
                 </div>
 
-                {/* Middle Section: Slanted Accent Line */}
-                <div
-                  className="absolute left-[45%] sm:left-[47%] md:left-[43%] top-0 bottom-0 w-12 sm:w-16 md:w-20 bg-[#8B1538] z-20 opacity-80"
-                  style={{
-                    clipPath: 'polygon(0 0, 100% 0, 70% 100%, 0 100%)',
-                  }}
-                ></div>
+                {/* Middle Section: Slanted Accent Line - removed now, check commit */}
+              
               </div>
             </div>
           );

@@ -428,6 +428,7 @@ function Home() {
           name="description"
           content={`Discover the best restaurant offers, budget meals, and dining deals in ${selectedCountry}. Search by cuisine, location, or restaurant.`}
         />
+        <link rel="alternate" type="text/markdown" href="/content/offers" />
         {/* SEO Keywords for Restaurants */}
         <meta name="keywords" content="Qatar food offers, Doha restaurant deals, budget meals Qatar, buy 1 get 1 food Qatar, best dining offers Doha" />
       </Helmet>
