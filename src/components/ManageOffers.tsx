@@ -27,7 +27,9 @@ import {
   Clock,         // Added for Status
   ChevronLeft,    // Added for Pagination
   HelpCircle,     // Added for User Guide
-  Edit2          // Added for Edit action
+  Edit2,          // Added for Edit action
+  List,           // Added for Listings
+  Building2       // Added for Providers
 } from "lucide-react";
 
 // Mock Services (Keep your existing imports here)
@@ -45,6 +47,9 @@ import {
   updateOffer,
 } from "../services/offerService";
 
+import { uploadListing, getAllListings } from "../services/listingService";
+import { getAllProviders, createProvider, updateProvider, deleteProvider } from "../services/providerService";
+
 import { getEnquiries, updateEnquiryStatus, sendAccountCreationEmail } from "../services/enquiryService";
 
 // Auth Hook
@@ -53,6 +58,8 @@ import { getAuthToken } from '../auth/firebaseClient';
 
 // App Config
 import { cuisineOptions, countryMap } from "../config/appConfig";
+import ListingForm from "./common/ListingForm";
+import ProviderForm from "./common/ProviderForm";
 
 export default function ManageOffers() {
   const navigate = useNavigate();
@@ -89,6 +96,23 @@ export default function ManageOffers() {
   const [showEditOfferForm, setShowEditOfferForm] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [updateImage, setUpdateImage] = useState(false);
+
+  // -- Listings States --
+  const [showAddListingForm, setShowAddListingForm] = useState(false);
+  const [listings, setListings] = useState([]);
+  const [listingPreview, setListingPreview] = useState(null);
+  const [listingGalleryPreviews, setListingGalleryPreviews] = useState([]);
+
+  // -- Provider States --
+  const [providers, setProviders] = useState([]);
+  const [showAddProviderForm, setShowAddProviderForm] = useState(false);
+  const [editingProvider, setEditingProvider] = useState(null);
+  const [providerLogoPreview, setProviderLogoPreview] = useState(null);
+  const [providerBannerPreview, setProviderBannerPreview] = useState(null);
+  const [providerForm, setProviderForm] = useState({
+    verticalId: "", type: "", name: "", email: "", phone: "",
+    address: "", country: "Qatar", logo: null, banner: null,
+  });
 
   // Add this near your other useState definitions
   const [isUploading, setIsUploading] = useState(false);
@@ -131,6 +155,14 @@ export default function ManageOffers() {
     category: "", image: null, active: true,
   });
 
+  const [listingForm, setListingForm] = useState({
+    verticalId: "", title: "", description: "", category: "", subcategory: "",
+    originalPrice: "", discountedPrice: "", unit: "", currency: "QAR",
+    validFrom: getTodayDate(), validTo: getTomorrowDate(),
+    city: "", country: "Qatar", address: "",
+    attributes: {}, image: null, gallery: []
+  });
+
   // ===== Helpers =====
   const getAuthHeaders = () => ({ "x-api-token": apiKey || "" });
 
@@ -159,6 +191,8 @@ export default function ManageOffers() {
   // ===== Effects =====
   useEffect(() => {
     getAllOwnerRestaurants().then(setRestaurants).catch(console.error);
+    getAllProviders().then(setProviders).catch(console.error);
+    getAllListings().then(setListings).catch(console.error);
   }, []);
 
   // Fetch inactive offers when tab is switched
@@ -174,6 +208,10 @@ export default function ManageOffers() {
     // Fetch Messages when tab is switched
     if (activeTab === "messages") {
       fetchMessages(msgPage);
+    }
+    // Fetch Providers when tab is switched
+    if (activeTab === "providers") {
+      getAllProviders().then(setProviders).catch(console.error);
     }
   }, [activeTab, msgPage]); // Re-run when tab or page changes
 
@@ -192,6 +230,89 @@ export default function ManageOffers() {
       setLoadingMessages(false);
     }
   };
+
+  // ===== Provider Handlers =====
+  const handleProviderFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    if (type === "file") {
+      const file = (e.target as HTMLInputElement).files?.[0] || null;
+      setProviderForm(prev => ({ ...prev, [name]: file }));
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (name === "logo") setProviderLogoPreview(reader.result as string);
+          if (name === "banner") setProviderBannerPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    } else {
+      setProviderForm(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const resetProviderForm = () => {
+    setProviderForm({ verticalId: "", type: "", name: "", email: "", phone: "", address: "", country: "Qatar", logo: null, banner: null });
+    setProviderLogoPreview(null);
+    setProviderBannerPreview(null);
+    setEditingProvider(null);
+    setShowAddProviderForm(false);
+  };
+
+  const handleProviderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    Object.entries(providerForm).forEach(([key, val]) => {
+      if (val !== null && val !== undefined && val !== "") {
+        formData.append(key, val as any);
+      }
+    });
+    setIsUploading(true);
+    try {
+      if (editingProvider) {
+        await updateProvider(editingProvider.id, formData);
+        alert("Provider updated successfully!");
+      } else {
+        await createProvider(formData);
+        alert("Provider created successfully!");
+      }
+      getAllProviders().then(setProviders).catch(console.error);
+      resetProviderForm();
+    } catch (err: any) {
+      console.error(err);
+      alert("Error saving provider: " + err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleEditProvider = (p: any) => {
+    setEditingProvider(p);
+    setProviderForm({
+      verticalId: p.verticalId || "",
+      type: p.type || "",
+      name: p.name || "",
+      email: p.email || "",
+      phone: p.phone || "",
+      address: p.address || "",
+      country: p.country || "Qatar",
+      logo: null,
+      banner: null,
+    });
+    setProviderLogoPreview(p.logoUrl || null);
+    setProviderBannerPreview(p.bannerUrl || null);
+    setShowAddProviderForm(true);
+  };
+
+  const handleDeleteProvider = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this provider?")) return;
+    try {
+      await deleteProvider(id);
+      setProviders(prev => prev.filter((p: any) => p.id !== id));
+    } catch (err: any) {
+      alert("Error deleting provider: " + err.message);
+    }
+  };
+  // =============================
 
   useEffect(() => {
     // When switching to offers tab, if no restaurant selected, select first one
@@ -321,6 +442,128 @@ export default function ManageOffers() {
     } catch (err) { console.error(err); alert("Error uploading offer: " + err.message); }
     finally {
       setIsUploading(false); // <--- STOP LOADING
+    }
+  };
+
+  const handleListingFormChange = (e) => {
+    const { name, value, files } = e.target;
+    if (files && files.length > 0) {
+      if (name === "image") {
+        setListingForm((prev) => ({ ...prev, image: files[0] }));
+        setListingPreview(URL.createObjectURL(files[0]));
+      } else if (name === "galleryUrls") {
+        const newFiles = Array.from(files) as File[];
+        setListingForm((prev) => {
+          const currentGallery = prev.gallery || [];
+          const combined = [...currentGallery, ...newFiles].slice(0, 5);
+          return { ...prev, gallery: combined };
+        });
+        setListingGalleryPreviews((prev) => {
+          const currentPreviews = prev || [];
+          const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+          return [...currentPreviews, ...newPreviews].slice(0, 5);
+        });
+      }
+    } else {
+      setListingForm((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setListingForm(prev => {
+      const newGallery = [...(prev.gallery || [])];
+      newGallery.splice(index, 1);
+      return { ...prev, gallery: newGallery };
+    });
+    setListingGalleryPreviews(prev => {
+      const newPreviews = [...(prev || [])];
+      if (newPreviews[index] && newPreviews[index].startsWith('blob:')) {
+        URL.revokeObjectURL(newPreviews[index]); // Free memory if it's a blob
+      }
+      newPreviews.splice(index, 1);
+      return newPreviews;
+    });
+  };
+
+  const toggleAddListingForm = () => {
+    if (!showAddListingForm) {
+      setListingForm({
+        verticalId: "vehicles", title: "", description: "", category: "", subcategory: "",
+        originalPrice: "", discountedPrice: "", unit: "", currency: "QAR",
+        validFrom: getTodayDate(), validTo: getTomorrowDate(),
+        city: "", country: "Qatar", address: "",
+        attributes: {}, image: null, gallery: []
+      });
+      setListingPreview(null);
+      setListingGalleryPreviews([]);
+    }
+    setShowAddListingForm(!showAddListingForm);
+  };
+
+  const handleListingUpload = async (e) => {
+    e.preventDefault();
+    if (!apiKey) return alert("Please enter your Key.");
+
+    const formData = new FormData();
+    
+    // Add providerId (using selectedRestaurant conceptually, or user email, here we can use selectedRestaurant for now since it represents the provider/owner ID in the current app model)
+    // Actually for listings, we probably want to associate with the provider directly.
+    if (!selectedRestaurant) return alert("Select a Provider/Restaurant first.");
+    formData.set("providerId", selectedRestaurant);
+
+    // Add text fields
+    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory'];
+    textFields.forEach(field => {
+      if (listingForm[field]) formData.set(field, listingForm[field]);
+    });
+
+    // Add JSON fields
+    formData.set("pricing", JSON.stringify({
+      originalPrice: listingForm.originalPrice,
+      discountedPrice: listingForm.discountedPrice,
+      unit: listingForm.unit,
+      currency: listingForm.currency
+    }));
+
+    formData.set("location", JSON.stringify({
+      city: listingForm.city,
+      country: listingForm.country,
+      address: listingForm.address
+    }));
+
+    formData.set("validity", JSON.stringify({
+      validFrom: listingForm.validFrom,
+      validTo: listingForm.validTo
+    }));
+
+    formData.set("attributes", JSON.stringify(listingForm.attributes));
+
+    // Add files
+    if (listingForm.image) {
+      formData.append("image", listingForm.image);
+    }
+    
+    if (listingForm.gallery && listingForm.gallery.length > 0) {
+      listingForm.gallery.forEach(file => {
+        formData.append("galleryUrls", file);
+      });
+    }
+
+    setIsUploading(true);
+
+    try {
+      await uploadListing(formData, { headers: getAuthHeaders() });
+      alert("Listing uploaded successfully!");
+      // We might want to fetch listings here
+      // setListings(await getListingsByProviderId(selectedRestaurant));
+      
+      setListingForm({ verticalId: "", title: "", description: "", category: "", subcategory: "", originalPrice: "", discountedPrice: "", unit: "", currency: "QAR", validFrom: getTodayDate(), validTo: getTomorrowDate(), city: "", country: "Qatar", address: "", attributes: {}, image: null, gallery: [] });
+      setShowAddListingForm(false);
+    } catch (err) { 
+      console.error(err); 
+      alert("Error uploading listing: " + err.message); 
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -478,7 +721,9 @@ export default function ManageOffers() {
         <nav className="flex-1 py-6 space-y-1">
           {renderSidebarItem("dashboard", <LayoutDashboard size={20} />, "Dashboard")}
           {renderSidebarItem("restaurants", <Store size={20} />, "Restaurants")}
-          {renderSidebarItem("offers", <Tag size={20} />, "Offers")}
+          {renderSidebarItem("offers", <Tag size={20} />, "Restaurant offers")}
+          {renderSidebarItem("providers", <Building2 size={20} />, "Providers")}
+          {renderSidebarItem("listings", <List size={20} />, "Listings")}
           {/* New Messages Item */}
           {renderSidebarItem("messages", <MessageSquare size={20} />, "Messages")}
           {user?.role === "admin" && renderSidebarItem("bulk", <UploadCloud size={20} />, "Bulk Import")}
@@ -543,41 +788,69 @@ export default function ManageOffers() {
           {/* --- DASHBOARD TAB --- */}
           {activeTab === "dashboard" && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+              {/* Stat Cards — row 1: Restaurants, Offers, Inactive Offers */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
                   <div className="p-3 bg-blue-100 text-blue-600 rounded-lg"><Store size={24} /></div>
                   <div>
                     <p className="text-sm text-gray-500 font-medium">Total Restaurants</p>
                     <h3 className="text-2xl font-bold text-gray-800">{getFilteredRestaurants(restaurants).length}</h3>
                   </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
                   <div className="p-3 bg-green-100 text-green-600 rounded-lg"><Tag size={24} /></div>
                   <div>
                     <p className="text-sm text-gray-500 font-medium">Offers Managed</p>
                     <h3 className="text-2xl font-bold text-gray-800">{offers.length > 0 ? offers.length : 0}</h3>
                   </div>
                 </div>
-
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-                  <div className="p-3 bg-purple-100 text-orange-600 rounded-lg"><EyeOff size={24} /></div>
+                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                  <div className="p-3 bg-orange-100 text-orange-600 rounded-lg"><EyeOff size={24} /></div>
                   <div>
                     <p className="text-sm text-gray-500 font-medium">Inactive Offers</p>
-                    <h3 className="text-lg font-bold text-gray-800">{inactiveOffers.length ? getFilteredOffers(inactiveOffers).length : "-"}</h3>
+                    <h3 className="text-2xl font-bold text-gray-800">{inactiveOffers.length ? getFilteredOffers(inactiveOffers).length : "-"}</h3>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stat Cards — row 2: Providers, Listings */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                  <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg"><Building2 size={24} /></div>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Total Providers</p>
+                    <h3 className="text-2xl font-bold text-gray-800">{providers.length}</h3>
+                  </div>
+                </div>
+                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                  <div className="p-3 bg-teal-100 text-teal-600 rounded-lg"><List size={24} /></div>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Total Listings</p>
+                    <h3 className="text-2xl font-bold text-gray-800">{listings.length}</h3>
                   </div>
                 </div>
               </div>
 
               {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white shadow-lg">
-                  <h3 className="text-xl font-bold mb-2">Manage Restaurants</h3>
-                  <p className="text-blue-100 mb-4 text-sm">Add, edit, or update branding for your partner restaurants.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 text-white shadow-lg">
+                  <h3 className="text-lg font-bold mb-1">Manage Restaurants</h3>
+                  <p className="text-blue-100 mb-3 text-xs">Add, edit, or update branding for your partner restaurants.</p>
                   <button onClick={() => setActiveTab('restaurants')} className="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50 transition">Go to Restaurants</button>
                 </div>
-                <div className="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-6 text-white shadow-lg">
-                  <h3 className="text-xl font-bold mb-2">Offer Management</h3>
-                  <p className="text-slate-300 mb-4 text-sm">Create seasonal offers and manage pricing strategies.</p>
+                <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 text-white shadow-lg">
+                  <h3 className="text-lg font-bold mb-1">Manage Providers</h3>
+                  <p className="text-indigo-100 mb-3 text-xs">Register and manage providers across verticals.</p>
+                  <button onClick={() => setActiveTab('providers')} className="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition">Go to Providers</button>
+                </div>
+                <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 text-white shadow-lg">
+                  <h3 className="text-lg font-bold mb-1">Manage Listings</h3>
+                  <p className="text-teal-100 mb-3 text-xs">Post and manage listings for vehicles, accommodation, services.</p>
+                  <button onClick={() => setActiveTab('listings')} className="bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Listings</button>
+                </div>
+                <div className="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-5 text-white shadow-lg">
+                  <h3 className="text-lg font-bold mb-1">Manage Restaurant Offers</h3>
+                  <p className="text-slate-300 mb-3 text-xs">Create seasonal offers and manage pricing strategies.</p>
                   <button onClick={() => setActiveTab('offers')} className="bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">Manage Offers</button>
                 </div>
               </div>
@@ -944,6 +1217,162 @@ export default function ManageOffers() {
             </div>
           )}
 
+          {/* --- LISTINGS TAB (NEW) --- */}
+          {activeTab === "listings" && (
+            <div className="space-y-6">
+              {/* Filter Bar */}
+              <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-4 md:items-end justify-between">
+                <div className="flex items-end gap-2 w-full md:w-auto">
+                  <div className="bg-blue-100 p-2 rounded-lg text-blue-600"><List size={20} /></div>
+                  <div className="flex-1">
+                    <label className="text-xs text-gray-500 font-semibold block mb-1">SELECT PROVIDER (RESTAURANT/OWNER)</label>
+                    <select
+                      value={selectedRestaurant}
+                      onChange={handleSelectRestaurant}
+                      className="bg-gray-50 border border-gray-300 text-gray-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                    >
+                      <option value="">-- Choose a Provider --</option>
+                      {providers.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                {selectedRestaurant && (
+                  <button
+                    onClick={toggleAddListingForm}
+                    className="w-full md:w-auto flex-shrink-0 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition shadow-sm whitespace-nowrap"
+                  >
+                    {showAddListingForm ? <X size={18} /> : <Plus size={18} />}
+                    {showAddListingForm ? "Cancel" : "Add New Listing"}
+                  </button>
+                )}
+              </div>
+
+              {/* Add Listing Form */}
+              {showAddListingForm && selectedRestaurant && (
+                <div className="bg-white p-6 rounded-xl shadow border border-green-100">
+                  <h4 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Create New Listing</h4>
+                  <ListingForm 
+                    listingForm={listingForm}
+                    setListingForm={setListingForm}
+                    handleListingFormChange={handleListingFormChange}
+                    handleListingUpload={handleListingUpload}
+                    listingPreview={listingPreview}
+                    listingGalleryPreviews={listingGalleryPreviews}
+                    removeGalleryImage={removeGalleryImage}
+                  />
+                </div>
+              )}
+              {!selectedRestaurant && (
+                <div className="text-center py-20 text-gray-400">
+                  <List size={48} className="mx-auto mb-4 opacity-20" />
+                  <p>Please select a provider to manage listings.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* --- PROVIDERS TAB --- */}
+          {activeTab === "providers" && (
+            <div className="space-y-6">
+              {/* Header row */}
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <Building2 size={24} className="text-blue-500" />
+                  Providers
+                </h3>
+                <button
+                  onClick={() => { resetProviderForm(); setShowAddProviderForm(!showAddProviderForm); }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition shadow-sm"
+                >
+                  {showAddProviderForm ? <X size={18} /> : <Plus size={18} />}
+                  {showAddProviderForm ? "Cancel" : "Add Provider"}
+                </button>
+              </div>
+
+              {/* Add / Edit Form */}
+              {showAddProviderForm && (
+                <div className="bg-white p-6 rounded-xl shadow border border-blue-100">
+                  <h4 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
+                    {editingProvider ? `Edit Provider — ${editingProvider.name}` : "Register New Provider"}
+                  </h4>
+                  <ProviderForm
+                    providerForm={providerForm}
+                    setProviderForm={setProviderForm}
+                    handleProviderFormChange={handleProviderFormChange}
+                    handleProviderSubmit={handleProviderSubmit}
+                    logoPreview={providerLogoPreview}
+                    bannerPreview={providerBannerPreview}
+                    isEditing={!!editingProvider}
+                    isUploading={isUploading}
+                  />
+                </div>
+              )}
+
+              {/* Provider Cards */}
+              {providers.length === 0 ? (
+                <div className="text-center py-20 text-gray-400">
+                  <Building2 size={48} className="mx-auto mb-4 opacity-20" />
+                  <p>No providers yet. Add your first provider above.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {providers
+                    .filter((p: any) => user?.role === "admin" || p.ownerLogin === user?.email)
+                    .map((p: any) => (
+                    <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                      {/* Banner */}
+                      <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 relative">
+                        {p.bannerUrl && (
+                          <img src={p.bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+                        )}
+                        {/* Logo */}
+                        <div className="absolute -bottom-6 left-4">
+                          {p.logoUrl ? (
+                            <img src={p.logoUrl} alt={p.name} className="h-12 w-12 rounded-full border-2 border-white shadow object-cover" />
+                          ) : (
+                            <div className="h-12 w-12 rounded-full border-2 border-white shadow bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                              {p.name?.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        {/* Action buttons */}
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button onClick={() => handleEditProvider(p)} className="bg-white/90 text-blue-600 p-1.5 rounded-full hover:bg-blue-600 hover:text-white transition shadow" title="Edit">
+                            <Edit2 size={14} />
+                          </button>
+                          {user?.role === "admin" && (
+                            <button onClick={() => handleDeleteProvider(p.id)} className="bg-white/90 text-red-500 p-1.5 rounded-full hover:bg-red-500 hover:text-white transition shadow" title="Delete">
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Info */}
+                      <div className="pt-8 pb-4 px-4 flex-1 flex flex-col gap-1">
+                        <div className="flex items-center justify-between">
+                          <h5 className="font-bold text-gray-800 truncate">{p.name}</h5>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold capitalize">{p.verticalId}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 capitalize">{p.type}</p>
+                        {p.phone && <p className="text-xs text-gray-500">{p.phone}</p>}
+                        {p.email && <p className="text-xs text-gray-400 truncate">{p.email}</p>}
+                        {p.address && <p className="text-xs text-gray-400 truncate mt-1">{p.address}</p>}
+                        <div className="mt-2">
+                          <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                            p.active ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
+                          }`}>
+                            {p.active ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* --- MESSAGES TAB (NEW) --- */}
           {activeTab === "messages" && (

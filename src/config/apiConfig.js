@@ -6,13 +6,18 @@ const RESTAURANTS_URL = import.meta.env.VITE_RESTAURANTS_URL;
 const BULK_API_URL = import.meta.env.VITE_BULK_API_URL;
 const ENQUIRY_API_URL = import.meta.env.VITE_ENQUIRY_API_URL;
 const USER_API_URL = import.meta.env.VITE_USER_API_URL; 
+const LISTINGS_URL = `${BASE_API}/listings`;
+const PROVIDERS_URL = `${BASE_API}/providers`;
+
 export  {
   OFFERS_URL,
   RESTAURANTS_URL,
   BASE_API,
   BULK_API_URL,
   ENQUIRY_API_URL,
-  USER_API_URL
+  USER_API_URL,
+  LISTINGS_URL,
+  PROVIDERS_URL
 };
 
 /*
