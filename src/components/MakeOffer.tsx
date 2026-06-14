@@ -30,6 +30,7 @@ import {
   inactivateListings as inactivateListingsSvc,
 } from "../services/listingService";
 import useAuth from "../auth/useAuth";
+import { useModal } from "@/contexts/ModalContext";
 
 // --- Types ---
 interface Offer {
@@ -59,6 +60,7 @@ export default function MakeOfferOnline() {
   const navigate = useNavigate();
   const auth = useAuth();
   const isAdmin = auth.user?.role === "admin";
+  const { openLogin } = useModal(); // 2. Get the open function
 
   // --- State ---
   // Top-level mode: "offers" or "listings"
@@ -207,6 +209,36 @@ export default function MakeOfferOnline() {
     return r ? r.name : `#${id}`;
   };
 
+  // ✅ NEW Helper: Checks Auth before navigating
+  const handleProtectedNavigation = (path: string) => {
+    //setMenuOpen(false); // Close the menu immediately
+
+    if (auth.user) {
+      // User is logged in -> Go to page
+      setTimeout(() => navigate(path), 120);
+    } else {
+      // User is NOT logged in -> Open Login Modal
+      if (auth.provider === "FIREBASE") {
+        openLogin(() => {
+          // This runs only AFTER successful login
+          navigate(path);
+        });
+      } else {
+        // Fallback for Keycloak
+        auth.login();
+      }
+    }
+  };
+  // Inside your component
+  const onGoToManageOfferClick = () => {
+    // Mobile (< 768px) goes to simple form, others go to Admin Dashboard
+    if (window.innerWidth < 768) {
+      handleProtectedNavigation("/admin");
+    } else {
+      handleProtectedNavigation("/manage-offers");
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
 
@@ -216,7 +248,7 @@ export default function MakeOfferOnline() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate("/manage-offers")}
+              onClick={onGoToManageOfferClick}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 flex-shrink-0"
               title="Back to Offer Management"
             >

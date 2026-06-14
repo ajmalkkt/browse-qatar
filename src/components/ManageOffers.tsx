@@ -47,7 +47,7 @@ import {
   updateOffer,
 } from "../services/offerService";
 
-import { uploadListing, getAllListings } from "../services/listingService";
+import { uploadListing, getAllListings, getInactiveListings, updateListing, deleteListing } from "../services/listingService";
 import { getAllProviders, createProvider, updateProvider, deleteProvider } from "../services/providerService";
 
 import { getEnquiries, updateEnquiryStatus, sendAccountCreationEmail } from "../services/enquiryService";
@@ -235,14 +235,12 @@ export default function ManageOffers() {
         });
     }
     if (activeTab === "listings") {
-      import('../services/listingService').then((module) => {
-        module.getInactiveListings()
+      getInactiveListings()
           .then((data) => setInactiveListings(data || []))
           .catch((err) => {
             console.error("Failed to fetch inactive listings", err);
             setInactiveListings([]);
           });
-      });
     }
     // Fetch Messages when tab is switched
     if (activeTab === "messages") {
@@ -574,7 +572,7 @@ export default function ManageOffers() {
       const allListings = await getAllListings();
       setListings(allListings);
       // also refresh inactive
-      import('../services/listingService').then(m => m.getInactiveListings().then(setInactiveListings).catch(console.error));
+      getInactiveListings().then(setInactiveListings).catch(console.error);
       setListingForm({ verticalId: "", title: "", description: "", category: "", subcategory: "", originalPrice: "", discountedPrice: "", unit: "", currency: "QAR", validFrom: getTodayDate(), validTo: getTomorrowDate(), city: "", country: "Qatar", address: "", attributes: {}, image: null, gallery: [] });
       setListingPreview(null);
       setListingGalleryPreviews([]);
@@ -592,7 +590,6 @@ export default function ManageOffers() {
     if (!window.confirm(`Delete listing "${title}"? This cannot be undone.`)) return;
     setIsUploading(true);
     try {
-      const { deleteListing } = await import('../services/listingService');
       await deleteListing(id, { headers: getAuthHeaders() });
       setListings(prev => prev.filter((l: any) => l.id !== id));
       setInactiveListings(prev => prev.filter((l: any) => l.id !== id));
@@ -632,12 +629,11 @@ export default function ManageOffers() {
     }
     setIsUploading(true);
     try {
-      const { updateListing: updateListingSvc } = await import('../services/listingService');
-      await updateListingSvc((editingListing as any).id, formData, { headers: getAuthHeaders() });
+      await updateListing((editingListing as any).id, formData, { headers: getAuthHeaders() });
       alert("Listing updated successfully!");
       const allListings = await getAllListings();
       setListings(allListings);
-      import('../services/listingService').then(m => m.getInactiveListings().then(setInactiveListings).catch(console.error));
+      getInactiveListings().then(setInactiveListings).catch(console.error);
       setShowEditListingForm(false);
       setEditingListing(null);
     } catch (err: any) {
