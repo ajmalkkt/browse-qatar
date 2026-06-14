@@ -85,13 +85,63 @@ export async function deleteListing(id, options = {}) {
 }
 
 // Get inactive listings
-export async function getInactiveListings(verticalId) {
-  let url = `${LISTINGS_URL}?status=inactive`;
-  if (verticalId) {
-    url += `&vertical=${verticalId}`;
-  }
-  const res = await fetch(url);
+export async function getInactiveListings() {
+  const res = await fetch(`${LISTINGS_URL}/all/inactive`);
   if (!res.ok) throw new Error("Failed to fetch inactive listings");
+  return res.json();
+}
+
+// Get all active listings
+export async function getAllActiveListings() {
+  const res = await fetch(`${LISTINGS_URL}/all/active`);
+  if (!res.ok) throw new Error("Failed to fetch active listings");
+  return res.json();
+}
+
+// Activate a single listing
+export async function activateListing(id, apiKey) {
+  const token = await getAdminAuthToken();
+  const res = await fetch(`${LISTINGS_URL}/activate/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-token": apiKey,
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to activate listing");
+  return res.json();
+}
+
+// Bulk activate listings
+export async function bulkActivateListings(payload, apiKey) {
+  const token = await getAdminAuthToken();
+  const res = await fetch(`${LISTINGS_URL}/bulk-activate`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-token": apiKey,
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to bulk activate listings");
+  return res.json();
+}
+
+// Inactivate listings (bulk)
+export async function inactivateListings(payload, apiKey) {
+  const token = await getAdminAuthToken();
+  const res = await fetch(`${LISTINGS_URL}/inactivate`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-token": apiKey,
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to inactivate listings");
   return res.json();
 }
 
@@ -115,6 +165,10 @@ export default {
   updateListing,
   deleteListing,
   getInactiveListings,
+  getAllActiveListings,
   getListingsByProviderId,
   getAllListings,
+  activateListing,
+  bulkActivateListings,
+  inactivateListings,
 };

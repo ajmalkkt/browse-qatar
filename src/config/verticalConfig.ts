@@ -205,9 +205,17 @@ export const verticalConfig: Record<string, VerticalConfig> = {
   }
 };
 
-// Get all enabled verticals
+// Get all enabled verticals - driven by VITE_SHOW_* env flags
 export function getEnabledVerticals(): VerticalConfig[] {
-  return Object.values(verticalConfig).filter(v => v.enabled);
+  const envFlags: Record<string, boolean> = {
+    restaurants:    import.meta.env.VITE_SHOW_RESTAURANTS !== 'false',
+    vehicles:       import.meta.env.VITE_SHOW_VEHICLES === 'true',
+    accommodations: import.meta.env.VITE_SHOW_ACCOMMODATIONS === 'true',
+    services:       import.meta.env.VITE_SHOW_SERVICES === 'true',
+    classifieds:    import.meta.env.VITE_SHOW_CLASSIFIEDS === 'true',
+    jobs:           import.meta.env.VITE_SHOW_JOBS === 'true',
+  };
+  return Object.values(verticalConfig).filter(v => envFlags[v.id] ?? false);
 }
 
 // Get vertical by ID

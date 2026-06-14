@@ -61,6 +61,11 @@ import { cuisineOptions, countryMap } from "../config/appConfig";
 import ListingForm from "./common/ListingForm";
 import ProviderForm from "./common/ProviderForm";
 
+// --- Local Types ---
+interface Offer { id: number; title: string; restaurantId?: number; cuisine?: string; validTo?: string; active?: boolean; ownerLogin?: string; originalPrice?: string | number; discountedPrice?: string | number; imageUrl?: string; category?: string; }
+interface Provider { id: number; name: string; verticalId?: string; type?: string; email?: string; ownerLogin?: string; logoUrl?: string; }
+interface Listing { id: number; title: string; verticalId?: string; description?: string; active?: boolean; ownerLogin?: string; providerId?: number; pricing?: { originalPrice?: number; discountedPrice?: number; currency?: string; unit?: string }; validity?: { from?: string; to?: string }; location?: { city?: string; country?: string; address?: string }; imageUrl?: string; galleryUrls?: string[]; attributes?: any; category?: string; subcategory?: string; }
+
 export default function ManageOffers() {
   const navigate = useNavigate();
   const offerInputRef = useRef(null);
@@ -87,7 +92,9 @@ export default function ManageOffers() {
   const [restaurants, setRestaurants] = useState([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState("");
   const [offers, setOffers] = useState([]);
-  const [inactiveOffers, setInactiveOffers] = useState([]);
+  const [inactiveOffers, setInactiveOffers] = useState<Offer[]>([]);
+  const [inactiveListings, setInactiveListings] = useState<Listing[]>([]);
+  
   const [logoPreview, setLogoPreview] = useState(null);
   const [brandPreview, setBrandPreview] = useState(null);
   const [apiKey, setApiKey] = useState("");
@@ -102,6 +109,10 @@ export default function ManageOffers() {
   const [listings, setListings] = useState([]);
   const [listingPreview, setListingPreview] = useState(null);
   const [listingGalleryPreviews, setListingGalleryPreviews] = useState([]);
+  const [listingTab, setListingTab] = useState("active"); // active, inactive
+  const [showEditListingForm, setShowEditListingForm] = useState(false);
+  const [editingListing, setEditingListing] = useState(null);
+  const [listingUpdateImage, setListingUpdateImage] = useState(false);
 
   // -- Provider States --
   const [providers, setProviders] = useState([]);
@@ -155,12 +166,11 @@ export default function ManageOffers() {
     category: "", image: null, active: true,
   });
 
-  const [listingForm, setListingForm] = useState({
+  const [listingForm, setListingForm] = useState<any>({
     verticalId: "", title: "", description: "", category: "", subcategory: "",
     originalPrice: "", discountedPrice: "", unit: "", currency: "QAR",
-    validFrom: getTodayDate(), validTo: getTomorrowDate(),
-    city: "", country: "Qatar", address: "",
-    attributes: {}, image: null, gallery: []
+    validFrom: getTodayDate(), validTo: getTomorrowDate(), city: "", country: "Qatar", address: "",
+    attributes: {}, active: false, image: null, gallery: []
   });
 
   // ===== Helpers =====
@@ -188,6 +198,25 @@ export default function ManageOffers() {
     return allOffers.filter((o) => o.ownerLogin === user.email);
   };
 
+  // Filter providers based on user role and ownership
+  const getFilteredProviders = (allProviders) => {
+    if (!user) return [];
+    if (user.role === "admin") {
+      return allProviders;
+    }
+    // Assuming provider has ownerLogin or email field mapping to user's email
+    return allProviders.filter((p) => p.ownerLogin === user.email || p.email === user.email);
+  };
+
+  // Filter listings based on user role and ownership
+  const getFilteredListings = (allListings) => {
+    if (!user) return [];
+    if (user.role === "admin") {
+      return allListings;
+    }
+    return allListings.filter((l) => l.ownerLogin === user.email);
+  };
+
   // ===== Effects =====
   useEffect(() => {
     getAllOwnerRestaurants().then(setRestaurants).catch(console.error);
@@ -195,7 +224,7 @@ export default function ManageOffers() {
     getAllListings().then(setListings).catch(console.error);
   }, []);
 
-  // Fetch inactive offers when tab is switched
+  // Fetch inactive offers and listings when tab is switched
   useEffect(() => {
     if (activeTab === "offers" || activeTab === "bulk") {
       getInactiveOffers()
@@ -204,6 +233,16 @@ export default function ManageOffers() {
           console.error("Failed to fetch inactive offers", err);
           setInactiveOffers([]);
         });
+    }
+    if (activeTab === "listings") {
+      import('../services/listingService').then((module) => {
+        module.getInactiveListings()
+          .then((data) => setInactiveListings(data || []))
+          .catch((err) => {
+            console.error("Failed to fetch inactive listings", err);
+            setInactiveListings([]);
+          });
+      });
     }
     // Fetch Messages when tab is switched
     if (activeTab === "messages") {
@@ -505,63 +544,104 @@ export default function ManageOffers() {
     if (!apiKey) return alert("Please enter your Key.");
 
     const formData = new FormData();
-    
-    // Add providerId (using selectedRestaurant conceptually, or user email, here we can use selectedRestaurant for now since it represents the provider/owner ID in the current app model)
-    // Actually for listings, we probably want to associate with the provider directly.
     if (!selectedRestaurant) return alert("Select a Provider/Restaurant first.");
     formData.set("providerId", selectedRestaurant);
 
-    // Add text fields
     const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory'];
     textFields.forEach(field => {
       if (listingForm[field]) formData.set(field, listingForm[field]);
     });
 
-    // Add JSON fields
     formData.set("pricing", JSON.stringify({
       originalPrice: listingForm.originalPrice,
       discountedPrice: listingForm.discountedPrice,
       unit: listingForm.unit,
       currency: listingForm.currency
     }));
-
-    formData.set("location", JSON.stringify({
-      city: listingForm.city,
-      country: listingForm.country,
-      address: listingForm.address
-    }));
-
-    formData.set("validity", JSON.stringify({
-      validFrom: listingForm.validFrom,
-      validTo: listingForm.validTo
-    }));
-
+    formData.set("location", JSON.stringify({ city: listingForm.city, country: listingForm.country, address: listingForm.address }));
+    formData.set("validity", JSON.stringify({ from: listingForm.validFrom, to: listingForm.validTo }));
     formData.set("attributes", JSON.stringify(listingForm.attributes));
 
-    // Add files
-    if (listingForm.image) {
-      formData.append("image", listingForm.image);
-    }
-    
+    if (listingForm.image) formData.append("image", listingForm.image);
     if (listingForm.gallery && listingForm.gallery.length > 0) {
-      listingForm.gallery.forEach(file => {
-        formData.append("galleryUrls", file);
-      });
+      listingForm.gallery.forEach(file => formData.append("galleryUrls", file));
     }
 
     setIsUploading(true);
-
     try {
       await uploadListing(formData, { headers: getAuthHeaders() });
       alert("Listing uploaded successfully!");
-      // We might want to fetch listings here
-      // setListings(await getListingsByProviderId(selectedRestaurant));
-      
+      const allListings = await getAllListings();
+      setListings(allListings);
+      // also refresh inactive
+      import('../services/listingService').then(m => m.getInactiveListings().then(setInactiveListings).catch(console.error));
       setListingForm({ verticalId: "", title: "", description: "", category: "", subcategory: "", originalPrice: "", discountedPrice: "", unit: "", currency: "QAR", validFrom: getTodayDate(), validTo: getTomorrowDate(), city: "", country: "Qatar", address: "", attributes: {}, image: null, gallery: [] });
+      setListingPreview(null);
+      setListingGalleryPreviews([]);
       setShowAddListingForm(false);
     } catch (err) { 
       console.error(err); 
       alert("Error uploading listing: " + err.message); 
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteListing = async (id: number, title: string) => {
+    if (!apiKey) return alert("Please enter your Key.");
+    if (!window.confirm(`Delete listing "${title}"? This cannot be undone.`)) return;
+    setIsUploading(true);
+    try {
+      const { deleteListing } = await import('../services/listingService');
+      await deleteListing(id, { headers: getAuthHeaders() });
+      setListings(prev => prev.filter((l: any) => l.id !== id));
+      setInactiveListings(prev => prev.filter((l: any) => l.id !== id));
+    } catch (err: any) {
+      alert("Failed to delete listing: " + err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleListingUpdate = async (e) => {
+    e.preventDefault();
+    if (!apiKey) return alert("Please enter your Key.");
+    if (!editingListing) return;
+    const formData = new FormData();
+    formData.set("providerId", String((editingListing as any).providerId));
+    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory'];
+    textFields.forEach(field => { if (listingForm[field]) formData.set(field, listingForm[field]); });
+    formData.set("pricing", JSON.stringify({ originalPrice: listingForm.originalPrice, discountedPrice: listingForm.discountedPrice, unit: listingForm.unit, currency: listingForm.currency }));
+    formData.set("location", JSON.stringify({ city: listingForm.city, country: listingForm.country, address: listingForm.address }));
+    
+    // Convert validFrom/validTo into backend dates if provided
+    const validityData: any = {};
+    if (listingForm.validFrom) validityData.from = new Date(listingForm.validFrom).toISOString();
+    if (listingForm.validTo) validityData.to = new Date(listingForm.validTo).toISOString();
+    formData.set("validity", JSON.stringify(validityData));
+    
+    formData.set("attributes", JSON.stringify(listingForm.attributes || {}));
+
+    if (listingForm.active !== undefined) {
+      formData.set("active", String(listingForm.active));
+      formData.set("status", listingForm.active ? "active" : "inactive");
+    }
+    if (listingUpdateImage && listingForm.image) formData.append("image", listingForm.image);
+    if (listingForm.gallery && listingForm.gallery.length > 0) {
+      listingForm.gallery.forEach(file => formData.append("galleryUrls", file));
+    }
+    setIsUploading(true);
+    try {
+      const { updateListing: updateListingSvc } = await import('../services/listingService');
+      await updateListingSvc((editingListing as any).id, formData, { headers: getAuthHeaders() });
+      alert("Listing updated successfully!");
+      const allListings = await getAllListings();
+      setListings(allListings);
+      import('../services/listingService').then(m => m.getInactiveListings().then(setInactiveListings).catch(console.error));
+      setShowEditListingForm(false);
+      setEditingListing(null);
+    } catch (err: any) {
+      alert("Failed to update listing: " + err.message);
     } finally {
       setIsUploading(false);
     }
@@ -722,8 +802,8 @@ export default function ManageOffers() {
           {renderSidebarItem("dashboard", <LayoutDashboard size={20} />, "Dashboard")}
           {renderSidebarItem("restaurants", <Store size={20} />, "Restaurants")}
           {renderSidebarItem("offers", <Tag size={20} />, "Restaurant offers")}
-          {renderSidebarItem("providers", <Building2 size={20} />, "Providers")}
-          {renderSidebarItem("listings", <List size={20} />, "Listings")}
+          {renderSidebarItem("providers", <Building2 size={20} />, "Ads Providers")}
+          {renderSidebarItem("listings", <List size={20} />, "Ads Listings")}
           {/* New Messages Item */}
           {renderSidebarItem("messages", <MessageSquare size={20} />, "Messages")}
           {user?.role === "admin" && renderSidebarItem("bulk", <UploadCloud size={20} />, "Bulk Import")}
@@ -818,14 +898,14 @@ export default function ManageOffers() {
                 <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
                   <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg"><Building2 size={24} /></div>
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">Total Providers</p>
+                    <p className="text-sm text-gray-500 font-medium">Total Ad Providers</p>
                     <h3 className="text-2xl font-bold text-gray-800">{providers.length}</h3>
                   </div>
                 </div>
                 <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
                   <div className="p-3 bg-teal-100 text-teal-600 rounded-lg"><List size={24} /></div>
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">Total Listings</p>
+                    <p className="text-sm text-gray-500 font-medium">Total Ad Listings</p>
                     <h3 className="text-2xl font-bold text-gray-800">{listings.length}</h3>
                   </div>
                 </div>
@@ -838,20 +918,20 @@ export default function ManageOffers() {
                   <p className="text-blue-100 mb-3 text-xs">Add, edit, or update branding for your partner restaurants.</p>
                   <button onClick={() => setActiveTab('restaurants')} className="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50 transition">Go to Restaurants</button>
                 </div>
-                <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-lg font-bold mb-1">Manage Providers</h3>
-                  <p className="text-indigo-100 mb-3 text-xs">Register and manage providers across verticals.</p>
-                  <button onClick={() => setActiveTab('providers')} className="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition">Go to Providers</button>
-                </div>
-                <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-lg font-bold mb-1">Manage Listings</h3>
-                  <p className="text-teal-100 mb-3 text-xs">Post and manage listings for vehicles, accommodation, services.</p>
-                  <button onClick={() => setActiveTab('listings')} className="bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Listings</button>
-                </div>
                 <div className="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-5 text-white shadow-lg">
                   <h3 className="text-lg font-bold mb-1">Manage Restaurant Offers</h3>
                   <p className="text-slate-300 mb-3 text-xs">Create seasonal offers and manage pricing strategies.</p>
-                  <button onClick={() => setActiveTab('offers')} className="bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">Manage Offers</button>
+                  <button onClick={() => setActiveTab('offers')} className="bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">Go to  Offers</button>
+                </div>
+                <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 text-white shadow-lg">
+                  <h3 className="text-lg font-bold mb-1">Manage Ads Providers</h3>
+                  <p className="text-indigo-100 mb-3 text-xs">Register and manage providers across verticals.</p>
+                  <button onClick={() => setActiveTab('providers')} className="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition">Go to Ad Providers</button>
+                </div>
+                <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 text-white shadow-lg">
+                  <h3 className="text-lg font-bold mb-1">Manage Ads Listings</h3>
+                  <p className="text-teal-100 mb-3 text-xs">Post and manage listings for vehicles, accommodation, services.</p>
+                  <button onClick={() => setActiveTab('listings')} className="bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Ad Listings</button>
                 </div>
               </div>
             </div>
@@ -1225,14 +1305,14 @@ export default function ManageOffers() {
                 <div className="flex items-end gap-2 w-full md:w-auto">
                   <div className="bg-blue-100 p-2 rounded-lg text-blue-600"><List size={20} /></div>
                   <div className="flex-1">
-                    <label className="text-xs text-gray-500 font-semibold block mb-1">SELECT PROVIDER (RESTAURANT/OWNER)</label>
+                    <label className="text-xs text-gray-500 font-semibold block mb-1">SELECT AD PROVIDER</label>
                     <select
                       value={selectedRestaurant}
                       onChange={handleSelectRestaurant}
                       className="bg-gray-50 border border-gray-300 text-gray-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                     >
                       <option value="">-- Choose a Provider --</option>
-                      {providers.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      {getFilteredProviders(providers).map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>
                 </div>
@@ -1263,10 +1343,168 @@ export default function ManageOffers() {
                   />
                 </div>
               )}
-              {!selectedRestaurant && (
+
+              {!selectedRestaurant ? (
                 <div className="text-center py-20 text-gray-400">
                   <List size={48} className="mx-auto mb-4 opacity-20" />
                   <p>Please select a provider to manage listings.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Sub-tabs */}
+                  <div className="flex border-b border-gray-200">
+                    <button
+                      onClick={() => setListingTab("active")}
+                      className={`px-6 py-2 text-sm font-medium transition-colors ${listingTab === "active" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"}`}
+                    >
+                      Active Listings
+                    </button>
+                    <button
+                      onClick={() => setListingTab("inactive")}
+                      className={`px-6 py-2 text-sm font-medium transition-colors ${listingTab === "inactive" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"}`}
+                    >
+                      Inactive / Under Review
+                    </button>
+                  </div>
+
+                  {/* Listing Cards */}
+                  {(() => {
+                    const displayListings = (listingTab === "active"
+                      ? getFilteredListings(listings).filter((l: any) => l.active)
+                      : getFilteredListings(inactiveListings)
+                    ).filter((l: any) => selectedRestaurant ? String(l.providerId) === String(selectedRestaurant) : true);
+                    return displayListings.length === 0 ? (
+                      <div className="text-center py-16 text-gray-400">
+                        <List size={40} className="mx-auto mb-3 opacity-20" />
+                        <p>{listingTab === "active" ? "No active listings." : "No inactive listings."}</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {displayListings.map((l: any) => (
+                          <div key={l.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition group">
+                            <div className="relative h-40">
+                              <img
+                                src={l.imageUrl || "https://via.placeholder.com/300x200?text=No+Image"}
+                                alt={l.title}
+                                className="w-full h-full object-cover"
+                              />
+                              {/* Active / Inactive Badge */}
+                              <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                l.active ? "bg-green-500 text-white" : "bg-yellow-400 text-gray-800"
+                              }`}>
+                                {l.active ? "Active" : "Under Review"}
+                              </span>
+                              {/* Edit / Delete Buttons */}
+                              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                                <button
+                                  onClick={() => {
+                                    setEditingListing(l);
+                                    setListingForm({
+                                      verticalId: l.verticalId || "",
+                                      title: l.title || "",
+                                      description: l.description || "",
+                                      category: l.category || "",
+                                      subcategory: l.subcategory || "",
+                                      originalPrice: l.pricing?.originalPrice || "",
+                                      discountedPrice: l.pricing?.discountedPrice || "",
+                                      unit: l.pricing?.unit || "",
+                                      currency: l.pricing?.currency || "QAR",
+                                      validFrom: l.validity?.from ? new Date(l.validity.from).toISOString().split("T")[0] : "",
+                                      validTo: l.validity?.to ? new Date(l.validity.to).toISOString().split("T")[0] : "",
+                                      city: l.location?.city || "",
+                                      country: l.location?.country || "Qatar",
+                                      address: l.location?.address || "",
+                                      attributes: l.attributes || {},
+                                      active: !!l.active,
+                                      image: null,
+                                      gallery: []
+                                    });
+                                    setListingUpdateImage(false);
+                                    setListingPreview(l.imageUrl || null);
+                                    setListingGalleryPreviews(l.galleryUrls || []);
+                                    setShowEditListingForm(true);
+                                  }}
+                                  className="bg-white/90 text-blue-600 p-1.5 rounded-full hover:bg-blue-600 hover:text-white transition shadow"
+                                  title="Edit Listing"
+                                >
+                                  <Edit2 size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteListing(l.id, l.title)}
+                                  className="bg-white/90 text-red-600 p-1.5 rounded-full hover:bg-red-600 hover:text-white transition shadow"
+                                  title="Delete Listing"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="p-3">
+                              <h5 className="font-semibold text-gray-800 text-sm truncate" title={l.title}>#{l.id} {l.title}</h5>
+                              <p className="text-xs text-gray-500 mt-1 truncate">{l.description}</p>
+                              <div className="flex items-center justify-between mt-2">
+                                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">{l.verticalId}</span>
+                                {l.pricing?.discountedPrice && (
+                                  <span className="text-xs font-bold text-green-600">{l.pricing.currency || "QAR"} {l.pricing.discountedPrice}</span>
+                                )}
+                              </div>
+                              {l.location?.city && (
+                                <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
+                                  {l.location.city}
+                                </p>
+                              )}
+
+                              {user?.role === "admin" && listingTab !== "active" && (
+                                <div className="mt-4 pt-3 border-t border-gray-100">
+                                  <button
+                                    onClick={() => navigate('/make-offer', { state: { listing: l } })}
+                                    className="w-full flex items-center justify-center gap-2 bg-purple-50 text-purple-600 py-2 rounded-lg text-xs font-bold hover:bg-purple-100 transition"
+                                  >
+                                    Review & Activate <ExternalLink size={14} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
+
+              {/* Edit Listing Modal */}
+              {showEditListingForm && editingListing && (
+                <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4 bg-black/50 overflow-y-auto">
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mb-8">
+                    <div className="flex items-center justify-between p-5 border-b">
+                      <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <Edit2 size={18} className="text-blue-600" />
+                        Edit Listing — #{(editingListing as any).id}
+                      </h3>
+                      <button
+                        onClick={() => { setShowEditListingForm(false); setEditingListing(null); }}
+                        className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    <div className="p-5">
+                      <ListingForm
+                        listingForm={listingForm}
+                        setListingForm={setListingForm}
+                        handleListingFormChange={handleListingFormChange}
+                        handleListingUpload={handleListingUpdate}
+                        listingPreview={listingPreview}
+                        listingGalleryPreviews={listingGalleryPreviews}
+                        removeGalleryImage={removeGalleryImage}
+                        isAdmin={user?.role === "admin"}
+                        isEdit={true}
+                        updateImage={listingUpdateImage}
+                        setUpdateImage={setListingUpdateImage}
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -1279,14 +1517,14 @@ export default function ManageOffers() {
               <div className="flex justify-between items-center">
                 <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                   <Building2 size={24} className="text-blue-500" />
-                  Providers
+                  Ads Providers
                 </h3>
                 <button
                   onClick={() => { resetProviderForm(); setShowAddProviderForm(!showAddProviderForm); }}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition shadow-sm"
                 >
                   {showAddProviderForm ? <X size={18} /> : <Plus size={18} />}
-                  {showAddProviderForm ? "Cancel" : "Add Provider"}
+                  {showAddProviderForm ? "Cancel" : "Add New Provider"}
                 </button>
               </div>
 

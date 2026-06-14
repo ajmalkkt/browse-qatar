@@ -105,7 +105,7 @@ export default function MenuOptions({ onAddBusiness, setMenuOpen }: MenuOptionsP
         onClick={onManageOffersClick}
         className="block w-full text-left px-5 py-3 hover:bg-blue-50 border-b border-gray-200 text-gray-700 font-medium"
       >
-        Manage Offers
+        Manage Offers/Listings
       </button>
 
       {/* --- Make Offer --- */}
@@ -114,7 +114,7 @@ export default function MenuOptions({ onAddBusiness, setMenuOpen }: MenuOptionsP
         onClick={() => handleProtectedNavigation("/make-offer")}
         className="block w-full text-left px-5 py-3 hover:bg-blue-50 border-b border-gray-200 text-gray-700 font-medium"
       >
-        Approve Offers
+        Approve Offers/Listings
       </button>
       )}
 

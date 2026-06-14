@@ -1,4 +1,5 @@
-import React from "react";
+import { getAllVerticals, Vertical } from "../../services/verticalService";
+import React,{useState, useEffect} from "react";
 
 interface ListingFormProps {
   listingForm: any;
@@ -8,6 +9,10 @@ interface ListingFormProps {
   listingPreview: string | null;
   listingGalleryPreviews: string[];
   removeGalleryImage?: (index: number) => void;
+  isAdmin?: boolean;
+  isEdit?: boolean;
+  updateImage?: boolean;
+  setUpdateImage?: (val: boolean) => void;
 }
 
 export default function ListingForm({
@@ -17,21 +22,39 @@ export default function ListingForm({
   handleListingUpload,
   listingPreview,
   listingGalleryPreviews,
-  removeGalleryImage
+  removeGalleryImage,
+  isAdmin,
+  isEdit,
+  updateImage,
+  setUpdateImage
 }: ListingFormProps) {
+
+  const [verticals, setVerticals] = useState<Vertical[]>([]);
+  
+  useEffect(() => {
+    const fetchVerticals = async () => {
+      const data = await getAllVerticals();
+      setVerticals(data);
+    };
+    fetchVerticals();
+  }, []);
+
   return (
     <form onSubmit={handleListingUpload} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Vertical</label>
+        <label className="text-xs font-semibold text-gray-500">Ads Vertical</label>
         <select 
           name="verticalId" 
           value={listingForm.verticalId} 
           onChange={handleListingFormChange} 
           className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
         >
-          <option value="vehicles">Vehicles</option>
-          <option value="accommodation">Accommodation</option>
-          <option value="services">Services</option>
+          <option value="">-- Select Vertical --</option>
+          {verticals.map((v) => (
+            <option key={v.id} value={v.id}>
+              {v.name}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -52,6 +75,7 @@ export default function ListingForm({
           name="category" 
           value={listingForm.category} 
           onChange={handleListingFormChange} 
+          placeholder="e.g.Sedan, Hotel, IT Services, etc."
           className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
         />
       </div>
@@ -80,7 +104,7 @@ export default function ListingForm({
         />
       </div>
 
-      <div className="space-y-1 md:col-span-2 lg:col-span-3">
+      <div className="space-y-1">
         <label className="text-xs font-semibold text-gray-500">Unit (e.g., night, trip)</label>
         <input 
           name="unit" 
@@ -90,16 +114,57 @@ export default function ListingForm({
         />
       </div>
 
-      <div className="space-y-1 md:col-span-2 lg:col-span-3">
-        <label className="text-xs font-semibold text-gray-500 flex items-center gap-1">Main Image *</label>
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-500">Valid From</label>
         <input 
-          name="image" 
-          type="file" 
-          accept="image/*" 
+          name="validFrom" 
+          type="date"
+          value={listingForm.validFrom || ""} 
           onChange={handleListingFormChange} 
-          className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100" 
-          required={!listingForm.image} // Only require if no image exists (e.g. not in edit mode)
+          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
         />
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-500">Valid To</label>
+        <input 
+          name="validTo" 
+          type="date"
+          value={listingForm.validTo || ""} 
+          onChange={handleListingFormChange} 
+          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
+          required
+        />
+      </div>
+
+      <div className="space-y-1 md:col-span-2 lg:col-span-3">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-semibold text-gray-500 flex items-center gap-1">
+            Main Image {(!isEdit || updateImage) && "*"}
+          </label>
+          {isEdit && setUpdateImage && (
+            <label className="flex items-center gap-2 text-xs font-semibold text-gray-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={updateImage || false}
+                onChange={(e) => setUpdateImage(e.target.checked)}
+                className="w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              Enable new image upload
+            </label>
+          )}
+        </div>
+        
+        {(!isEdit || updateImage) && (
+          <input 
+            name="image" 
+            type="file" 
+            accept="image/*" 
+            onChange={handleListingFormChange} 
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mt-2" 
+            required={!isEdit || updateImage}
+          />
+        )}
         {listingPreview && <img src={listingPreview} alt="Preview" className="h-12 w-12 rounded border object-cover mt-2" />}
       </div>
 
@@ -212,6 +277,22 @@ export default function ListingForm({
           className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
         />
       </div>
+
+      {isAdmin && isEdit && (
+        <div className="md:col-span-2 lg:col-span-3 flex items-center gap-2 pt-2">
+          <input 
+            type="checkbox" 
+            name="active" 
+            id="activeCheckbox"
+            checked={!!listingForm.active} 
+            onChange={(e) => setListingForm((prev: any) => ({ ...prev, active: e.target.checked }))} 
+            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+          />
+          <label htmlFor="activeCheckbox" className="text-sm font-bold text-gray-700 cursor-pointer">
+            Activate Listing (Sets active and status)
+          </label>
+        </div>
+      )}
 
       <div className="md:col-span-2 lg:col-span-3 pt-2">
         <button type="submit" className="w-full md:w-auto bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 font-medium shadow-md transition-colors">
