@@ -368,12 +368,12 @@ function Home() {
             onAddBusiness={() => setEnquiryOpen(true)}
           />
           {SHOW_VERTICAL_NAV && (
-            <div className="max-w-7xl mx-auto px-4 py-2 overflow-x-auto">
+            <div className="max-w-7xl mx-auto px-2 py-2 overflow-x-auto flex justify-center">
               <VerticalNav compact={false} showLabels={true} className="!pb-0" />
             </div>
           )}
         </div>
-        <main className="max-w-7xl mx-auto px-4 py-6">
+        <main className="max-w-7xl mx-auto px-2 py-6">
           <VerticalGrid
             className="!px-0"
             title=""
@@ -449,8 +449,11 @@ function Home() {
           onSearchClick={handleCuisineSelect}
           searchQuery={searchQuery}
         />
+        {/* 
+         Vertical Nav reprsent the business vertical nav/tab in the headers .
+      */}
         {SHOW_VERTICAL_NAV && (
-          <div className="max-w-7xl mx-auto px-4 py-2 overflow-x-auto">
+          <div className="max-w-7xl mx-auto px-4 py-2 overflow-x-auto flex justify-center">
             <VerticalNav compact={false} showLabels={true} className="!pb-0" />
           </div>
         )}

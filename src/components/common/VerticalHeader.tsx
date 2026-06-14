@@ -38,7 +38,7 @@ export default function VerticalHeader({
         ${className}
       `}
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto flex justify-center">
         {showNav && <VerticalNav />}
       </div>
     </div>
