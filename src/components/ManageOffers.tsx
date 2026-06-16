@@ -1026,9 +1026,21 @@ export default function ManageOffers() {
                           <span className="text-xs bg-yellow-50 text-yellow-700 px-2 py-1 rounded border border-yellow-100">★ {r.rating || "N/A"}</span>
                         </div>
                       </div>
-                      <button onClick={() => { setSelectedRestaurant(r.id); setActiveTab("offers"); }} className="mt-4 w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg border border-gray-200 text-sm font-medium transition">
-                        Manage Offers <ChevronRight size={16} />
-                      </button>
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          onClick={() => { setSelectedRestaurant(r.id); setActiveTab("offers"); }}
+                          className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg border border-gray-200 text-sm font-medium transition"
+                        >
+                          Manage Offers <ChevronRight size={16} />
+                        </button>
+                        <button
+                          onClick={() => navigate(`/restaurant/${r.id}?edit=true`)}
+                          className="flex items-center gap-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 px-3 py-2 rounded-lg text-sm font-medium transition"
+                          title="Manage Menu Pages"
+                        >
+                          📖 Menu
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

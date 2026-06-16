@@ -269,6 +269,43 @@ export function getRestaurantImageUrl(id, type = 'logo') {
 //export const getRestaurantImageUrl = (restaurantId, type = "logo") =>
 //  `${import.meta.env.VITE_API_BASE_URL}/api/restaurants/${restaurantId}/image/${type}`;
 
+// Direct API fetch for a single restaurant (includes menuImages, bypasses cache)
+export async function getRestaurantDetail(id) {
+  const res = await fetch(`${RESTAURANTS_URL}/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch restaurant detail');
+  return res.json();
+}
+
+// Upload menu page images for a restaurant (multi-file)
+export async function uploadMenuImages(restaurantId, files, options = {}) {
+  const token = await getAdminAuthToken();
+  const formData = new FormData();
+  Array.from(files).forEach((file) => formData.append('menu', file));
+  const res = await fetch(`${RESTAURANTS_URL}/${restaurantId}/menu`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      ...(options.headers || {}),
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error('Failed to upload menu images');
+  return res.json();
+}
+
+// Delete a single menu page image from a restaurant
+export async function deleteMenuImage(restaurantId, url, options = {}) {
+  const token = await getAdminAuthToken();
+  const res = await fetch(`${RESTAURANTS_URL}/${restaurantId}/menu?url=${encodeURIComponent(url)}`, {
+    method: 'DELETE',
+    headers: {
+      ...(options.headers || {}),
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error('Failed to delete menu image');
+  return res.json();
+}
 
 export default {
   getAllRestaurants,
@@ -277,3 +314,6 @@ export default {
   uploadRestaurant,
   getRestaurantImageUrl,
 };
+
+
+

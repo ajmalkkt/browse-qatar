@@ -966,16 +966,30 @@ export default function ManageOffers() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {getFilteredRestaurants(restaurants).map((r) => (
-                  <div key={r.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-row md:flex-col">
-                    <div className="w-24 md:w-full md:h-24 bg-gray-100 flex-shrink-0 relative flex items-center justify-center">
-                      <img src={r.logoUrl || "https://via.placeholder.com/150"} alt={r.name} className="md:absolute md:-bottom-10 md:left-5 h-16 w-16 md:h-20 md:w-20 rounded-lg md:border-4 md:border-white md:shadow object-cover m-2 md:m-0" />
-                    </div>
-                    <div className="p-3 md:px-5 md:pb-5 md:pt-12 flex-1 flex flex-col justify-center md:block">
-                      <h4 className="font-bold text-gray-800 leading-tight">{r.name}</h4>
-                      <p className="text-xs text-gray-500 flex items-center gap-1 mt-1 line-clamp-1"><Store size={12} /> {r.address}</p>
-                      <button onClick={() => { setSelectedRestaurant(r.id); setActiveTab("offers"); }} className="mt-2 md:mt-4 w-full flex items-center justify-center gap-2 bg-gray-50 text-blue-600 py-1.5 md:py-2 rounded-lg border border-gray-200 text-xs md:text-sm font-medium">
-                        Manage Offers <ChevronRight size={14} />
-                      </button>
+                  <div key={r.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="flex flex-row md:flex-col">
+                      <div className="w-24 md:w-full md:h-24 bg-gray-100 flex-shrink-0 relative flex items-center justify-center">
+                        <img src={r.logoUrl || "https://via.placeholder.com/150"} alt={r.name} className="md:absolute md:-bottom-10 md:left-5 h-16 w-16 md:h-20 md:w-20 rounded-lg md:border-4 md:border-white md:shadow object-cover m-2 md:m-0" />
+                      </div>
+                      <div className="p-3 md:px-5 md:pb-4 md:pt-12 flex-1 flex flex-col justify-center md:block">
+                        <h4 className="font-bold text-gray-800 leading-tight">{r.name}</h4>
+                        <p className="text-xs text-gray-500 flex items-center gap-1 mt-1 line-clamp-1"><Store size={12} /> {r.address}</p>
+                        <div className="mt-2 md:mt-3 flex gap-2">
+                          <button
+                            onClick={() => { setSelectedRestaurant(r.id); setActiveTab("offers"); }}
+                            className="flex-1 flex items-center justify-center gap-1 bg-gray-50 text-blue-600 py-1.5 rounded-lg border border-gray-200 text-xs font-medium"
+                          >
+                            Manage Offers <ChevronRight size={13} />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/restaurant/${r.id}?edit=true`)}
+                            className="flex items-center gap-1 bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 px-2.5 py-1.5 rounded-lg text-xs font-medium transition"
+                            title="Manage Menu Pages"
+                          >
+                            📖 Menu
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
