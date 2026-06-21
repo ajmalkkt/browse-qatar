@@ -167,7 +167,7 @@ export default function AllRestaurants() {
 
                                                 {r.rating || "4.5"}
                                             </div>
-                                            <span className="text-xs text-blue-600 font-medium group-hover:underline">View Offers</span>
+                                            <span className="text-xs text-blue-600 font-medium group-hover:underline">View Details</span>
                                         </div>
                                     </div>
                                 </div>

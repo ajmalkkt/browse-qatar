@@ -29,7 +29,21 @@ import {
   HelpCircle,     // Added for User Guide
   Edit2,          // Added for Edit action
   List,           // Added for Listings
-  Building2       // Added for Providers
+  Building2,
+  CheckSquare,
+  Filter,
+  Mail,
+  MailOpen,
+  Calendar,
+  PlusCircle,
+  CreditCard,
+  PlayCircle,
+  Eye,
+  RefreshCw,
+  Smartphone,
+  Monitor,
+  Share2,
+  Download
 } from "lucide-react";
 
 // Mock Services (Keep your existing imports here)
@@ -57,7 +71,7 @@ import useAuth from "../auth/useAuth";
 import { getAuthToken } from '../auth/firebaseClient';
 
 // App Config
-import { cuisineOptions, countryMap } from "../config/appConfig";
+import { cuisineOptions, countryMap,REQUIRE_API_KEY_FOR_ADS } from "../config/appConfig";
 import ListingForm from "./common/ListingForm";
 import ProviderForm from "./common/ProviderForm";
 
@@ -139,6 +153,9 @@ export default function ManageOffers() {
   const [selectedEnquiryId, setSelectedEnquiryId] = useState("");
   const [tempPassword, setTempPassword] = useState("");
   const [sendingAccountEmail, setSendingAccountEmail] = useState(false);
+
+  // -- Search State --
+  const [tabSearchTerm, setTabSearchTerm] = useState("");
   // --------------------
 
 
@@ -178,43 +195,60 @@ export default function ManageOffers() {
 
   // Filter restaurants based on user role and ownership
   const getFilteredRestaurants = (allRestaurants) => {
-    if (!user) return [];
-
-    // Direct synchronous check
-    if (user.role === "admin") {
-      return allRestaurants;
+    let filtered = allRestaurants;
+    if (user?.role !== "admin") {
+      filtered = allRestaurants.filter((r) => r.ownerLogin === user?.email);
     }
-
-    return allRestaurants.filter((r) => r.ownerLogin === user.email);
+    if (tabSearchTerm) {
+      const q = tabSearchTerm.toLowerCase();
+      filtered = filtered.filter(r => r.name?.toLowerCase().includes(q) || r.address?.toLowerCase().includes(q));
+    }
+    return filtered;
   };
 
   // Filter offers based on user role and ownership
   const getFilteredOffers = (allOffers) => {
-    if (!user) return [];
-    if (user.role === "admin") {
-      return allOffers;
+    let filtered = allOffers;
+    if (user?.role !== "admin") {
+      filtered = allOffers.filter((o) => o.ownerLogin === user?.email);
     }
-
-    return allOffers.filter((o) => o.ownerLogin === user.email);
+    if (tabSearchTerm) {
+      const q = tabSearchTerm.toLowerCase();
+      filtered = filtered.filter(o => o.title?.toLowerCase().includes(q) || o.description?.toLowerCase().includes(q) || o.category?.toLowerCase().includes(q));
+    }
+    return filtered;
   };
 
   // Filter providers based on user role and ownership
   const getFilteredProviders = (allProviders) => {
-    if (!user) return [];
-    if (user.role === "admin") {
-      return allProviders;
+    let filtered = allProviders;
+    if (user?.role !== "admin") {
+      filtered = allProviders.filter((p) => p.ownerLogin === user?.email || p.email === user?.email);
     }
-    // Assuming provider has ownerLogin or email field mapping to user's email
-    return allProviders.filter((p) => p.ownerLogin === user.email || p.email === user.email);
+    if (tabSearchTerm) {
+      const q = tabSearchTerm.toLowerCase();
+      filtered = filtered.filter(p => p.name?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q));
+    }
+    return filtered;
   };
 
   // Filter listings based on user role and ownership
   const getFilteredListings = (allListings) => {
-    if (!user) return [];
-    if (user.role === "admin") {
-      return allListings;
+    let filtered = allListings;
+    if (user?.role !== "admin") {
+      filtered = allListings.filter((l) => l.ownerLogin === user?.email);
     }
-    return allListings.filter((l) => l.ownerLogin === user.email);
+    if (tabSearchTerm) {
+      const q = tabSearchTerm.toLowerCase();
+      filtered = filtered.filter(l => l.title?.toLowerCase().includes(q) || l.description?.toLowerCase().includes(q));
+    }
+    return filtered;
+  };
+
+  const getFilteredMessages = (allMessages) => {
+    if (!tabSearchTerm) return allMessages;
+    const q = tabSearchTerm.toLowerCase();
+    return allMessages.filter(m => m.name?.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q) || m.subject?.toLowerCase().includes(q));
   };
 
   // ===== Effects =====
@@ -417,7 +451,7 @@ export default function ManageOffers() {
   };
 
   const handleDeleteRestaurant = async (id: string, name: string) => {
-    if (!apiKey) return alert("Please enter your Key in the top bar.");
+    if (REQUIRE_API_KEY_FOR_ADS === true && !apiKey) return alert("Please enter your Key in the top bar.");
     if (!window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) return;
 
     setIsUploading(true);
@@ -453,7 +487,7 @@ export default function ManageOffers() {
 
   const handleOfferUpload = async (e) => {
     e.preventDefault();
-    if (!apiKey) return alert("Please enter your Key.");
+    if (!apiKey) return alert("Please enter your Key in the top bar.");
     if (!selectedRestaurant) return alert("Select a restaurant first.");
 
     const formData = new FormData();
@@ -539,7 +573,7 @@ export default function ManageOffers() {
 
   const handleListingUpload = async (e) => {
     e.preventDefault();
-    if (!apiKey) return alert("Please enter your Key.");
+    if (REQUIRE_API_KEY_FOR_ADS === true && !apiKey) return alert("Please enter your Key in the top bar.");
 
     const formData = new FormData();
     if (!selectedRestaurant) return alert("Select a Provider/Restaurant first.");
@@ -586,7 +620,6 @@ export default function ManageOffers() {
   };
 
   const handleDeleteListing = async (id: number, title: string) => {
-    if (!apiKey) return alert("Please enter your Key.");
     if (!window.confirm(`Delete listing "${title}"? This cannot be undone.`)) return;
     setIsUploading(true);
     try {
@@ -602,7 +635,7 @@ export default function ManageOffers() {
 
   const handleListingUpdate = async (e) => {
     e.preventDefault();
-    if (!apiKey) return alert("Please enter your Key.");
+    if (REQUIRE_API_KEY_FOR_ADS === true && !apiKey) return alert("Please enter your Key in the top bar.");
     if (!editingListing) return;
     const formData = new FormData();
     formData.set("providerId", String((editingListing as any).providerId));
@@ -645,7 +678,7 @@ export default function ManageOffers() {
 
   const handleOfferUpdate = async (e) => {
     e.preventDefault();
-    if (!apiKey) return alert("Please enter your Key.");
+    if (!apiKey) return alert("Please enter your Key in the top bar.");
     if (!editingOffer) return;
 
     const formData = new FormData();
@@ -691,7 +724,6 @@ export default function ManageOffers() {
   };
 
   const handleDeleteOffer = async (id) => {
-    if (!apiKey) return alert("Please enter your Key.");
     if (!window.confirm("Are you sure you want to delete this offer?")) return;
     try {
       await deleteOffer(id, { headers: getAuthHeaders() });
@@ -705,7 +737,6 @@ export default function ManageOffers() {
   };
 
   const handleBulkProcessing = async () => {
-    if (!apiKey) return alert("Please enter your Key.");
     setIsUploading(true); // <--- START LOADING
     try {
       await uploadBulkData({ headers: getAuthHeaders() });
@@ -717,7 +748,6 @@ export default function ManageOffers() {
   };
   // --- Message Handlers ---
   const handleResolveMessage = async (id) => {
-    if (!apiKey) return alert("Please enter your Key.");
     if (!window.confirm("Mark this message as RESOLVED?")) return;
 
     setIsUploading(true);
@@ -799,7 +829,7 @@ export default function ManageOffers() {
           {renderSidebarItem("restaurants", <Store size={20} />, "Restaurants")}
           {renderSidebarItem("offers", <Tag size={20} />, "Restaurant offers")}
           {renderSidebarItem("providers", <Building2 size={20} />, "Ads Providers")}
-          {renderSidebarItem("listings", <List size={20} />, "Ads Listings")}
+          {renderSidebarItem("listings", <List size={20} />, "Manage Your Ads")}
           {/* New Messages Item */}
           {renderSidebarItem("messages", <MessageSquare size={20} />, "Messages")}
           {user?.role === "admin" && renderSidebarItem("bulk", <UploadCloud size={20} />, "Bulk Import")}
@@ -812,7 +842,7 @@ export default function ManageOffers() {
           </button>
           <button onClick={() => navigate("/")} className="flex items-center gap-3 text-gray-500 hover:text-red-600 transition-colors w-full p-2 rounded-md hover:bg-red-50">
             <LogOut size={20} />
-            {isSidebarOpen && <span className="text-sm font-medium">Exit Admin</span>}
+            {isSidebarOpen && <span className="text-sm font-medium">Exit</span>}
           </button>
         </div>
       </aside>
@@ -826,23 +856,28 @@ export default function ManageOffers() {
             <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
               <Menu size={20} />
             </button>
-            <h2 className="text-lg font-semibold text-gray-700 capitalize truncate">{activeTab === "inactive" ? "Inactive Offers" : activeTab}</h2>
+            <h2 className="text-lg font-semibold text-gray-700 capitalize truncate hidden md:block">{activeTab === "inactive" ? "Inactive Offers" : activeTab}</h2>
           </div>
 
-
-          <div className="flex items-center gap-6">
-            {/* API Key Input (Styled as session context) */}
-            <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-1.5 border border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-              <span className="text-xs font-bold text-red-400 mr-2">Your Key</span>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter session key..."
-                className="bg-transparent border-none outline-none text-sm w-32 text-gray-700 placeholder-gray-400"
+          {activeTab !== "dashboard" && activeTab !== "bulk" && (
+            <div className="flex-1 max-w-md mx-4 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <input 
+                type="text" 
+                placeholder={`Search ${activeTab}...`} 
+                value={tabSearchTerm} 
+                onChange={(e) => setTabSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-8 py-1.5 bg-gray-100 border border-gray-200 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
               />
+              {tabSearchTerm && (
+                <button onClick={() => setTabSearchTerm("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <X size={14} />
+                </button>
+              )}
             </div>
+          )}
 
+          <div className="flex items-center gap-2 md:gap-6 ml-auto">
             {/* User Profile */}
             <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
               <div className="text-right hidden sm:block">
@@ -873,25 +908,7 @@ export default function ManageOffers() {
                     <h3 className="text-2xl font-bold text-gray-800">{getFilteredRestaurants(restaurants).length}</h3>
                   </div>
                 </div>
-                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-                  <div className="p-3 bg-green-100 text-green-600 rounded-lg"><Tag size={24} /></div>
-                  <div>
-                    <p className="text-sm text-gray-500 font-medium">Offers Managed</p>
-                    <h3 className="text-2xl font-bold text-gray-800">{offers.length > 0 ? offers.length : 0}</h3>
-                  </div>
-                </div>
-                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-                  <div className="p-3 bg-orange-100 text-orange-600 rounded-lg"><EyeOff size={24} /></div>
-                  <div>
-                    <p className="text-sm text-gray-500 font-medium">Inactive Offers</p>
-                    <h3 className="text-2xl font-bold text-gray-800">{inactiveOffers.length ? getFilteredOffers(inactiveOffers).length : "-"}</h3>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stat Cards — row 2: Providers, Listings */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                 <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
                   <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg"><Building2 size={24} /></div>
                   <div>
                     <p className="text-sm text-gray-500 font-medium">Total Ad Providers</p>
@@ -910,22 +927,22 @@ export default function ManageOffers() {
               {/* Quick Actions */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                 <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-lg font-bold mb-1">Manage Restaurants</h3>
+                  <h3 className="text-lg font-bold mb-1">Manage Your Restaurants</h3>
                   <p className="text-blue-100 mb-3 text-xs">Add, edit, or update branding for your partner restaurants.</p>
                   <button onClick={() => setActiveTab('restaurants')} className="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50 transition">Go to Restaurants</button>
                 </div>
                 <div className="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-lg font-bold mb-1">Manage Restaurant Offers</h3>
+                  <h3 className="text-lg font-bold mb-1">Manage Your Restaurant Offers</h3>
                   <p className="text-slate-300 mb-3 text-xs">Create seasonal offers and manage pricing strategies.</p>
                   <button onClick={() => setActiveTab('offers')} className="bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">Go to  Offers</button>
                 </div>
                 <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-lg font-bold mb-1">Manage Ads Providers</h3>
-                  <p className="text-indigo-100 mb-3 text-xs">Register and manage providers across verticals.</p>
+                  <h3 className="text-lg font-bold mb-1">Manage Your Ad Provider/Business</h3>
+                  <p className="text-indigo-100 mb-3 text-xs">Register your company or provider for grouping ads.</p>
                   <button onClick={() => setActiveTab('providers')} className="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition">Go to Ad Providers</button>
                 </div>
                 <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-lg font-bold mb-1">Manage Ads Listings</h3>
+                  <h3 className="text-lg font-bold mb-1">Manage Your Ads </h3>
                   <p className="text-teal-100 mb-3 text-xs">Post and manage listings for vehicles, accommodation, services.</p>
                   <button onClick={() => setActiveTab('listings')} className="bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Ad Listings</button>
                 </div>
@@ -981,6 +998,17 @@ export default function ManageOffers() {
                           ))}
                         </select>
                       </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold uppercase text-gray-500">Enter Your Key *</label>
+                      <input
+                        type="password"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        placeholder="Enter API Key..."
+                        className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                        required
+                      />
                     </div>
 
                     {/* File Inputs Styled */}
@@ -1133,6 +1161,31 @@ export default function ManageOffers() {
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-gray-500">Valid To</label>
                       <input name="validTo" type="date" value={offerForm.validTo} onChange={handleOfferFormChange} className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" required />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-gray-500">Country *</label>
+                      <select
+                        name="country"
+                        value={offerForm.country || "Qatar"}
+                        onChange={handleOfferFormChange}
+                        required
+                        className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+                      >
+                        {Object.values(countryMap).map((c) => (
+                          <option key={c as string} value={c as string}>{c as string}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-gray-500">Enter Your Key *</label>
+                      <input
+                        type="password"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        placeholder="Enter API Key..."
+                        className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                        required
+                      />
                     </div>
                     <div className="md:col-span-3 space-y-1">
                       <label className="text-xs font-semibold text-gray-500">Description</label>
@@ -1348,6 +1401,9 @@ export default function ManageOffers() {
                     listingPreview={listingPreview}
                     listingGalleryPreviews={listingGalleryPreviews}
                     removeGalleryImage={removeGalleryImage}
+                    isAdmin={user?.role === "admin"}
+                    apiKey={apiKey}
+                    setApiKey={setApiKey}
                   />
                 </div>
               )}
@@ -1355,7 +1411,8 @@ export default function ManageOffers() {
               {!selectedRestaurant ? (
                 <div className="text-center py-20 text-gray-400">
                   <List size={48} className="mx-auto mb-4 opacity-20" />
-                  <p>Please select a provider to manage listings.</p>
+                  <p>Please select a provider to manage listings. 
+                    If you do not have registered the provider/business yet, go to Ads Providers menu to do so first.</p>
                 </div>
               ) : (
                 <>
@@ -1384,7 +1441,7 @@ export default function ManageOffers() {
                     return displayListings.length === 0 ? (
                       <div className="text-center py-16 text-gray-400">
                         <List size={40} className="mx-auto mb-3 opacity-20" />
-                        <p>{listingTab === "active" ? "No active listings." : "No inactive listings."}</p>
+                        <p>{listingTab === "active" ? "No active listings. Add your ads to get started" : "No inactive listings."}</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -1510,6 +1567,8 @@ export default function ManageOffers() {
                         isEdit={true}
                         updateImage={listingUpdateImage}
                         setUpdateImage={setListingUpdateImage}
+                        apiKey={apiKey}
+                        setApiKey={setApiKey}
                       />
                     </div>
                   </div>
@@ -1551,6 +1610,8 @@ export default function ManageOffers() {
                     bannerPreview={providerBannerPreview}
                     isEditing={!!editingProvider}
                     isUploading={isUploading}
+                    apiKey={apiKey}
+                    setApiKey={setApiKey}
                   />
                 </div>
               )}
@@ -1654,7 +1715,7 @@ export default function ManageOffers() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
-                        {messages.map((msg) => (
+                        {getFilteredMessages(messages).map((msg) => (
                           <tr key={msg._id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                               {formatDate(msg.createdAt)}
@@ -1958,6 +2019,33 @@ export default function ManageOffers() {
                     value={offerForm.validTo ? offerForm.validTo.split('T')[0] : ""}
                     onChange={handleOfferFormChange}
                     className="w-full border border-gray-300 rounded-lg p-2.5"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold uppercase text-gray-500">Country *</label>
+                  <select
+                    name="country"
+                    value={offerForm.country || "Qatar"}
+                    onChange={handleOfferFormChange}
+                    required
+                    className="w-full border border-gray-300 rounded-lg p-2.5 bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    {Object.values(countryMap).map((c) => (
+                      <option key={c as string} value={c as string}>{c as string}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold uppercase text-gray-500">Enter Your Key *</label>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter API Key..."
+                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     required
                   />
                 </div>

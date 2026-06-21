@@ -446,7 +446,15 @@ function Home() {
           selectedCountry={selectedCountry}
           onSelectCountry={setSelectedCountry}
           onAddBusiness={() => setEnquiryOpen(true)}
-          onSearchClick={handleCuisineSelect}
+          onSearchClick={(query, isSearch) => {
+            if (currentVertical === 'restaurants') {
+              handleCuisineSelect(query, isSearch);
+            } else {
+              if (!isSearch) setSearchQuery(query || "");
+              setSearchParams(query ? { search: query } : {}, { replace: true });
+              scrollToOffers();
+            }
+          }}
           searchQuery={searchQuery}
         />
         {/* 

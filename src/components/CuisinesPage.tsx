@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, Utensils } from "lucide-react";
+import { ArrowLeft, Utensils, Search, X } from "lucide-react";
 import { cuisineLists } from "../config/appConfig";
 import TopHeader from "./TopHeader";
 
 const CuisinesPage = () => {
     const navigate = useNavigate();
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const filteredCuisines = cuisineLists.filter(c => 
+        c.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="min-h-screen bg-gray-50 pb-12">
@@ -21,20 +26,41 @@ const CuisinesPage = () => {
             </Helmet>
 
             <div className="bg-white shadow-sm sticky top-0 z-50">
-                <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                    <Link to="/restaurants-offers" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
-                        <ArrowLeft size={20} />
-                    </Link>
-                    <div className="flex items-center gap-2">
-                        <Utensils className="text-blue-600" size={24} />
-                        <h1 className="text-xl font-bold text-gray-900">Explore Cuisines</h1>
+                <div className="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center w-full md:w-auto justify-between">
+                        <div className="flex items-center gap-3">
+                            <Link to="/restaurants-offers" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+                                <ArrowLeft size={20} />
+                            </Link>
+                            <h1 className="text-xl font-bold text-gray-900 hidden sm:block">Explore Cuisines</h1>
+                        </div>
+                        <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-8 w-auto object-contain md:hidden" />
                     </div>
-                    <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-8 w-auto object-contain" />
+
+                    <div className="relative w-full md:w-96">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search cuisines..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-full text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                        />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm("")}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
+                    </div>
+                    <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-8 w-auto object-contain hidden md:block" />
                 </div>
             </div>
 
             <main className="container mx-auto px-4 py-8">
-                <header className="text-center mb-12">
+                <header className="text-center mb-8">
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">A World of Flavors in Qatar</h2>
                     <p className="text-gray-600 max-w-2xl mx-auto text-lg">
                         From spicy street food to elegant fine dining, explore the diverse culinary landscape
@@ -42,8 +68,14 @@ const CuisinesPage = () => {
                     </p>
                 </header>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {cuisineLists.map((cuisine) => (
+                {filteredCuisines.length === 0 ? (
+                    <div className="text-center py-20 text-gray-500">
+                        <Utensils size={48} className="mx-auto mb-4 opacity-20" />
+                        <p className="text-lg font-medium">No cuisines found matching {searchTerm ? `"${searchTerm}"` : ""}</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filteredCuisines.map((cuisine) => (
                         <div
                             key={cuisine.name}
                             className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 group flex flex-col"
@@ -76,6 +108,7 @@ const CuisinesPage = () => {
                         </div>
                     ))}
                 </div>
+                )}
             </main>
 
             <footer className="mt-16 py-12 bg-white border-t border-gray-100">

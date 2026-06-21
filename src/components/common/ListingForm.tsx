@@ -1,5 +1,6 @@
 import { getAllVerticals, Vertical } from "../../services/verticalService";
 import React,{useState, useEffect} from "react";
+import { countryMap, REQUIRE_API_KEY_FOR_ADS } from "../../config/appConfig";
 
 interface ListingFormProps {
   listingForm: any;
@@ -13,6 +14,8 @@ interface ListingFormProps {
   isEdit?: boolean;
   updateImage?: boolean;
   setUpdateImage?: (val: boolean) => void;
+  apiKey: string;
+  setApiKey: (val: string) => void;
 }
 
 export default function ListingForm({
@@ -26,7 +29,9 @@ export default function ListingForm({
   isAdmin,
   isEdit,
   updateImage,
-  setUpdateImage
+  setUpdateImage,
+  apiKey,
+  setApiKey
 }: ListingFormProps) {
 
   const [verticals, setVerticals] = useState<Vertical[]>([]);
@@ -42,7 +47,7 @@ export default function ListingForm({
   return (
     <form onSubmit={handleListingUpload} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Ads Vertical</label>
+        <label className="text-xs font-semibold text-gray-500">Ads Category</label>
         <select 
           name="verticalId" 
           value={listingForm.verticalId} 
@@ -134,6 +139,46 @@ export default function ListingForm({
           onChange={handleListingFormChange} 
           className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
           required
+        />
+      </div>
+
+      {/* Country Selection */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-500">Country *</label>
+        <select
+          name="country"
+          value={listingForm.country || "Qatar"}
+          onChange={handleListingFormChange}
+          required
+          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+        >
+          {Object.values(countryMap).map((c) => (
+            <option key={c as string} value={c as string}>{c as string}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* City */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-500">City</label>
+        <input 
+          name="city" 
+          value={listingForm.city || ""} 
+          onChange={handleListingFormChange} 
+          placeholder="e.g. Doha"
+          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+        />
+      </div>
+
+      {/* Address */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-500">Address</label>
+        <input 
+          name="address" 
+          value={listingForm.address || ""} 
+          onChange={handleListingFormChange} 
+          placeholder="e.g. West Bay"
+          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
         />
       </div>
 
@@ -294,9 +339,24 @@ export default function ListingForm({
         </div>
       )}
 
+      {/* API Key */}
+      {REQUIRE_API_KEY_FOR_ADS == true && (<div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-500">
+          Enter your Key *
+        </label>
+        <input
+          type="password"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          required={REQUIRE_API_KEY_FOR_ADS}
+          placeholder="Enter API Key..."
+          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        />
+      </div>)}
+
       <div className="md:col-span-2 lg:col-span-3 pt-2">
         <button type="submit" className="w-full md:w-auto bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 font-medium shadow-md transition-colors">
-          Upload Listing
+          Upload Ads
         </button>
       </div>
     </form>

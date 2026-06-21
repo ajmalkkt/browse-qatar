@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Building2, Car, Wrench, User, UtensilsCrossed, Hotel, Briefcase, ShoppingBag, Users } from "lucide-react";
 import { getAllVerticals, Vertical } from "../../services/verticalService";
+import { countryMap, REQUIRE_API_KEY_FOR_ADS } from "../../config/appConfig";
 
 const ICON_MAP: Record<string, any> = {
   UtensilsCrossed,
@@ -25,6 +26,8 @@ interface ProviderFormProps {
   bannerPreview: string | null;
   isEditing?: boolean;
   isUploading?: boolean;
+  apiKey: string;
+  setApiKey: (val: string) => void;
 }
 
 export default function ProviderForm({
@@ -36,6 +39,8 @@ export default function ProviderForm({
   bannerPreview,
   isEditing = false,
   isUploading = false,
+  apiKey,
+  setApiKey,
 }: ProviderFormProps) {
   const [verticals, setVerticals] = useState<Vertical[]>([]);
 
@@ -57,8 +62,8 @@ export default function ProviderForm({
     >
       {/* Vertical */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Ads Vertical *
+        <label className="text-xs font-semibold text-gray-500 tracking-wide">
+          Ads Category *
         </label>
         <select
           name="verticalId"
@@ -78,7 +83,7 @@ export default function ProviderForm({
 
       {/* Provider Type */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label className="text-xs font-semibold text-gray-500 tracking-wide">
           Business / Provider Type *
         </label>
         <select
@@ -99,7 +104,7 @@ export default function ProviderForm({
 
       {/* Name */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label className="text-xs font-semibold text-gray-500 tracking-wide">
           Business / Provider Name *
         </label>
         <input
@@ -114,7 +119,7 @@ export default function ProviderForm({
 
       {/* Email */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label className="text-xs font-semibold text-gray-500 tracking-wide">
           Email
         </label>
         <input
@@ -129,7 +134,7 @@ export default function ProviderForm({
 
       {/* Phone */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label className="text-xs font-semibold text-gray-500 tracking-wide">
           Phone
         </label>
         <input
@@ -143,21 +148,27 @@ export default function ProviderForm({
 
       {/* Country */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Country
+        <label className="text-xs font-semibold text-gray-500  tracking-wide">
+          Country *
         </label>
-        <input
+        <select
           name="country"
-          value={providerForm.country}
+          value={providerForm.country || "Qatar"}
           onChange={handleProviderFormChange}
-          placeholder="Qatar"
-          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-        />
+          required
+          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+        >
+          {Object.values(countryMap).map((c) => (
+            <option key={c as string} value={c as string}>
+              {c as string}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Address - full width */}
       <div className="sm:col-span-2 lg:col-span-3 space-y-1">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label className="text-xs font-semibold text-gray-500 tracking-wide">
           Address
         </label>
         <input
@@ -171,7 +182,7 @@ export default function ProviderForm({
 
       {/* Logo Upload */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label className="text-xs font-semibold text-gray-500 tracking-wide">
           Logo Image
         </label>
         <input
@@ -192,7 +203,7 @@ export default function ProviderForm({
 
       {/* Banner Upload */}
       <div className="sm:col-span-2 space-y-1">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label className="text-xs font-semibold text-gray-500 tracking-wide">
           Banner / Cover Image
         </label>
         <input
@@ -210,6 +221,21 @@ export default function ProviderForm({
           />
         )}
       </div>
+      
+      {/* API Key */} 
+      {REQUIRE_API_KEY_FOR_ADS == true && (<div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-500 tracking-wide">
+          Enter Your Key *
+        </label>
+        <input
+          type="password"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          required={REQUIRE_API_KEY_FOR_ADS}
+          placeholder="Enter API Key..."
+          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        />
+      </div>)}
 
       {/* Submit */}
       <div className="sm:col-span-2 lg:col-span-3 pt-2 flex items-center gap-4">

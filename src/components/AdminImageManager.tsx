@@ -55,7 +55,7 @@ import { getEnquiries, updateEnquiryStatus } from "../services/enquiryService";
 import useAuth from "../auth/useAuth";
 
 // App Config
-import { cuisineOptions, countryMap } from "../config/appConfig";
+import { cuisineOptions, countryMap,REQUIRE_API_KEY_FOR_ADS } from "../config/appConfig";
 import ListingForm from "./common/ListingForm";
 import ProviderForm from "./common/ProviderForm";
 
@@ -139,14 +139,17 @@ export default function ManageOffers() {
   // ===== Forms =====
   const getTodayDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    return today.toISOString().split("T")[0];
   };
 
   const getTomorrowDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+    return today.toISOString().split("T")[0];
   };
+
+  // -- Search State --
+  const [tabSearchTerm, setTabSearchTerm] = useState("");
 
   const [form, setForm] = useState({
     id: "", name: "", address: "", phone: "", rating: "", cuisine: "",
@@ -170,27 +173,57 @@ export default function ManageOffers() {
   const getAuthHeaders = () => ({ "x-api-token": apiKey || "" });
 
   const getFilteredRestaurants = (allRestaurants) => {
-    if (!user) return [];
-    if (user.role === "admin") return allRestaurants;
-    return allRestaurants.filter((r) => r.ownerLogin === user.email);
+    let filtered = allRestaurants;
+    if (user?.role !== "admin") {
+      filtered = allRestaurants.filter((r) => r.ownerLogin === user?.email);
+    }
+    if (tabSearchTerm) {
+      const q = tabSearchTerm.toLowerCase();
+      filtered = filtered.filter(r => r.name?.toLowerCase().includes(q) || r.address?.toLowerCase().includes(q));
+    }
+    return filtered;
   };
 
   const getFilteredOffers = (allOffers) => {
-    if (!user) return [];
-    if (user.role === "admin") return allOffers;
-    return allOffers.filter((o) => o.ownerLogin === user.email);
+    let filtered = allOffers;
+    if (user?.role !== "admin") {
+      filtered = allOffers.filter((o) => o.ownerLogin === user?.email);
+    }
+    if (tabSearchTerm) {
+      const q = tabSearchTerm.toLowerCase();
+      filtered = filtered.filter(o => o.title?.toLowerCase().includes(q) || o.description?.toLowerCase().includes(q) || o.category?.toLowerCase().includes(q));
+    }
+    return filtered;
   };
 
   const getFilteredProviders = (allProviders) => {
-    if (!user) return [];
-    if (user.role === "admin") return allProviders;
-    return allProviders.filter((p) => p.ownerLogin === user.email || p.email === user.email);
+    let filtered = allProviders;
+    if (user?.role !== "admin") {
+      filtered = allProviders.filter((p) => p.ownerLogin === user?.email || p.email === user?.email);
+    }
+    if (tabSearchTerm) {
+      const q = tabSearchTerm.toLowerCase();
+      filtered = filtered.filter(p => p.name?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q));
+    }
+    return filtered;
   };
 
   const getFilteredListings = (allListings) => {
-    if (!user) return [];
-    if (user.role === "admin") return allListings;
-    return allListings.filter((l) => l.ownerLogin === user.email);
+    let filtered = allListings;
+    if (user?.role !== "admin") {
+      filtered = allListings.filter((l) => l.ownerLogin === user?.email);
+    }
+    if (tabSearchTerm) {
+      const q = tabSearchTerm.toLowerCase();
+      filtered = filtered.filter(l => l.title?.toLowerCase().includes(q) || l.description?.toLowerCase().includes(q));
+    }
+    return filtered;
+  };
+
+  const getFilteredMessages = (allMessages) => {
+    if (!tabSearchTerm) return allMessages;
+    const q = tabSearchTerm.toLowerCase();
+    return allMessages.filter(m => m.name?.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q) || m.subject?.toLowerCase().includes(q));
   };
 
   // ===== Effects =====
@@ -228,6 +261,7 @@ export default function ManageOffers() {
     if (activeTab === "messages") {
       fetchMessages(msgPage);
     }
+    setTabSearchTerm(""); // reset search on tab change
   }, [activeTab, msgPage]); // Re-run when tab or page changes
 
   const fetchMessages = async (page) => {
@@ -294,7 +328,7 @@ export default function ManageOffers() {
 
   const handleRestaurantSubmit = async (e) => {
     e.preventDefault();
-    if (!apiKey) return alert("Please enter your Key.");
+    if (!apiKey) return alert("Please enter your Key in the top bar.");
     if (!form.name || !form.address || !form.logo || !form.country) return alert("Missing required fields.");
 
     const formData = new FormData();
@@ -328,7 +362,7 @@ export default function ManageOffers() {
 
   const handleOfferUpload = async (e) => {
     e.preventDefault();
-    if (!apiKey) return alert("Please enter your Key.");
+    if (!apiKey) return alert("Please enter your Key in the top bar.");
     if (!selectedRestaurant) return alert("Select a restaurant first.");
 
     const formData = new FormData();
@@ -411,7 +445,7 @@ export default function ManageOffers() {
 
   const handleListingUpload = async (e) => {
     e.preventDefault();
-    if (!apiKey) return alert("Please enter your Key.");
+    if (REQUIRE_API_KEY_FOR_ADS === true && !apiKey) return alert("Please enter your Key in the top bar.");
 
     const formData = new FormData();
     if (!selectedRestaurant) return alert("Select a Provider/Restaurant first.");
@@ -468,7 +502,6 @@ export default function ManageOffers() {
   };
 
   const handleDeleteListing = async (id: number, title: string) => {
-    if (!apiKey) return alert("Please enter your Key.");
     if (!window.confirm(`Delete listing "${title}"? This cannot be undone.`)) return;
     setIsUploading(true);
     try {
@@ -484,7 +517,7 @@ export default function ManageOffers() {
 
   const handleListingUpdate = async (e) => {
     e.preventDefault();
-    if (!apiKey) return alert("Please enter your Key.");
+    if (REQUIRE_API_KEY_FOR_ADS === true && !apiKey) return alert("Please enter your Key in the top bar.");
     if (!editingListing) return;
     const formData = new FormData();
     formData.set("providerId", String((editingListing as any).providerId));
@@ -609,7 +642,7 @@ export default function ManageOffers() {
 
   const handleOfferUpdate = async (e) => {
     e.preventDefault();
-    if (!apiKey) return alert("Please enter your Key.");
+    if (!apiKey) return alert("Please enter your Key in the top bar.");
     if (!editingOffer) return;
 
     const formData = new FormData();
@@ -654,7 +687,6 @@ export default function ManageOffers() {
   };
 
   const handleDeleteOffer = async (id) => {
-    if (!apiKey) return alert("Please enter your Key.");
     if (!window.confirm("Are you sure you want to delete this offer?")) return;
     try {
       await deleteOffer(id, { headers: getAuthHeaders() });
@@ -668,7 +700,7 @@ export default function ManageOffers() {
   };
 
   const handleBulkProcessing = async () => {
-    if (!apiKey) return alert("Please enter your Key.");
+    if (REQUIRE_API_KEY_FOR_ADS === true && !apiKey) return alert("Please enter your Key in the top bar.");
     setIsUploading(true);
     try {
       await uploadBulkData({ headers: getAuthHeaders() });
@@ -679,7 +711,6 @@ export default function ManageOffers() {
 
   // --- Message Handlers ---
   const handleResolveMessage = async (id) => {
-    if (!apiKey) return alert("Please enter your Key.");
     if (!window.confirm("Mark this message as RESOLVED?")) return;
 
     setIsUploading(true);
@@ -755,7 +786,7 @@ export default function ManageOffers() {
           {renderSidebarItem("restaurants", <Store size={20} />, "Restaurants")}
           {renderSidebarItem("offers", <Tag size={20} />, "Restaurant offers")}
           {renderSidebarItem("providers", <Building2 size={20} />, "Ads Providers")}
-          {renderSidebarItem("listings", <List size={20} />, "Ads Listings")}
+          {renderSidebarItem("listings", <List size={20} />, "Manage Your Ads")}
           {/* New Messages Item */}
           {renderSidebarItem("messages", <MessageSquare size={20} />, "Messages")}
         </nav>
@@ -767,7 +798,7 @@ export default function ManageOffers() {
           </button>
           <button onClick={() => navigate("/")} className="flex items-center gap-3 text-gray-500 hover:text-red-600 transition-colors w-full p-2 rounded-md hover:bg-red-50">
             <LogOut size={20} />
-            {(isSidebarOpen || isMobileMenuOpen) && <span className="text-sm font-medium">Exit Admin</span>}
+            {(isSidebarOpen || isMobileMenuOpen) && <span className="text-sm font-medium">Exit</span>}
           </button>
         </div>
       </aside>
@@ -794,50 +825,34 @@ export default function ManageOffers() {
               </button>
 
               <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-5 w-auto hidden sm:block" />
-              <h2 className="text-lg font-semibold text-gray-700 capitalize truncate">{activeTab}</h2>
+              <h2 className="text-lg font-semibold text-gray-700 capitalize truncate hidden md:block">{activeTab}</h2>
             </div>
 
-
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-red-400">Key</span>
-              <button
-                onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-                className={`md:hidden p-2 rounded-full transition-colors ${apiKey ? "text-green-600 bg-green-50" : "text-gray-500 bg-gray-100"}`}
-              >
-                <Key size={20} />
-              </button>
-
-              <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-1.5 border border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                <span className="text-xs font-bold text-red-400 mr-2">Key</span>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Your Key..."
-                  className="bg-transparent border-none outline-none text-sm w-24 lg:w-32 text-gray-700 placeholder-gray-400"
+            {activeTab !== "dashboard" && activeTab !== "bulk" && (
+              <div className="flex-1 max-w-sm mx-2 md:mx-4 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <input 
+                  type="text" 
+                  placeholder={`Search ${activeTab}...`} 
+                  value={tabSearchTerm} 
+                  onChange={(e) => setTabSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-8 py-1.5 bg-gray-100 border border-gray-200 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
                 />
+                {tabSearchTerm && (
+                  <button onClick={() => setTabSearchTerm("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <X size={14} />
+                  </button>
+                )}
               </div>
+            )}
 
+            <div className="flex items-center gap-2 md:gap-3">
               <div className="h-9 w-9 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold border-2 border-white shadow-sm">
                 {displayUser.name.charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
 
-          {showApiKeyInput && (
-            <div className="md:hidden px-4 pb-4 animate-in slide-in-from-top-2">
-              <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 border border-gray-200">
-                <span className="text-xs font-bold text-red-400 mr-2 whitespace-nowrap">Your Key</span>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Enter your key"
-                  className="bg-transparent border-none outline-none text-sm w-full text-gray-700"
-                />
-              </div>
-            </div>
-          )}
         </header>
 
         {/* ===== Scrollable Content Area ===== */}
@@ -851,8 +866,6 @@ export default function ManageOffers() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5">
                 {[
                   { icon: <Store size={22} />, color: "text-blue-600", bg: "bg-blue-100", label: "Restaurants", val: getFilteredRestaurants(restaurants).length },
-                  { icon: <Tag size={22} />, color: "text-green-600", bg: "bg-green-100", label: "Offers", val: offers.length },
-                  { icon: <EyeOff size={22} />, color: "text-orange-600", bg: "bg-orange-100", label: "Inactive Offers", val: getFilteredOffers(inactiveOffers).length || "-" },
                 ].map((stat, idx) => (
                   <div key={idx} className="bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
                     <div className={`p-3 ${stat.bg} ${stat.color} rounded-lg flex-shrink-0`}>{stat.icon}</div>
@@ -883,23 +896,23 @@ export default function ManageOffers() {
               {/* Quick Actions — 2x2 grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4 md:gap-5">
                 <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Restaurants</h3>
+                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Your Restaurants</h3>
                   <p className="text-blue-100 mb-3 text-xs">Add, edit, or update restaurant details.</p>
                   <button onClick={() => setActiveTab('restaurants')} className="w-full md:w-auto bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50 transition">Go to Restaurants</button>
                 </div>
                 <div className="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Restaurant Offers</h3>
+                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Your Restaurant Offers</h3>
                   <p className="text-slate-300 mb-3 text-xs">Create seasonal offers and manage pricing strategies.</p>
                   <button onClick={() => setActiveTab('offers')} className="w-full md:w-auto bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">Go to Restaurant Offers</button>
                 </div>
                 <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Ad Providers</h3>
-                  <p className="text-indigo-100 mb-3 text-xs">Register and manage providers across verticals.</p>
+                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Your Ad Provider/Business</h3>
+                  <p className="text-indigo-100 mb-3 text-xs">Register your company or provider for grouping Ads.</p>
                   <button onClick={() => setActiveTab('providers')} className="w-full md:w-auto bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition">Go to Ad Providers</button>
                 </div>
                 <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Ad Listings</h3>
-                  <p className="text-teal-100 mb-3 text-xs">Post listings for vehicles, accommodation, services.</p>
+                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Your Ads</h3>
+                  <p className="text-teal-100 mb-3 text-xs">Post Ads for vehicles, accommodation, services.</p>
                   <button onClick={() => setActiveTab('listings')} className="w-full md:w-auto bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Ad Listings</button>
                 </div>
               </div>
@@ -950,6 +963,17 @@ export default function ManageOffers() {
                           {Object.values(countryMap).map((c) => <option key={c as string} value={c as string}>{c as string}</option>)}
                         </select>
                       </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold uppercase text-gray-500">Enter Your Key *</label>
+                      <input
+                        type="password"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        placeholder="Enter API Key..."
+                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        required
+                      />
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-gray-500 flex items-center gap-1"><Paperclip size={14} /> Logo *</label>
@@ -1066,6 +1090,31 @@ export default function ManageOffers() {
                       <select name="offerType" value={offerForm.offerType} onChange={handleOfferFormChange} className="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white">
                         {["All", "Buffet", "Combo", "Happy Hour", "Special", "Catering", "Discount"].map(t => <option key={t} value={t}>{t}</option>)}
                       </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-gray-500">Country *</label>
+                      <select
+                        name="country"
+                        value={offerForm.country || "Qatar"}
+                        onChange={handleOfferFormChange}
+                        required
+                        className="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white"
+                      >
+                        {Object.values(countryMap).map((c) => (
+                          <option key={c as string} value={c as string}>{c as string}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-gray-500">Enter Your Key *</label>
+                      <input
+                        type="password"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        placeholder="Enter API Key..."
+                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-blue-500 outline-none"
+                        required
+                      />
                     </div>
                     <div className="space-y-1 md:col-span-2">
                       <label className="text-xs font-semibold text-gray-500 flex items-center gap-1"><Paperclip size={14} /> Image *</label>
@@ -1285,6 +1334,9 @@ export default function ManageOffers() {
                     listingPreview={listingPreview}
                     listingGalleryPreviews={listingGalleryPreviews}
                     removeGalleryImage={removeGalleryImage}
+                    isAdmin={user?.role === "admin"}
+                    apiKey={apiKey}
+                    setApiKey={setApiKey}
                   />
                 </div>
               )}
@@ -1292,7 +1344,8 @@ export default function ManageOffers() {
               {!selectedRestaurant ? (
                 <div className="text-center py-20 text-gray-400">
                   <List size={48} className="mx-auto mb-4 opacity-20" />
-                  <p>Please select a provider to manage listings.</p>
+                  <p>Please select a provider to manage listings. 
+                    If you do not have registered the provider/business yet, go to Ads Providers menu to do so first.</p>
                 </div>
               ) : (
                 <>
@@ -1321,7 +1374,7 @@ export default function ManageOffers() {
                     return displayListings.length === 0 ? (
                       <div className="text-center py-16 text-gray-400">
                         <List size={40} className="mx-auto mb-3 opacity-20" />
-                        <p>{listingTab === "active" ? "No active listings." : "No inactive listings."}</p>
+                        <p>{listingTab === "active" ? "No active listings. Add new listings to get started." : "No inactive listings."}</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -1447,6 +1500,8 @@ export default function ManageOffers() {
                         isEdit={true}
                         updateImage={listingUpdateImage}
                         setUpdateImage={setListingUpdateImage}
+                        apiKey={apiKey}
+                        setApiKey={setApiKey}
                       />
                     </div>
                   </div>
@@ -1487,6 +1542,8 @@ export default function ManageOffers() {
                     bannerPreview={providerBannerPreview}
                     isEditing={!!editingProvider}
                     isUploading={isUploading}
+                    apiKey={apiKey}
+                    setApiKey={setApiKey}
                   />
                 </div>
               )}
@@ -1592,7 +1649,7 @@ export default function ManageOffers() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
-                        {messages.map((msg) => (
+                        {getFilteredMessages(messages).map((msg) => (
                           <tr key={msg._id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                               {formatDate(msg.createdAt)}
@@ -1830,6 +1887,33 @@ export default function ManageOffers() {
                     value={offerForm.validTo ? offerForm.validTo.split('T')[0] : ""}
                     onChange={handleOfferFormChange}
                     className="w-full border border-gray-300 rounded-lg p-2.5"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold uppercase text-gray-500">Country *</label>
+                  <select
+                    name="country"
+                    value={offerForm.country || "Qatar"}
+                    onChange={handleOfferFormChange}
+                    required
+                    className="w-full border border-gray-300 rounded-lg p-2.5 bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    {Object.values(countryMap).map((c) => (
+                      <option key={c as string} value={c as string}>{c as string}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold uppercase text-gray-500">Enter Your Key *</label>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter API Key..."
+                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     required
                   />
                 </div>

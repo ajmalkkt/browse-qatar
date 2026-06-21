@@ -30,6 +30,11 @@ const VerticalLayout: React.FC = () => {
     filters: searchQuery ? { search: searchQuery } : {}
   });
 
+  const filteredListings = listings.filter((l: any) => {
+    if (!selectedCountry) return true;
+    return l.location?.country === selectedCountry;
+  });
+
   // Validate vertical ID
   const isValidVertical = verticals.some(v => v.id === vertical);
 
@@ -72,7 +77,7 @@ const VerticalLayout: React.FC = () => {
             <h3 className="text-red-800 font-bold mb-2">Error loading listings</h3>
             <p className="text-red-600">{error.message}</p>
           </div>
-        ) : listings.length === 0 ? (
+        ) : filteredListings.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">
             <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +91,7 @@ const VerticalLayout: React.FC = () => {
           </div>
         ) : (
           <div className={`grid gap-6 ${['vehicles', 'jobs'].includes(vertical) ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}`}>
-            {listings.map((listing) => (
+            {filteredListings.map((listing) => (
               <ListingCard 
                 key={listing.id} 
                 listing={listing} 

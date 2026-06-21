@@ -22,6 +22,8 @@ const AUTH_PROVIDER = (import.meta.env.VITE_AUTH_PROVIDER || "KEYCLOAK").toUpper
 // Feature flags for signup (disabled by default, set VITE_ENABLE_SIGNUP=true to enable)
 const ENABLE_SIGNUP = import.meta.env.VITE_ENABLE_SIGNUP === "true";
 
+const REQUIRE_API_KEY_FOR_ADS = import.meta.env.VITE_REQUIRE_API_KEY_FOR_ADS === "true";
+
 const DEFAULT_COUNTRY = import.meta.env.VITE_DEFAULT_COUNTRY || "Qatar";
 const DEFAULT_CATEGORY = import.meta.env.VITE_DEFAULT_CATEGORY || "All Offers";
 
@@ -280,5 +282,6 @@ export {
   ENABLE_RANDOM_SORT,
   RESTAURANT_SORT_CONFIG,
   SHOW_VERTICAL_NAV,
+  REQUIRE_API_KEY_FOR_ADS,
 };
 

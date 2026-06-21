@@ -430,6 +430,21 @@ export default function RestaurantDetails() {
           </button>
         </div>
       )}
+      {/* Footer */}
+      <footer className="bg-white py-6 px-4 border-t border-gray-100">
+        <div className="container mx-auto text-center text-muted-foreground">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3">
+            <p className="m-0 text-gray-600 text-sm">
+              © {new Date().getFullYear()} BrowseQatar Offers Platform. All rights reserved.
+            </p>
+            <span className="hidden md:inline text-muted-foreground">|</span>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <img src="/meraki.webp" alt="Meraki AI" className="w-5 h-5 object-contain" />
+              <span>Powered by MerakiAi</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
