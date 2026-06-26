@@ -824,7 +824,9 @@ export default function ManageOffers() {
                 <Menu size={20} />
               </button>
 
-              <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-5 w-auto hidden sm:block" />
+              {activeTab === "dashboard"&& (
+                <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-7 w-auto flex-shrink-0" />
+              )}
               <h2 className="text-lg font-semibold text-gray-700 capitalize truncate hidden md:block">{activeTab}</h2>
             </div>
 
@@ -880,8 +882,8 @@ export default function ManageOffers() {
               {/* Stat Cards — row 2: Providers, Listings */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
                 {[
-                  { icon: <Building2 size={22} />, color: "text-indigo-600", bg: "bg-indigo-100", label: "Ad Providers", val: providers.length },
-                  { icon: <List size={22} />, color: "text-teal-600", bg: "bg-teal-100", label: "Total Ad Listings", val: listings.length },
+                  { icon: <Building2 size={22} />, color: "text-indigo-600", bg: "bg-indigo-100", label: "Ad Providers", val: user?.role === "admin" ? providers.length : providers.filter((p: any) => p.ownerLogin === user?.email || p.email === user?.email).length },
+                  { icon: <List size={22} />, color: "text-teal-600", bg: "bg-teal-100", label: "Total Ad Listings", val: user?.role === "admin" ? listings.length : listings.filter((l: any) => l.ownerLogin === user?.email).length },
                 ].map((stat, idx) => (
                   <div key={idx} className="bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
                     <div className={`p-3 ${stat.bg} ${stat.color} rounded-lg flex-shrink-0`}>{stat.icon}</div>
@@ -1549,16 +1551,14 @@ export default function ManageOffers() {
               )}
 
               {/* Provider Cards */}
-              {providers.length === 0 ? (
+              {getFilteredProviders(providers).length === 0 ? (
                 <div className="text-center py-20 text-gray-400 bg-white rounded-xl border border-dashed border-gray-300">
                   <Building2 size={48} className="mx-auto mb-4 opacity-20" />
-                  <p className="text-sm">No providers yet. Add your first provider above.</p>
+                  <p className="text-sm">{tabSearchTerm ? "No providers match your search." : "No providers yet. Add your first provider above."}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-                  {providers
-                    .filter((p: any) => user?.role === "admin" || p.ownerLogin === user?.email)
-                    .map((p: any) => (
+                  {getFilteredProviders(providers).map((p: any) => (
                     <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
                       {/* Banner */}
                       <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 relative">

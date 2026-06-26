@@ -909,20 +909,20 @@ export default function ManageOffers() {
                   </div>
                 </div>
                  <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-                  <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg"><Building2 size={24} /></div>
-                  <div>
-                    <p className="text-sm text-gray-500 font-medium">Total Ad Providers</p>
-                    <h3 className="text-2xl font-bold text-gray-800">{providers.length}</h3>
-                  </div>
-                </div>
-                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-                  <div className="p-3 bg-teal-100 text-teal-600 rounded-lg"><List size={24} /></div>
-                  <div>
-                    <p className="text-sm text-gray-500 font-medium">Total Ad Listings</p>
-                    <h3 className="text-2xl font-bold text-gray-800">{listings.length}</h3>
-                  </div>
-                </div>
-              </div>
+                   <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg"><Building2 size={24} /></div>
+                   <div>
+                     <p className="text-sm text-gray-500 font-medium">Total Ad Providers</p>
+                     <h3 className="text-2xl font-bold text-gray-800">{user?.role === "admin" ? providers.length : providers.filter((p: any) => p.ownerLogin === user?.email || p.email === user?.email).length}</h3>
+                   </div>
+                 </div>
+                 <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                   <div className="p-3 bg-teal-100 text-teal-600 rounded-lg"><List size={24} /></div>
+                   <div>
+                     <p className="text-sm text-gray-500 font-medium">Total Ad Listings</p>
+                     <h3 className="text-2xl font-bold text-gray-800">{user?.role === "admin" ? listings.length : listings.filter((l: any) => l.ownerLogin === user?.email).length}</h3>
+                   </div>
+                 </div>
+               </div>
 
               {/* Quick Actions */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
@@ -1617,16 +1617,14 @@ export default function ManageOffers() {
               )}
 
               {/* Provider Cards */}
-              {providers.length === 0 ? (
+              {getFilteredProviders(providers).length === 0 ? (
                 <div className="text-center py-20 text-gray-400">
                   <Building2 size={48} className="mx-auto mb-4 opacity-20" />
-                  <p>No providers yet. Add your first provider above.</p>
+                  <p>{tabSearchTerm ? "No providers match your search." : "No providers yet. Add your first provider above."}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {providers
-                    .filter((p: any) => user?.role === "admin" || p.ownerLogin === user?.email)
-                    .map((p: any) => (
+                  {getFilteredProviders(providers).map((p: any) => (
                     <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                       {/* Banner */}
                       <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 relative">

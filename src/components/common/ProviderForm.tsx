@@ -72,8 +72,8 @@ export default function ProviderForm({
           required
           className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
         >
-          <option value="">-- Select Vertical --</option>
-          {verticals.map((v) => (
+          <option value="">-- Select Category --</option>
+          {verticals.filter((v) => v.id !== 'restaurants').map((v) => (
             <option key={v.id} value={v.id}>
               {v.name}
             </option>

@@ -25,9 +25,9 @@ const VerticalLayout: React.FC = () => {
     }
   }, [vertical, currentVertical, switchVertical]);
 
-  const { listings, loading, error } = useListing({
+  const { listings, loading, error, setFilters } = useListing({
     verticalId: vertical || '',
-    filters: searchQuery ? { search: searchQuery } : {}
+    filters: {}
   });
 
   const filteredListings = listings.filter((l: any) => {
@@ -44,6 +44,8 @@ const VerticalLayout: React.FC = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    // Update API filters so backend search is triggered
+    setFilters(query ? { search: query } : {});
   };
 
   return (
