@@ -934,7 +934,7 @@ export default function ManageOffers() {
                 <div className="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-5 text-white shadow-lg">
                   <h3 className="text-lg font-bold mb-1">Manage Your Restaurant Offers</h3>
                   <p className="text-slate-300 mb-3 text-xs">Create seasonal offers and manage pricing strategies.</p>
-                  <button onClick={() => setActiveTab('offers')} className="bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">Go to  Offers</button>
+                  <button onClick={() => setActiveTab('offers')} className="bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">Go to  Your Offers</button>
                 </div>
                 <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 text-white shadow-lg">
                   <h3 className="text-lg font-bold mb-1">Manage Your Ad Provider/Business</h3>
@@ -944,7 +944,7 @@ export default function ManageOffers() {
                 <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 text-white shadow-lg">
                   <h3 className="text-lg font-bold mb-1">Manage Your Ads </h3>
                   <p className="text-teal-100 mb-3 text-xs">Post and manage listings for vehicles, accommodation, services.</p>
-                  <button onClick={() => setActiveTab('listings')} className="bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Ad Listings</button>
+                  <button onClick={() => setActiveTab('listings')} className="bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Your Ads</button>
                 </div>
               </div>
             </div>

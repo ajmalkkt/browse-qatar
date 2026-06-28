@@ -915,7 +915,7 @@ export default function ManageOffers() {
                 <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 text-white shadow-lg">
                   <h3 className="text-base md:text-lg font-bold mb-1">Manage Your Ads</h3>
                   <p className="text-teal-100 mb-3 text-xs">Post Ads for vehicles, accommodation, services.</p>
-                  <button onClick={() => setActiveTab('listings')} className="w-full md:w-auto bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Ad Listings</button>
+                  <button onClick={() => setActiveTab('listings')} className="w-full md:w-auto bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Your Ads</button>
                 </div>
               </div>
 
