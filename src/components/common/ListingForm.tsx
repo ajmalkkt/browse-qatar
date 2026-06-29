@@ -103,15 +103,20 @@ export default function ListingForm({
         />
       </div>
 
-      <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Unit (e.g., night, trip)</label>
-        <input 
-          name="unit" 
-          value={listingForm.unit} 
-          onChange={handleListingFormChange} 
-          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
-        />
-      </div>
+      {(listingForm.verticalId === "accommodations" || listingForm.verticalId === "vehicles" || listingForm.verticalId === "jobs") && (
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-gray-500">
+            {listingForm.verticalId === "jobs" ? "Open Position" : "Unit (e.g., night, trip)"}
+          </label>
+          <input 
+            name="unit" 
+            value={listingForm.unit || ""} 
+            onChange={handleListingFormChange} 
+            placeholder={listingForm.verticalId === "jobs" ? "e.g., 3" : "e.g., night, trip"}
+            className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
+          />
+        </div>
+      )}
 
       <div className="space-y-1">
         <label className="text-xs font-semibold text-gray-500">Valid From</label>

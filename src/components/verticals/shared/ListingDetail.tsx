@@ -1,8 +1,59 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Navigate, Link } from 'react-router-dom';
 import { useListingById } from '../../../hooks/useListing';
 import { useVertical } from '../../../hooks/useVertical';
-import { ChevronLeft, MapPin, Calendar, Tag, Share2, Heart, ExternalLink } from 'lucide-react';
+import { ChevronLeft, MapPin, Calendar, Tag, Share2, Heart, ExternalLink, Lock, Mail, Phone, Sparkles, X } from 'lucide-react';
+import { getProviderById } from '../../../services/providerService';
+
+const MOCK_PROVIDERS: Record<string, any> = {
+  dealer1: {
+    id: "dealer1",
+    name: "Al Faris Motors",
+    type: "Dealer",
+    phone: "+974 5555 1234",
+    email: "contact@alfarismotors.com",
+    address: "Salwa Road, Doha, Qatar",
+    logoUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=alfaris",
+    bannerUrl: ""
+  },
+  landlord1: {
+    id: "landlord1",
+    name: "Doha Real Estate",
+    type: "Agency",
+    phone: "+974 4444 9876",
+    email: "info@doharealestate.qa",
+    address: "West Bay, Doha, Qatar",
+    logoUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=dohare",
+    bannerUrl: ""
+  },
+  recruiter1: {
+    id: "recruiter1",
+    name: "Qatar Careers Ltd",
+    type: "Agency",
+    phone: "+974 3333 7777",
+    email: "recruitment@qatarcareers.qa",
+    address: "Grand Hamad Street, Doha, Qatar",
+    logoUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=qatarcareers",
+    bannerUrl: ""
+  }
+};
+
+const maskEmail = (email?: string) => {
+  if (!email || email.trim() === "") return "Not disclosed";
+  const parts = email.split('@');
+  if (parts.length !== 2) return "********";
+  const [local, domain] = parts;
+  if (local.length <= 2) {
+    return `${local[0]}***@${domain}`;
+  }
+  return `${local.slice(0, 2)}*****${local.slice(-1)}@${domain}`;
+};
+
+const maskPhone = (phone?: string) => {
+  if (!phone || phone.trim() === "") return "Not disclosed";
+  if (phone.length <= 5) return "*****";
+  return phone.slice(0, 5) + "*".repeat(phone.length - 5);
+};
 
 /**
  * Shared detail page for any listing from any vertical
@@ -13,6 +64,56 @@ const ListingDetail: React.FC = () => {
   const { verticals, currentConfig } = useVertical();
   
   const { listing, loading, error } = useListingById(vertical || '', id);
+
+  const [provider, setProvider] = useState<any>(null);
+  const [loadingProvider, setLoadingProvider] = useState(false);
+  const [showProviderModal, setShowProviderModal] = useState(false);
+
+  useEffect(() => {
+    if (!listing || !listing.providerId) {
+      setProvider(null);
+      return;
+    }
+
+    const providerIdStr = String(listing.providerId);
+    const isNumericId = /^\d+$/.test(providerIdStr);
+
+    if (isNumericId) {
+      setLoadingProvider(true);
+      getProviderById(parseInt(providerIdStr))
+        .then((data) => {
+          setProvider(data);
+        })
+        .catch((err) => {
+          console.warn("Failed to fetch provider from API, using fallback name if available:", err);
+          setProvider({
+            id: providerIdStr,
+            name: (listing as any).restaurantName || "Verified Partner",
+            type: listing.providerType || "Partner",
+            phone: "",
+            email: "",
+            address: listing.location && typeof listing.location === 'object' ? `${listing.location.city || ''}, ${listing.location.country || ''}` : String(listing.location || "")
+          });
+        })
+        .finally(() => {
+          setLoadingProvider(false);
+        });
+    } else {
+      const mock = MOCK_PROVIDERS[providerIdStr];
+      if (mock) {
+        setProvider(mock);
+      } else {
+        setProvider({
+          id: providerIdStr,
+          name: (listing as any).restaurantName || "Verified Partner",
+          type: listing.providerType || "Partner",
+          phone: "",
+          email: "",
+          address: listing.location && typeof listing.location === 'object' ? `${listing.location.city || ''}, ${listing.location.country || ''}` : String(listing.location || "")
+        });
+      }
+    }
+  }, [listing]);
 
   // Validate vertical
   const isValidVertical = verticals.some(v => v.id === vertical);
@@ -122,25 +223,41 @@ const ListingDetail: React.FC = () => {
                       const currency = listing.pricing?.currency || 'QR';
                       const unit = listing.pricing?.unit || listing.unit;
                       const showDiscount = vertical !== 'jobs' && discountedPrice && Number(discountedPrice) > 0 && Number(discountedPrice) < Number(originalPrice);
+                      const showUnit = vertical === 'accommodations' || vertical === 'vehicles';
+                      const isJob = vertical === 'jobs';
 
                       if (showDiscount) {
                         return (
-                          <>
-                            <span className="text-3xl font-black text-blue-600">
-                              {currency} {discountedPrice} 
-                              <p className="text-sm font-normal text-gray-500 mb-1">{unit ? `#${unit}` : '1'} unit(s)</p>
-                            </span>
-                            <span className="text-lg text-gray-400 line-through font-medium">
-                              {currency} {originalPrice}
-                            </span>
-                          </>
+                          <div className="flex flex-col">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-3xl font-black text-blue-600">
+                                {currency} {discountedPrice} 
+                              </span>
+                              <span className="text-lg text-gray-400 line-through font-medium">
+                                {currency} {originalPrice}
+                              </span>
+                            </div>
+                            {showUnit && (
+                              <p className="text-sm font-normal text-gray-500 mt-1">{unit ? `#${unit}` : '1'} unit(s)</p>
+                            )}
+                            {isJob && (
+                              <p className="text-sm font-normal text-gray-500 mt-1">{unit || '1'} open position(s)</p>
+                            )}
+                          </div>
                         );
                       }
                       return (
-                        <span className="text-3xl font-black text-blue-600">
-                          {currency} {originalPrice || 0}
-                          <p className="text-sm font-normal text-gray-500 mb-1">{unit ? `#${unit}` : '1'} unit(s)</p>
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-3xl font-black text-blue-600">
+                            {currency} {originalPrice || 0}
+                          </span>
+                          {showUnit && (
+                            <p className="text-sm font-normal text-gray-500 mt-1">{unit ? `#${unit}` : '1'} unit(s)</p>
+                          )}
+                          {isJob && (
+                            <p className="text-sm font-normal text-gray-500 mt-1">{unit || '1'} open position(s)</p>
+                          )}
+                        </div>
                       );
                     })()}
                   </div>
@@ -215,18 +332,124 @@ const ListingDetail: React.FC = () => {
             {/* Provider Section */}
             <div className="bg-white rounded-2xl shadow-sm p-6 flex items-center justify-between border border-gray-100">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-xl font-bold">
-                  {listing.providerType?.[0].toUpperCase() || 'P'}
-                </div>
+                {provider?.logoUrl ? (
+                  <img src={provider.logoUrl} alt={provider.name} className="w-12 h-12 rounded-full object-cover border" />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-xl font-bold">
+                    {(provider?.name || listing.providerType || 'P')[0].toUpperCase()}
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-gray-400">Listed by</p>
-                  <p className="font-bold text-gray-900">Verified Partner</p>
+                  <p className="font-bold text-gray-900">{provider?.name || "Verified Partner"}</p>
                 </div>
               </div>
-              <button className="text-blue-600 font-bold hover:underline">
+              <button 
+                onClick={() => setShowProviderModal(true)}
+                className="text-blue-600 font-bold hover:underline"
+              >
                 View Profile
               </button>
             </div>
+
+            {/* Provider Details Modal */}
+            {showProviderModal && (
+              <div 
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4"
+                onClick={() => setShowProviderModal(false)}
+              >
+                <div 
+                  className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative border border-gray-100 transform transition-all scale-100"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header Banner */}
+                  <div className="h-28 bg-gradient-to-r from-blue-600 to-indigo-700 relative flex items-center justify-center">
+                    <button
+                      className="absolute top-3 right-3 text-white/80 hover:text-white bg-black/20 hover:bg-black/40 p-1.5 rounded-full transition-colors"
+                      onClick={() => setShowProviderModal(false)}
+                      title="Close"
+                    >
+                      <X size={18} />
+                    </button>
+                    <h2 className="text-white text-lg font-bold">Business Profile</h2>
+                  </div>
+
+                  {/* Provider Logo / Avatar (overlapping the banner) */}
+                  <div className="flex justify-center -mt-10 relative z-10">
+                    {provider?.logoUrl ? (
+                      <img 
+                        src={provider.logoUrl} 
+                        alt={provider.name} 
+                        className="w-20 h-20 rounded-full border-4 border-white shadow-lg bg-white object-cover" 
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full border-4 border-white shadow-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-3xl">
+                        {(provider?.name || 'P')[0].toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Provider Info */}
+                  <div className="px-6 pt-3 pb-6 space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold text-gray-900">{provider?.name || "Verified Partner"}</h3>
+                      <span className="inline-block mt-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 capitalize">
+                        {provider?.type || "Verified Partner"}
+                      </span>
+                      {provider?.address && (
+                        <p className="flex items-center justify-center gap-1 text-sm text-gray-500 mt-2">
+                          <MapPin size={14} className="text-gray-400" />
+                          <span>{provider.address}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="border-t border-gray-100 pt-4 space-y-3">
+                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider text-left">Contact Information</h4>
+                      
+                      {/* Email (masked) */}
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <Mail size={16} className="text-gray-400" />
+                          <span className="text-sm font-medium text-gray-700">{maskEmail(provider?.email)}</span>
+                        </div>
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                          <Lock size={10} /> Locked
+                        </span>
+                      </div>
+
+                      {/* Mobile/Phone (masked) */}
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <Phone size={16} className="text-gray-400" />
+                          <span className="text-sm font-medium text-gray-700">{maskPhone(provider?.phone)}</span>
+                        </div>
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                          <Lock size={10} /> Locked
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Premium Plan Promotion Callout */}
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 rounded-xl p-4 flex flex-col gap-2">
+                      <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
+                        <Sparkles size={16} className="text-amber-600" />
+                        <span>Subscribe to Premium Plan</span>
+                      </div>
+                      <p className="text-xs text-amber-700 leading-relaxed text-left">
+                        Subscribe to our Premium Plan to disclose provider contact numbers, email addresses, and unlock direct contact options.
+                      </p>
+                      <button 
+                        onClick={() => alert("Premium subscription feature is coming soon!")}
+                        className="w-full mt-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all text-xs"
+                      >
+                        Subscribe to Disclose Contact Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Validity info */}
             <div className="flex items-center gap-2 text-gray-400 text-xs px-2">

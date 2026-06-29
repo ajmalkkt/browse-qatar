@@ -73,3 +73,11 @@ export async function deleteProvider(id, options = {}) {
   if (!res.ok) throw new Error('Failed to delete provider');
   return res.json();
 }
+
+/** Get a single provider by ID */
+export async function getProviderById(id) {
+  const res = await fetch(`${PROVIDERS_URL}/${id}`);
+  if (!res.ok) throw new Error("Failed to fetch provider details");
+  return res.json();
+}
+
