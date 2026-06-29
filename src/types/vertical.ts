@@ -48,6 +48,7 @@ export interface VerticalConfig {
   description: string;
   features?: string[]; // ['offers', 'ratings', 'reviews']
   fallbackUrl?: string;
+  additionalAttributes?: any[];
 }
 
 export interface VerticalContextType {

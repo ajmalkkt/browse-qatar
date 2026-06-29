@@ -475,6 +475,7 @@ export default function ManageOffers() {
     }));
 
     formData.set("attributes", JSON.stringify(listingForm.attributes));
+    formData.set("additionalAttributes", JSON.stringify(listingForm.attributes || {}));
 
     if (listingForm.image) {
       formData.append("image", listingForm.image);
@@ -533,6 +534,7 @@ export default function ManageOffers() {
     formData.set("validity", JSON.stringify(validityData));
     
     formData.set("attributes", JSON.stringify(listingForm.attributes || {}));
+    formData.set("additionalAttributes", JSON.stringify(listingForm.attributes || {}));
 
     if (listingForm.active !== undefined) {
       formData.set("active", String(listingForm.active));
@@ -631,12 +633,15 @@ export default function ManageOffers() {
 
   const handleDeleteProvider = async (id) => {
     if (!window.confirm("Are you sure you want to delete this provider?")) return;
+    setIsUploading(true);
     try {
       await deleteProvider(id);
       setProviders(prev => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error(err);
       alert("Error deleting provider: " + err.message);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -1414,7 +1419,7 @@ export default function ManageOffers() {
                                       city: l.location?.city || "",
                                       country: l.location?.country || "Qatar",
                                       address: l.location?.address || "",
-                                      attributes: l.attributes || {},
+                                      attributes: { ...(l.additionalAttributes || {}), ...(l.attributes || {}) },
                                       active: !!l.active,
                                       image: null,
                                       gallery: []
@@ -1443,8 +1448,8 @@ export default function ManageOffers() {
                               <p className="text-xs text-gray-500 mt-1 truncate">{l.description}</p>
                               <div className="flex items-center justify-between mt-2">
                                 <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">{l.verticalId}</span>
-                                {l.pricing?.discountedPrice && (
-                                  <span className="text-xs font-bold text-green-600">{l.pricing.currency || "QAR"} {l.pricing.discountedPrice}</span>
+                                {(l.pricing?.discountedPrice || l.pricing?.originalPrice) && (
+                                  <span className="text-xs font-bold text-green-600">{l.pricing.currency || "QAR"} {l.pricing.discountedPrice || l.pricing.originalPrice}</span>
                                 )}
                               </div>
                               {l.location?.city && (

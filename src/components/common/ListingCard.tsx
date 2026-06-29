@@ -36,7 +36,7 @@ export default function ListingCard({
   const currency = listing.pricing?.currency || 'QAR';
 
   // Calculate discount percentage
-  const discount = originalPrice && discountedPrice
+  const discount = vertical !== 'jobs' && originalPrice && discountedPrice && Number(discountedPrice) < Number(originalPrice)
     ? Math.round(((Number(originalPrice) - Number(discountedPrice)) / Number(originalPrice)) * 100)
     : null;
 
@@ -173,20 +173,30 @@ export default function ListingCard({
 
         {/* Price Section */}
         <div className="border-t border-gray-100 pt-2 mt-2">
-          {originalPrice && discountedPrice ? (
-            <div className="flex items-baseline gap-2">
+          {vertical === 'jobs' ? (
+            originalPrice ? (
+              <span className="text-base font-bold text-gray-900">
+                Salary: {currency} {originalPrice} {listing.pricing?.unit ? `/ ${listing.pricing.unit}` : ''}
+              </span>
+            ) : (
+              <span className="text-sm font-semibold text-gray-500">Salary: Not specified</span>
+            )
+          ) : (
+            originalPrice && discountedPrice && Number(discountedPrice) < Number(originalPrice) ? (
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg md:text-xl font-bold text-gray-900">
+                  {currency} {discountedPrice} {listing.pricing?.unit ? `/ ${listing.pricing.unit}` : ''}
+                </span>
+                <span className="text-xs md:text-sm text-gray-400 line-through">
+                  {currency} {originalPrice}
+                </span>
+              </div>
+            ) : originalPrice ? (
               <span className="text-lg md:text-xl font-bold text-gray-900">
-                {currency}{discountedPrice}
+                {currency} {originalPrice} {listing.pricing?.unit ? `/ ${listing.pricing.unit}` : ''}
               </span>
-              <span className="text-xs md:text-sm text-gray-400 line-through">
-                {currency}{originalPrice}
-              </span>
-            </div>
-          ) : originalPrice ? (
-            <span className="text-lg md:text-xl font-bold text-gray-900">
-              {currency}{originalPrice}
-            </span>
-          ) : null}
+            ) : null
+          )}
         </div>
       </div>
     </div>

@@ -47,12 +47,15 @@ export default function ListingForm({
   return (
     <form onSubmit={handleListingUpload} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Ads Category</label>
+        <label className="text-xs font-semibold text-gray-500">
+          Ads Sector {isEdit && <span className="text-gray-400 font-normal">(locked in edit)</span>}
+        </label>
         <select 
           name="verticalId" 
           value={listingForm.verticalId} 
           onChange={handleListingFormChange} 
-          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+          disabled={isEdit}
+          className={`w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white ${isEdit ? 'bg-gray-50 cursor-not-allowed text-gray-500' : ''}`}
         >
           <option value="">-- Select Category --</option>
           {verticals.filter((v) => v.id !== 'restaurants').map((v) => (
@@ -64,7 +67,7 @@ export default function ListingForm({
       </div>
 
       <div className="md:col-span-1 lg:col-span-2 space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Title</label>
+        <label className="text-xs font-semibold text-gray-500">Title *</label>
         <input 
           name="title" 
           value={listingForm.title} 
@@ -86,24 +89,15 @@ export default function ListingForm({
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Original Price</label>
+        <label className="text-xs font-semibold text-gray-500">
+          {listingForm.verticalId === "jobs" ? "Salary Offered *" : "Price *"}
+        </label>
         <input 
           name="originalPrice" 
           type="number" 
           value={listingForm.originalPrice} 
           onChange={handleListingFormChange} 
-          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
-          required 
-        />
-      </div>
-
-      <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Discounted Price</label>
-        <input 
-          name="discountedPrice" 
-          type="number" 
-          value={listingForm.discountedPrice} 
-          onChange={handleListingFormChange} 
+          placeholder={listingForm.verticalId === "jobs" ? "Enter salary offered..." : "Expected price..."}
           className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
           required 
         />
@@ -260,57 +254,60 @@ export default function ListingForm({
       </div>
 
       {/* Dynamic Attributes Based on Vertical */}
-      {listingForm.verticalId === "vehicles" && (
-         <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-            <div className="space-y-1">
-               <label className="text-xs font-semibold text-gray-500">Make/Model</label>
-               <input 
-                 value={listingForm.attributes?.makeModel || ""} 
-                 onChange={(e) => setListingForm((prev: any) => ({...prev, attributes: {...prev.attributes, makeModel: e.target.value}}))} 
-                 className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
-               />
-            </div>
-            <div className="space-y-1">
-               <label className="text-xs font-semibold text-gray-500">Year</label>
-               <input 
-                 type="number" 
-                 value={listingForm.attributes?.year || ""} 
-                 onChange={(e) => setListingForm((prev: any) => ({...prev, attributes: {...prev.attributes, year: e.target.value}}))} 
-                 className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
-               />
-            </div>
-            <div className="space-y-1">
-               <label className="text-xs font-semibold text-gray-500">Color</label>
-               <input 
-                 value={listingForm.attributes?.color || ""} 
-                 onChange={(e) => setListingForm((prev: any) => ({...prev, attributes: {...prev.attributes, color: e.target.value}}))} 
-                 className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
-               />
-            </div>
-         </div>
-      )}
-      
-      {listingForm.verticalId === "accommodation" && (
-         <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-            <div className="space-y-1">
-               <label className="text-xs font-semibold text-gray-500">Property Type</label>
-               <input 
-                 value={listingForm.attributes?.propertyType || ""} 
-                 onChange={(e) => setListingForm((prev: any) => ({...prev, attributes: {...prev.attributes, propertyType: e.target.value}}))} 
-                 className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
-               />
-            </div>
-            <div className="space-y-1">
-               <label className="text-xs font-semibold text-gray-500">Rooms</label>
-               <input 
-                 type="number" 
-                 value={listingForm.attributes?.rooms || ""} 
-                 onChange={(e) => setListingForm((prev: any) => ({...prev, attributes: {...prev.attributes, rooms: e.target.value}}))} 
-                 className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
-               />
-            </div>
-         </div>
-      )}
+      {(() => {
+        const activeVertical = verticals.find((v) => v.id === listingForm.verticalId);
+        if (!activeVertical || !activeVertical.additionalAttributes || activeVertical.additionalAttributes.length === 0) {
+          return null;
+        }
+        return (
+          <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+            {activeVertical.additionalAttributes.map((attr: any) => {
+              const value = listingForm.attributes?.[attr.name] || "";
+              const handleChange = (val: any) => {
+                setListingForm((prev: any) => ({
+                  ...prev,
+                  attributes: {
+                    ...(prev.attributes || {}),
+                    [attr.name]: val,
+                  },
+                }));
+              };
+              
+              return (
+                <div key={attr.name} className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-500">
+                    {attr.label} {attr.required && "*"}
+                  </label>
+                  {attr.type === "select" ? (
+                    <select
+                      value={value}
+                      onChange={(e) => handleChange(e.target.value)}
+                      required={attr.required}
+                      className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+                    >
+                      <option value="">-- Select {attr.label} --</option>
+                      {attr.options?.map((opt: string) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={attr.type || "text"}
+                      value={value}
+                      onChange={(e) => handleChange(e.target.value)}
+                      required={attr.required}
+                      placeholder={`Enter ${attr.label.toLowerCase()}`}
+                      className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       <div className="md:col-span-2 lg:col-span-3 space-y-1">
         <label className="text-xs font-semibold text-gray-500">Description</label>
@@ -356,7 +353,7 @@ export default function ListingForm({
 
       <div className="md:col-span-2 lg:col-span-3 pt-2">
         <button type="submit" className="w-full md:w-auto bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 font-medium shadow-md transition-colors">
-          Upload Ads
+          {isEdit ? "Update Listing" : "Upload Ads"}
         </button>
       </div>
     </form>

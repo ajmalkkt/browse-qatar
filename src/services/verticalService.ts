@@ -9,6 +9,7 @@ export interface Vertical {
   color: string;
   route: string;
   providerTypes: string[];
+  additionalAttributes?: any[];
 }
 
 export const getAllVerticals = async (): Promise<Vertical[]> => {

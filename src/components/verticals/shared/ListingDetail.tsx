@@ -112,24 +112,54 @@ const ListingDetail: React.FC = () => {
 
               <div className="py-6 border-y border-gray-100 flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Starting Price</p>
+                  <p className="text-sm text-gray-500 mb-1">
+                    {vertical === 'jobs' ? 'Salary Offered' : 'Price'}
+                  </p>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-blue-600">
-                      {listing.pricing?.currency || 'QR'} {listing.pricing?.discountedPrice || listing.discountedPrice || 0}
-                    </span>
-                    {(listing.pricing?.originalPrice || listing.originalPrice || 0) > (listing.pricing?.discountedPrice || listing.discountedPrice || 0) && (
-                      <span className="text-lg text-gray-400 line-through font-medium">
-                        {listing.pricing?.currency || 'QR'} {listing.pricing?.originalPrice || listing.originalPrice || 0}
-                      </span>
-                    )}
+                    {(() => {
+                      const originalPrice = listing.pricing?.originalPrice || listing.originalPrice;
+                      const discountedPrice = listing.pricing?.discountedPrice || listing.discountedPrice;
+                      const currency = listing.pricing?.currency || 'QR';
+                      const unit = listing.pricing?.unit || listing.unit;
+                      const showDiscount = vertical !== 'jobs' && discountedPrice && Number(discountedPrice) > 0 && Number(discountedPrice) < Number(originalPrice);
+
+                      if (showDiscount) {
+                        return (
+                          <>
+                            <span className="text-3xl font-black text-blue-600">
+                              {currency} {discountedPrice} 
+                              <p className="text-sm font-normal text-gray-500 mb-1">{unit ? `#${unit}` : '1'} unit(s)</p>
+                            </span>
+                            <span className="text-lg text-gray-400 line-through font-medium">
+                              {currency} {originalPrice}
+                            </span>
+                          </>
+                        );
+                      }
+                      return (
+                        <span className="text-3xl font-black text-blue-600">
+                          {currency} {originalPrice || 0}
+                          <p className="text-sm font-normal text-gray-500 mb-1">{unit ? `#${unit}` : '1'} unit(s)</p>
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
                 
-                {Number(listing.pricing?.originalPrice || listing.originalPrice || 0) > Number(listing.pricing?.discountedPrice || listing.discountedPrice || 0) && (
-                  <div className="bg-green-100 text-green-700 px-4 py-2 rounded-xl font-bold">
-                    {Math.round((1 - Number(listing.pricing?.discountedPrice || listing.discountedPrice || 0) / Number(listing.pricing?.originalPrice || listing.originalPrice || 1)) * 100)}% OFF
-                  </div>
-                )}
+                {(() => {
+                  const originalPrice = listing.pricing?.originalPrice || listing.originalPrice;
+                  const discountedPrice = listing.pricing?.discountedPrice || listing.discountedPrice;
+                  const showDiscount = vertical !== 'jobs' && discountedPrice && Number(discountedPrice) > 0 && Number(discountedPrice) < Number(originalPrice);
+
+                  if (showDiscount) {
+                    return (
+                      <div className="bg-green-100 text-green-700 px-4 py-2 rounded-xl font-bold">
+                        {Math.round((1 - Number(discountedPrice) / Number(originalPrice)) * 100)}% OFF
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               <div className="space-y-4">
@@ -140,19 +170,37 @@ const ListingDetail: React.FC = () => {
               </div>
 
               {/* Attributes Section */}
-              {listing.attributes && Object.keys(listing.attributes).length > 0 && (
-                <div className="pt-6 border-t border-gray-100">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Specifications</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {Object.entries(listing.attributes).map(([key, value]) => (
-                      <div key={key} className="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">{key}</p>
-                        <p className="text-gray-900 font-semibold">{String(value)}</p>
-                      </div>
-                    ))}
+              {(() => {
+                const attrs = listing.attributes || listing.additionalAttributes;
+                if (!attrs || Object.keys(attrs).length === 0) return null;
+                
+                const getAttributeLabel = (key: string) => {
+                  const attrConfig = currentConfig?.additionalAttributes?.find((a: any) => a.name === key);
+                  if (attrConfig?.label) return attrConfig.label;
+                  return key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, (str) => str.toUpperCase());
+                };
+
+                return (
+                  <div className="pt-6 border-t border-gray-100">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Specifications</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {Object.entries(attrs).map(([key, value]) => {
+                        if (value === undefined || value === null || value === '') return null;
+                        return (
+                          <div key={key} className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">
+                              {getAttributeLabel(key)}
+                            </p>
+                            <p className="text-gray-900 font-semibold">{String(value)}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="pt-8 flex flex-col sm:flex-row gap-4">
                 <button className="flex-1 bg-blue-600 text-white h-14 rounded-xl font-bold text-lg shadow-lg shadow-blue-200 hover:bg-blue-700 transition flex items-center justify-center gap-2">

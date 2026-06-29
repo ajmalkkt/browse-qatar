@@ -5,6 +5,7 @@ export interface Pricing {
   originalPrice?: number | string;
   discountedPrice?: number | string;
   currency?: string;
+  unit?: string;
 }
 
 export interface Validity {
@@ -74,6 +75,8 @@ export interface Listing {
   validTo?: string;
   restaurantId?: number; // for backward compatibility
   ownerLogin?: string;
+  additionalAttributes?: any;
+  unit?: string;
 }
 
 export interface ListingFilters {

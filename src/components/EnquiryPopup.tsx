@@ -89,7 +89,7 @@ const EnquiryPopup: React.FC<EnquiryPopupProps> = ({ open, onClose }) => {
           &times;
         </button>
 
-        <h2 className="text-xl font-semibold mb-2">Register Your Business</h2>
+        <h2 className="text-xl font-semibold mb-2">Looking for Partnership - Contact Us</h2>
 
         <div className="mb-2">
           <span className="font-medium">Enquiry Email: </span>
