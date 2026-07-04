@@ -69,3 +69,18 @@ export async function sendAccountCreationEmail(enquiryId, tempPassword) {
   if (!response.ok) throw new Error("Failed to send account creation email");
   return await response.json();
 } 
+
+// send listing-specific enquiry message
+export async function sendListingEnquiryMessage(listingId, message, userName, email, phone) {
+  const token = await getAuthToken();
+  const response = await fetch(`${ENQUIRY_API_URL}/listing`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ listingId, userName, email, phone, message }),
+  });
+  if (!response.ok) throw new Error("Failed to send listing enquiry message");
+  return await response.json();
+}

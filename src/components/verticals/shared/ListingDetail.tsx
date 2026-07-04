@@ -4,6 +4,8 @@ import { useListingById } from '../../../hooks/useListing';
 import { useVertical } from '../../../hooks/useVertical';
 import { ChevronLeft, MapPin, Calendar, Tag, Share2, Heart, ExternalLink, Lock, Mail, Phone, Sparkles, X } from 'lucide-react';
 import { getProviderById } from '../../../services/providerService';
+import { incrementListingEnquiryClicks } from '../../../services/listingService';
+import ListingEnquiryPopup from '../../ListingEnquiryPopup';
 
 const MOCK_PROVIDERS: Record<string, any> = {
   dealer1: {
@@ -68,6 +70,19 @@ const ListingDetail: React.FC = () => {
   const [provider, setProvider] = useState<any>(null);
   const [loadingProvider, setLoadingProvider] = useState(false);
   const [showProviderModal, setShowProviderModal] = useState(false);
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
+
+  const handleEnquireNow = async () => {
+    setEnquiryOpen(true);
+    if (listing && listing.id) {
+      try {
+        await incrementListingEnquiryClicks(listing.id);
+        (listing as any).enquiryClicks = (Number((listing as any).enquiryClicks) || 0) + 1;
+      } catch (err) {
+        console.error("Failed to increment enquiry clicks:", err);
+      }
+    }
+  };
 
   useEffect(() => {
     if (!listing || !listing.providerId) {
@@ -320,7 +335,10 @@ const ListingDetail: React.FC = () => {
               })()}
 
               <div className="pt-8 flex flex-col sm:flex-row gap-4">
-                <button className="flex-1 bg-blue-600 text-white h-14 rounded-xl font-bold text-lg shadow-lg shadow-blue-200 hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                <button 
+                  onClick={handleEnquireNow}
+                  className="flex-1 bg-blue-600 text-white h-14 rounded-xl font-bold text-lg shadow-lg shadow-blue-200 hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                >
                   <span>Enquire Now</span>
                 </button>
                 <button className="sm:w-14 h-14 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-50 transition">
@@ -509,6 +527,12 @@ const ListingDetail: React.FC = () => {
           </div>
         </div>
       </footer>
+      <ListingEnquiryPopup
+        open={enquiryOpen}
+        onClose={() => setEnquiryOpen(false)}
+        listingId={listing?.id ?? ''}
+        adTitle={listing?.title ?? 'this Ad'}
+      />
     </div>
   );
 };

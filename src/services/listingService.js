@@ -160,6 +160,15 @@ export async function getAllListings() {
   return await res.json();
 }
 
+// Increment enquiry clicks
+export async function incrementListingEnquiryClicks(id) {
+  const res = await fetch(`${LISTINGS_URL}/${id}/enquire`, {
+    method: 'PATCH',
+  });
+  if (!res.ok) throw new Error("Failed to increment enquiry clicks");
+  return res.json();
+}
+
 export default {
   uploadListing,
   updateListing,
@@ -171,4 +180,5 @@ export default {
   activateListing,
   bulkActivateListings,
   inactivateListings,
+  incrementListingEnquiryClicks,
 };

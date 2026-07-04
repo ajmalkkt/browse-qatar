@@ -6,6 +6,7 @@ import VerticalHeader from '../../common/VerticalHeader';
 import ListingCard from '../../common/ListingCard';
 import TopHeader from '../../TopHeader';
 import { DEFAULT_COUNTRY } from '../../../config/appConfig';
+import EnquiryPopup from '../../EnquiryPopup';
 
 /**
  * Shared layout for all verticals listing pages
@@ -17,6 +18,7 @@ const VerticalLayout: React.FC = () => {
   const { currentVertical, switchVertical, verticals, currentConfig } = useVertical();
   const [selectedCountry, setSelectedCountry] = useState(DEFAULT_COUNTRY);
   const [searchQuery, setSearchQuery] = useState('');
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
 
   // Sync context with URL parameter
   useEffect(() => {
@@ -56,7 +58,7 @@ const VerticalLayout: React.FC = () => {
           onSearch={handleSearch}
           selectedCountry={selectedCountry}
           onSelectCountry={setSelectedCountry}
-          onAddBusiness={() => {}} // TODO: Handle business enquiry for verticals
+          onAddBusiness={() => setEnquiryOpen(true)}
           searchQuery={searchQuery}
         />
       </div>
@@ -121,6 +123,7 @@ const VerticalLayout: React.FC = () => {
           </div>
         </div>
       </footer>
+      <EnquiryPopup open={enquiryOpen} onClose={() => setEnquiryOpen(false)} />
     </div>
   );
 };

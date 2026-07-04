@@ -6,6 +6,7 @@ import OffersGrid from "./OffersGrid";
 import TopHeader from "./TopHeader";
 import { getAllRestaurants } from "../services/restaurantService";
 import { useEffect, useState } from "react";
+import EnquiryPopup from "./EnquiryPopup";
 
 export default function Favourites() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Favourites() {
   const [selectedCountry, setSelectedCountry] = useState("Qatar");
   const [restaurants, setRestaurants] = useState([] as any[]);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
 
   // Filter favorites by search query if needed
   const filteredFavorites = favorites.filter((offer) => {
@@ -83,7 +85,7 @@ export default function Favourites() {
         onSearch={handleSearch}
         selectedCountry={selectedCountry}
         onSelectCountry={setSelectedCountry}
-        onAddBusiness={() => { }}
+        onAddBusiness={() => setEnquiryOpen(true)}
         onSearchClick={() => { }}
         searchQuery={searchQuery}
       />
@@ -181,6 +183,7 @@ export default function Favourites() {
           </div>
         </div>
       </footer>
+      <EnquiryPopup open={enquiryOpen} onClose={() => setEnquiryOpen(false)} />
     </div>
   );
 }

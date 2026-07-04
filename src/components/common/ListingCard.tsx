@@ -163,12 +163,20 @@ export default function ListingCard({
             </div>
           )}
           
-          {listing.rating && (
-            <div className="flex items-center gap-1">
-              <Star size={12} className="fill-yellow-400 text-yellow-400" />
-              <span className="text-xs font-bold text-gray-700">{listing.rating}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {Number((listing as any).enquiryClicks) > 0 && (
+              <span className="text-[10px] md:text-xs font-bold bg-orange-50 text-orange-600 border border-orange-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                🔥 {Number((listing as any).enquiryClicks)} interested
+              </span>
+            )}
+            
+            {Number((listing as any).rating) > 0 && (
+              <div className="flex items-center gap-1">
+                <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                <span className="text-xs font-bold text-gray-700">{Number((listing as any).rating).toFixed(1)}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Price Section */}
