@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { getAllRestaurants } from "../services/restaurantService";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 interface Props {
@@ -14,6 +14,7 @@ export default function PopularBrands({ brands = [], onSelectRestaurant }: Props
   const animationRef = useRef<number | null>(null);
   // Track precise scroll position (float) to fix rounding issues on some devices/browsers
   const currentScrollPos = useRef<number>(0);
+  const navigate = useNavigate();
 
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState<String | null>(null);
@@ -159,7 +160,7 @@ export default function PopularBrands({ brands = [], onSelectRestaurant }: Props
             <div
               // Use index in key because items are duplicated, IDs won't be unique
               key={`${src.id}-${i}`}
-              onClick={() => handleRestaurantClick(src.id)}
+              onClick={() => navigate(`/restaurant/${src.id}`)}
               className="flex-shrink-0 cursor-pointer flex flex-col items-center gap-2 transition-transform hover:scale-105"
             >
               <div

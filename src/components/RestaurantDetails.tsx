@@ -218,7 +218,7 @@ export default function RestaurantDetails() {
           </button>
           <button
             onClick={() => setActiveTab("menu")}
-            className={`flex items-center gap-2 px-6 py-3.5 text-sm font-semibold transition-colors border-b-2 ${activeTab === "menu" ? "border-orange-500 text-orange-500" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            className={`flex items-center gap-2 px-6 py-3.5 text-sm font-semibold transition-colors border-b-2 ${activeTab === "menu" ? "border-orange-500 text-orange-500" : "border-transparent text-red-700 animate-pulse"}`}
           >
             <BookOpen size={16} />
             Menu
