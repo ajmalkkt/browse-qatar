@@ -1,0 +1,23 @@
+<svg width="1200" height="700" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f2d5c" />
+      <stop offset="50%" stop-color="#0b1f45" />
+      <stop offset="100%" stop-color="#071b3f" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="700" fill="url(#bg)" />
+  <circle cx="930" cy="170" r="95" fill="#ffd54f" opacity="0.95" />
+  <circle cx="930" cy="170" r="63" fill="#071b3f" />
+  <rect x="80" y="120" width="1040" height="460" rx="32" fill="#123b74" stroke="#ffd54f" stroke-width="10" />
+  <path d="M220 500c0-140 110-220 220-220s220 80 220 220" fill="none" stroke="#ffd54f" stroke-width="18" stroke-linecap="round" />
+  <path d="M560 500c0-120 90-180 180-180s180 60 180 180" fill="none" stroke="#ffd54f" stroke-width="18" stroke-linecap="round" />
+  <circle cx="360" cy="336" r="72" fill="#3b82f6" opacity="0.95" />
+  <circle cx="740" cy="336" r="72" fill="#ef4444" opacity="0.95" />
+  <path d="M330 332h60M710 332h60" stroke="#ffffff" stroke-width="8" stroke-linecap="round" />
+  <circle cx="360" cy="336" r="24" fill="#ffffff" opacity="0.85" />
+  <circle cx="740" cy="336" r="24" fill="#ffffff" opacity="0.85" />
+  <text x="600" y="255" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" letter-spacing="6" fill="#ffd54f">FIFA WORLD CUP</text>
+  <text x="600" y="315" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="86" font-weight="800" letter-spacing="8" fill="#ffffff">2026</text>
+  <text x="600" y="600" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="600" fill="#dbeafe">Canada • Mexico • United States</text>
+</svg>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, Maximize2, ZoomIn, ZoomOut } from "lucide-react";
 import { CURRENT_FESTIVAL } from "../config/festivalConfig";
+import { FESTIVAL_THEMES } from "../config/festivalThemes";
 
 const FestivalBanner = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -12,6 +13,8 @@ const FestivalBanner = () => {
     const [zoomScale, setZoomScale] = useState(1);
 
     const offers = CURRENT_FESTIVAL.offers;
+    const theme = FESTIVAL_THEMES[CURRENT_FESTIVAL.theme] ?? FESTIVAL_THEMES.arabian;
+    const currentOffer = offers[currentIndex];
 
     // Manages the "Flashy" show/hide cycle
     useEffect(() => {
@@ -68,51 +71,37 @@ const FestivalBanner = () => {
                         {/* Decorative Background Elements */}
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                             {/* Fixed Stars */}
-                            {[...Array(20)].map((_, i) => (
+                            {Array.from({ length: theme.background.stars.count }).map((_, i) => {
+                                const size = theme.background.stars.sizeOptions[i % theme.background.stars.sizeOptions.length];
+                                return (
+                                    <div
+                                        key={i}
+                                        className="absolute animate-star-twinkle"
+                                        style={{
+                                            top: `${(i * 137) % 95}%`,
+                                            left: `${(i * 149) % 95}%`,
+                                            width: `${size}px`,
+                                            height: `${size}px`,
+                                            backgroundColor: theme.background.stars.color,
+                                            borderRadius: "50%",
+                                            boxShadow: `0 0 4px ${theme.background.stars.color}`,
+                                            animationDelay: `${i * theme.background.stars.animationDelayStep}s`,
+                                            animationDuration: `${theme.background.stars.animationDurationBase + (i % theme.background.stars.animationDurationVariance)}s`,
+                                            opacity: theme.background.stars.opacity
+                                        }}
+                                    />
+                                );
+                            })}
+
+                            {theme.background.elements.map((element) => (
                                 <div
-                                    key={i}
-                                    className="absolute animate-star-twinkle"
-                                    style={{
-                                        top: `${(i * 137) % 95}%`,
-                                        left: `${(i * 149) % 95}%`,
-                                        width: `${(i % 3) + 1.2}px`,
-                                        height: `${(i % 3) + 1.2}px`,
-                                        backgroundColor: '#fcd34d',
-                                        borderRadius: '50%',
-                                        boxShadow: '0 0 4px #fcd34d',
-                                        animationDelay: `${i * 0.3}s`,
-                                        animationDuration: `${1.5 + (i % 3)}s`,
-                                        opacity: 0.7
-                                    }}
-                                />
+                                    key={element.id}
+                                    className={element.className}
+                                    style={element.style}
+                                >
+                                    {element.node}
+                                </div>
                             ))}
-
-                            {/* Main Large Sky Crescent Moon */}
-                            <div className="absolute top-[15px] left-[15px] w-12 h-12 text-amber-300 animate-glitter opacity-90 blur-[0.5px]">
-                                <svg viewBox="0 0 24 24" className="w-full h-full fill-current drop-shadow-[0_0_15px_rgba(252,211,77,0.9)]">
-                                    <path d="M12 3c.132 0 .263 0 .393.007a9 9 0 0 0 7.23 15.115A9 9 0 1 1 12 3z" />
-                                </svg>
-                            </div>
-
-                            {/* Left Side: Glittering Minaret & Minaret Crescent */}
-                            <div className="absolute bottom-0 left-[-5px] w-24 h-32 opacity-90 text-amber-400 animate-glitter">
-                                <svg viewBox="0 0 40 80" className="w-full h-full fill-current">
-                                    <path d="M5,80 L15,80 L15,35 Q10,30 5,35 Z" />
-                                    <path d="M8,32 L12,32 L10,20 Z" />
-                                    {/* Minaret Crescent */}
-                                    <path d="M10,5 A4,4 0 1,0 10,13 A3,3 0 1,1 10,5" transform="translate(0, 10)" />
-                                </svg>
-                            </div>
-
-                            {/* Right Side: Arabian Design Layout */}
-                            <div className="absolute bottom-0 right-[-10px] w-32 h-36 opacity-90 text-amber-500 animate-glitter">
-                                <svg viewBox="0 0 60 80" className="w-full h-full fill-current">
-                                    <path d="M10,80 L40,80 L40,65 Q25,45 10,65 Z" />
-                                    <path d="M35,80 L42,80 L42,35 Q38,30 35,35 Z" />
-                                    {/* Side Crescent - Large & Bold */}
-                                    <path d="M15,10 A8,8 0 1,0 15,26 A6,6 0 1,1 15,10" transform="translate(10, 5) rotate(10)" />
-                                </svg>
-                            </div>
                         </div>
 
                         {/* Top Close Button - Always visible on mobile, hover on desktop */}
@@ -129,8 +118,8 @@ const FestivalBanner = () => {
 
                         <div className="relative h-36 md:h-48 w-full overflow-hidden flex items-center justify-center bg-transparent">
                             <motion.img
-                                src={offers[currentIndex].image}
-                                alt={offers[currentIndex].title}
+                                src={currentOffer.image}
+                                alt={currentOffer.title}
                                 className="w-full h-full object-contain relative z-10"
                                 animate={{ scale: isHovered ? 1.05 : 1 }}
                                 transition={{ duration: 0.6 }}
@@ -148,6 +137,30 @@ const FestivalBanner = () => {
                                 <div className="bg-amber-500/95 backdrop-blur-sm text-black px-2 py-0.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center gap-1 shadow-lg border border-white/20">
                                     <Sparkles size={8} className="animate-pulse" />
                                     {CURRENT_FESTIVAL.badge}
+                                </div>
+                            </div>
+
+                            <div className="absolute bottom-8 left-0 right-0 z-30 bg-black/70 backdrop-blur-sm px-3 py-2 border-t border-amber-500/30">
+                                <div className="overflow-hidden">
+                                    <motion.div
+                                        className="flex items-center gap-4 whitespace-nowrap text-sm font-semibold text-white"
+                                        animate={{ x: ["0%", "-50%"] }}
+                                        transition={{ repeat: Infinity, repeatType: "loop", duration: 12, ease: "linear" }}
+                                    >
+                                        {Array.from({ length: 2 }).map((_, index) => (
+                                            <a
+                                                key={index}
+                                                href={currentOffer.link}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex items-center gap-2 hover:text-amber-300 transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                                                <span>{currentOffer.subtitle}</span>
+                                            </a>
+                                        ))}
+                                    </motion.div>
                                 </div>
                             </div>
                         </div>
@@ -203,8 +216,8 @@ const FestivalBanner = () => {
 
                             <div className="relative w-full flex justify-center overflow-hidden rounded bg-zinc-50 min-h-[40vh] max-h-[70vh]">
                                 <motion.img
-                                    src={offers[currentIndex].image}
-                                    alt={offers[currentIndex].title}
+                                    src={currentOffer.image}
+                                    alt={currentOffer.title}
                                     className="w-full h-auto max-h-[70vh] object-contain"
                                     style={{ scale: zoomScale }}
                                     transition={{ duration: 0.2 }}
@@ -232,8 +245,8 @@ const FestivalBanner = () => {
 
                             {/* Title area (matching OffersGrid) */}
                             <div className="mt-4 pb-2 text-center">
-                                <h3 className="font-bold text-xl text-zinc-900">{offers[currentIndex].title}</h3>
-                                <p className="text-zinc-500 text-sm mt-1">{CURRENT_FESTIVAL.badge}</p>
+                                <h3 className="font-bold text-xl text-zinc-900">{currentOffer.title}</h3>
+                                <p className="text-zinc-500 text-sm mt-1">{currentOffer.subtitle}</p>
                             </div>
                         </motion.div>
                     </div>
