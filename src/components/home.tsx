@@ -590,7 +590,7 @@ function Home() {
 
                 <p>
                   By using our platform, you gain access to the <strong>top food offers in Qatar</strong> across various cuisines
-                  including Indian, Lebanese, Turkish, and Western fusion. Don&apos;t miss out on <strong>best restaurants in Qatar </strong>
+                  including Indian, Lebanese, Turkish, Pure Vegetarian dishes and Western fusion. Don&apos;t miss out on <strong>best restaurants in Qatar </strong>
                   that frequently run seasonal promotions for Ramadan, Eid, and National Day.
                 </p>
               </div>

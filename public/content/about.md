@@ -54,6 +54,7 @@ From casual cafés to premium restaurants, Browse Qatar helps you:
 - Discover affordable restaurants in Doha
 - Explore top-rated dining spots
 - Enjoy quality food without overspending
+- Find Pure Vegetarian restaurants and vegetarian-friendly dining deals
 
 ## Our Vision
 

@@ -23,11 +23,11 @@ export default function AboutUs() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Helmet>
         <title>About Us | Browse Qatar - Best Food Offers & Dining Deals</title>
-        <meta name="description" content="Learn about Browse Qatar, your trusted platform to discover the best food offers, dining deals, and family buffet offers in Qatar while reducing food wastage." />
+        <meta name="description" content="Learn about Browse Qatar, your trusted platform to discover the best food offers, dining deals, Pure Veg restaurants and vegetarian offers in Qatar while reducing food wastage." />
         <link rel="canonical" href="https://browseqatar.com/about" />
         <link rel="alternate" type="text/markdown" href="/content/about" />
         <meta property="og:title" content="About Browse Qatar - No Waste... More Tasty!!!" />
-        <meta property="og:description" content="Discover how Browse Qatar connects food lovers with the best dining deals in Doha while promoting sustainability." />
+        <meta property="og:description" content="Discover how Browse Qatar connects food lovers with the best dining deals in Doha, including Pure Veg and vegetarian-friendly offers, while promoting sustainability." />
         <meta property="og:url" content="https://browseqatar.com/about" />
         <meta property="og:image" content="https://browseqatar.com/bqLogo.jpg" />
       </Helmet>
@@ -98,6 +98,10 @@ export default function AboutUs() {
               family dinner buffet offers, our platform brings everything
               together in one place. You can easily find
               the best food offers in Qatar today, updated regularly for your convenience.
+            </p>
+
+            <p className="text-gray-700 leading-relaxed mb-4">
+              We also make it easier to discover Pure Vegetarian restaurants and vegetarian-friendly menu deals in Doha. BrowseQatar highlights plant-based dining options for customers who want delicious Pure Veg meals in Qatar.
             </p>
 
             <p className="text-gray-700 leading-relaxed mb-6">

@@ -110,6 +110,10 @@ const AdminUserGuide = () => {
                             </li>
                             <li className="flex gap-2">
                                 <span className="font-bold text-green-500">2.</span>
+                                <div><strong>Pure Veg Offers:</strong> Mark Pure Vegetarian restaurants correctly so vegetarian diners can find the best Pure Veg deals and menu offers quickly.</div>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-bold text-green-500">3.</span>
                                 <div><strong>Quality:</strong> Use good quality images with size limit around 100KB. Offensive or political content is strictly prohibited and will be banned.</div>
                             </li>
                             <li className="flex gap-2">
@@ -118,6 +122,10 @@ const AdminUserGuide = () => {
                             </li>
                             <li className="flex gap-2">
                                 <span className="font-bold text-green-500">4.</span>
+                                <div><strong>Search & Filter:</strong> Use the search boxes to quickly find restaurants and offers by name, cuisine, category, or location.</div>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-bold text-green-500">5.</span>
                                 <div><strong>Inactive Status:</strong> Offers may go to "Inactive" for review or if expired. Check the Inactive tab to delete or reactivate them.</div>
                             </li>
                         </ul>
