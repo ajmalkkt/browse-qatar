@@ -153,7 +153,7 @@ export default function ManageOffers() {
 
   const [form, setForm] = useState({
     id: "", name: "", address: "", phone: "", rating: "", cuisine: "",
-    logo: null, brand: null, country: "Qatar",
+    logo: null, brand: null, country: "Qatar", isPureVeg: false,
   });
   const [offerForm, setOfferForm] = useState({
     title: "", description: "", cuisine: "", originalPrice: "", discountedPrice: "",
@@ -294,11 +294,13 @@ export default function ManageOffers() {
 
   // ===== Handlers =====
   const handleFormChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files, type, checked } = e.target;
     if (files && files.length > 0) {
       setForm((prev) => ({ ...prev, [name]: files[0] }));
       if (name === "logo") setLogoPreview(URL.createObjectURL(files[0]));
       if (name === "brand") setBrandPreview(URL.createObjectURL(files[0]));
+    } else if (type === "checkbox") {
+      setForm((prev) => ({ ...prev, [name]: checked }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -339,7 +341,7 @@ export default function ManageOffers() {
       await uploadRestaurant(formData, { headers: getAuthHeaders() });
       alert("Restaurant saved!");
       setRestaurants(await getAllOwnerRestaurants());
-      setForm({ id: "", name: "", address: "", phone: "", rating: "", cuisine: "", logo: null, brand: null, country: "Qatar" });
+      setForm({ id: "", name: "", address: "", phone: "", rating: "", cuisine: "", logo: null, brand: null, country: "Qatar", isPureVeg: false });
       setLogoPreview(null);
       setBrandPreview(null);
       setShowAddRestaurantForm(false);
@@ -958,6 +960,12 @@ export default function ManageOffers() {
                     <div className="space-y-1">
                       <label className="text-xs font-semibold uppercase text-gray-500">Cuisine(comma separated)</label>
                       <input name="cuisine" value={form.cuisine} onChange={handleFormChange} className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" />
+                    </div>
+                    <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg p-3">
+                      <input type="checkbox" id="isPureVeg" name="isPureVeg" checked={form.isPureVeg} onChange={handleFormChange} className="w-4 h-4 text-green-600 rounded cursor-pointer" />
+                      <label htmlFor="isPureVeg" className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 font-medium">
+                        <span>🌱 Pure Vegetarian Restaurant</span>
+                      </label>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">

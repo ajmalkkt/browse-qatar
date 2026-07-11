@@ -13,7 +13,70 @@ import {
   Upload, Trash2, Plus, X, ImagePlus
 } from "lucide-react";
 
-const MAX_MENU_FILES = 15;
+const MAX_MENU_FILES = 10;
+const BQ_PLACEHOLDER = "/bqLogo.jpg";
+
+type MenuImageCardProps = {
+  imageUrl: string;
+  alt: string;
+  index: number;
+  isEditMode: boolean;
+  onOpen: () => void;
+  onDelete?: () => void;
+};
+
+function MenuImageCard({ imageUrl, alt, index, isEditMode, onOpen, onDelete }: MenuImageCardProps) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const resolvedSrc = imageFailed || !imageUrl ? BQ_PLACEHOLDER : imageUrl;
+
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="block w-full text-left"
+        aria-label={`Open menu page ${index + 1}`}
+      >
+        <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
+          <img
+            src={resolvedSrc}
+            alt={alt}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
+          {(!imageUrl || imageFailed) && (
+            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 text-center">
+              <p className="text-xs font-semibold tracking-wide text-white">Menu image unavailable</p>
+              <p className="mt-0.5 text-[10px] text-gray-300">Refresh or check back shortly.</p>
+            </div>
+          )}
+        </div>
+      </button>
+
+      <div className="flex items-center justify-between px-3 py-2.5">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500">
+          Page {index + 1}
+        </span>
+        {isEditMode ? (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="rounded-full bg-red-500 p-1.5 text-white shadow-sm transition hover:bg-red-600"
+            title="Remove page"
+            aria-label="Remove page"
+          >
+            <Trash2 size={12} />
+          </button>
+        ) : (
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600">
+            Flyer View
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function RestaurantDetails() {
   const { id } = useParams<{ id: string }>();
@@ -157,16 +220,16 @@ export default function RestaurantDetails() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600" title="Back">
+            <button onClick={() => navigate(-1)} className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-600" title="Back">
               <ArrowLeft size={20} />
             </button>
-            <h1 className="text-xl font-bold text-gray-800 truncate">Restaurant Details</h1>
+            <h1 onClick={() => navigate(-1)} className="text-sm font-bold text-gray-500 truncate">Home/{restaurant.name}</h1>
           </div>
           <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-8 w-auto" />
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-24">
         {/* Profile Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6">
           <div className="h-32 bg-gradient-to-r from-blue-500 to-indigo-600 relative"></div>
@@ -182,6 +245,11 @@ export default function RestaurantDetails() {
                   <div className="flex items-center gap-1 font-semibold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">
                     <Star size={14} fill="currentColor" /><span>{restaurant.rating || "4.5"} Rating</span>
                   </div>
+                  {restaurant.isPureVeg && (
+                    <div className="flex items-center gap-1 font-semibold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full border border-green-200" title="Pure Vegetarian">
+                      <span className="text-base">🌱</span><span className="text-xs">Pure Veg</span>
+                    </div>
+                  )}
                   {editMode && (
                     <span className="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1 rounded-full">✏️ Edit Mode</span>
                   )}
@@ -357,58 +425,35 @@ export default function RestaurantDetails() {
                   </p>
                 )}
 
-                {editMode ? (
-                  /* Edit mode: thumbnail grid with delete buttons */
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-                    <div className="flex flex-wrap gap-3">
-                      {menuImages.map((url, idx) => (
-                        <div key={idx} className="relative group/thumb">
-                          <img
-                            src={url}
-                            alt={`Menu page ${idx + 1}`}
-                            onClick={() => openLightbox(idx)}
-                            className="h-28 w-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:border-blue-400 transition"
-                          />
-                          <button
-                            onClick={() => handleDeletePage(url)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center shadow text-xs hover:bg-red-600 transition opacity-0 group-hover/thumb:opacity-100"
-                            title="Remove page"
-                          >
-                            <Trash2 size={10} />
-                          </button>
-                          <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] text-center rounded-b-lg py-0.5">
-                            Page {idx + 1}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  /* View mode: full-width stacked pages */
-                  menuImages.map((url, idx) => (
-                    <div
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {menuImages.map((url, idx) => (
+                    <MenuImageCard
                       key={idx}
-                      className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => openLightbox(idx)}
-                    >
-                      <div className="bg-gray-50 px-4 py-2 border-b border-gray-100 flex items-center justify-between">
-                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Page {idx + 1}</span>
-                        <ExternalLink size={14} className="text-gray-400" />
-                      </div>
-                      <img
-                        src={url}
-                        alt={`${restaurant.name} menu page ${idx + 1}`}
-                        className="w-full object-contain max-h-[600px]"
-                        loading="lazy"
-                      />
-                    </div>
-                  ))
-                )}
+                      imageUrl={url}
+                      alt={`${restaurant.name} menu page ${idx + 1}`}
+                      index={idx}
+                      isEditMode={editMode}
+                      onOpen={() => openLightbox(idx)}
+                      onDelete={() => handleDeletePage(url)}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
         )}
       </main>
+
+      {menuImages.length > 0 && (
+        <button
+          onClick={() => setActiveTab("menu")}
+          className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full bg-white p-2 shadow-xl ring-1 ring-gray-200 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+          title="View Menu"
+          aria-label="View Menu"
+        >
+          <img src="/menu_book.png" alt="Menu" className="h-10 w-10" />
+        </button>
+      )}
 
       {/* Lightbox */}
       {lightboxIndex !== null && (
@@ -430,21 +475,6 @@ export default function RestaurantDetails() {
           </button>
         </div>
       )}
-      {/* Footer */}
-      <footer className="bg-white py-6 px-4 border-t border-gray-100">
-        <div className="container mx-auto text-center text-muted-foreground">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3">
-            <p className="m-0 text-gray-600 text-sm">
-              © {new Date().getFullYear()} BrowseQatar Offers Platform. All rights reserved.
-            </p>
-            <span className="hidden md:inline text-muted-foreground">|</span>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <img src="/meraki.webp" alt="Meraki AI" className="w-5 h-5 object-contain" />
-              <span>Powered by MerakiAi</span>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
