@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, Maximize2, ZoomIn, ZoomOut } from "lucide-react";
-import { CURRENT_FESTIVAL } from "../config/festivalConfig";
+import { CURRENT_FESTIVAL, isFestivalActive } from "../config/festivalConfig";
 import { FESTIVAL_THEMES } from "../config/festivalThemes";
 
 const FestivalBanner = () => {
@@ -11,14 +11,26 @@ const FestivalBanner = () => {
     const [isHovered, setIsHovered] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
     const [zoomScale, setZoomScale] = useState(1);
+    const [now, setNow] = useState(() => new Date());
 
     const offers = CURRENT_FESTIVAL.offers;
     const theme = FESTIVAL_THEMES[CURRENT_FESTIVAL.theme] ?? FESTIVAL_THEMES.arabian;
     const currentOffer = offers[currentIndex];
+    const isFestivalVisible = isFestivalActive(CURRENT_FESTIVAL, now);
+
+    useEffect(() => {
+        if (!CURRENT_FESTIVAL.startDateTime && !CURRENT_FESTIVAL.endDateTime) return;
+
+        const interval = window.setInterval(() => {
+            setNow(new Date());
+        }, 60000);
+
+        return () => window.clearInterval(interval);
+    }, []);
 
     // Manages the "Flashy" show/hide cycle
     useEffect(() => {
-        if (isDismissed || !CURRENT_FESTIVAL.active || isHovered || isZoomed) return;
+        if (isDismissed || !isFestivalVisible || isHovered || isZoomed) return;
 
         const cycle = setInterval(() => {
             setIsVisible((prev) => !prev);
@@ -52,7 +64,7 @@ const FestivalBanner = () => {
         setZoomScale(1);
     };
 
-    if (!CURRENT_FESTIVAL.active || isDismissed) return null;
+    if (!isFestivalVisible || isDismissed) return null;
 
     return (
         <>
