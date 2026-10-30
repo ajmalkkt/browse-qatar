@@ -141,7 +141,7 @@ export const verticalConfig: Record<string, VerticalConfig> = {
 
   classifieds: {
     id: 'classifieds',
-    name: 'Classifieds Buy & Sell',
+    name: 'Classifieds',
     icon: 'Package',
     color: '#7C3AED',
     route: '/classifieds',
@@ -159,14 +159,14 @@ export const verticalConfig: Record<string, VerticalConfig> = {
     },
     
     filters: {
-      category: { type: 'select', options: ['Electronics', 'Furniture', 'Books', 'Clothing', 'Sports', 'Other'] },
+      category: { type: 'select', options: ['Furniture', 'Home Appliances', 'Electronics', 'Mobile Phones', 'TVs', 'Computers', 'Books', 'Clothing', 'Sports', 'Other'] },
       condition: { type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
       priceRange: { type: 'range', min: 1, max: 100000 }
     },
     
     sortOptions: ['newest', 'priceLow', 'priceHigh'],
     featuredImage: 'https://images.unsplash.com/photo-1567016546367-c27a0d56712e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmdXJuaXR1cmUlMjBpbnRlcmlvciUyMGhvbWUlMjBkZWNvcnxlbnwxfHx8fDE3NzcxOTQ3NDJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
-    description: 'Buy and sell items in your neighborhood',
+    description: 'Buy and sell used furniture, home appliances and electronics in your neighborhood',
     features: ['listings', 'search', 'filter'],
     fallbackUrl: '/data/classifieds.json'
   },

@@ -253,11 +253,21 @@ export const countryMap = {
   'Saudi Arabia': "Saudi Arabia",
 };
 
+export const vehicleMakes = [
+  'Toyota', 'Honda', 'Nissan', 'BMW', 'Mercedes', 'Hyundai', 'Kia', 'Chevrolet', 'Ford', 'Mitsubishi'
+];
+
+export const vehicleModels = [
+  'Corolla', 'Civic', 'Camry', 'Altima', 'Accord', 'X5', 'C-Class', 'Elantra', 'Sportage', 'Cruze'
+];
+
 export default {
   cuisineOptions,
   locationOptions,
   offerTypeOptions,
   countryMap,
+  vehicleMakes,
+  vehicleModels,
   cuisineLists,
 };
 

@@ -120,7 +120,7 @@ export default function PopularBrands({ brands = [], onSelectRestaurant }: Props
           <Sparkles className="w-5 h-5 text-yellow-500 fill-yellow-500 animate-pulse" />
           <h3 className="text-lg font-semibold animate-pulse brand-gradient-text">In the Spotlight</h3>
         </div>
-        <Link to="/all-restaurants" className="text-xs font-semibold text-blue-500 hover:text-blue-600 hover:underline">
+        <Link to="/all-restaurants" state={{ returnTo: "/restaurants-offers" }} className="text-xs font-semibold text-blue-500 hover:text-blue-600 hover:underline">
           View All Restaurants &gt;
         </Link>
       </div>
@@ -160,7 +160,7 @@ export default function PopularBrands({ brands = [], onSelectRestaurant }: Props
             <div
               // Use index in key because items are duplicated, IDs won't be unique
               key={`${src.id}-${i}`}
-              onClick={() => navigate(`/restaurant/${src.id}`)}
+              onClick={() => navigate(`/restaurant/${src.id}`, { state: { returnTo: "/restaurants-offers" } })}
               className="flex-shrink-0 cursor-pointer flex flex-col items-center gap-2 transition-transform hover:scale-105"
             >
               <div

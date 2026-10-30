@@ -37,6 +37,7 @@ interface Restaurant {
 
 const OfferDetails = () => {
     const { id } = useParams<{ id: string }>();
+    const restaurantsRoute = import.meta.env.VITE_MODERN_VIEW === "true" ? "/marketplace/restaurants" : "/restaurants-offers";
     const [offer, setOffer] = useState<Offer | null>(null);
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
     const [loading, setLoading] = useState(true);
@@ -135,7 +136,7 @@ const OfferDetails = () => {
             {/* Header / Nav */}
             <div className="bg-white shadow-sm sticky top-0 z-10">
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                    <Link to="/restaurants-offers" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+                    <Link to={restaurantsRoute} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
                         <ArrowLeft size={20} />
                         <span className="font-medium">Back</span>
                     </Link>
@@ -161,7 +162,7 @@ const OfferDetails = () => {
                 {/* Intro Card */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
                     <p className="text-gray-600 text-sm leading-relaxed">
-                        Discover the best dining deals in Qatar with <Link to="/restaurants-offers" title="browseqatar.com" className="font-semibold text-blue-600 hover:underline">Browse Qatar</Link>.
+                        Discover the best dining deals in Qatar with <Link to={restaurantsRoute} title="browseqatar.com" className="font-semibold text-blue-600 hover:underline">Browse Qatar</Link>.
                         We bring you exclusive offers from top restaurants, cafes, and eateries.
                         Enjoy great food at unbeatable prices!
                     </p>
@@ -176,6 +177,17 @@ const OfferDetails = () => {
                             alt={offer.title}
                             className="w-full h-full object-cover"
                         />
+                        <button type="button" onClick={handleShare} aria-label="Share this offer" className="absolute bottom-4 right-4 rounded-full bg-white/90 p-2.5 text-gray-700 shadow transition hover:bg-white">
+                            <Share2 size={20} />
+                        </button>
+                        <div className="absolute bottom-16 right-4">
+                            <SharePopup
+                                isOpen={showSharePopup}
+                                onClose={() => setShowSharePopup(false)}
+                                title={offer.title || 'Check out this offer'}
+                                url={window.location.href}
+                            />
+                        </div>
                         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold shadow-sm text-blue-600">
                             {offer.offerType}
                         </div>

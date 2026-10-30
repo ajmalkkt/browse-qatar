@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { getAllRestaurants } from "../services/restaurantService";
 import { Search, MapPin, Star, Utensils, ArrowLeft, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X } from "lucide-react";
 
 export default function AllRestaurants() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const returnTo = location.state?.returnTo || (import.meta.env.VITE_MODERN_VIEW === "true" ? "/marketplace/restaurants" : "/restaurants-offers");
     const [restaurants, setRestaurants] = useState<any[]>([]);
     const [filteredRestaurants, setFilteredRestaurants] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export default function AllRestaurants() {
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-3 w-full md:w-auto">
                             <button
-                                onClick={() => navigate("/restaurants-offers")}
+                                onClick={() => navigate(returnTo)}
                                 className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
                                 title="Back to Restaurants"
                             >
@@ -126,7 +128,7 @@ export default function AllRestaurants() {
                             {currentItems.map((r) => (
                                 <div
                                     key={r.id}
-                                    onClick={() => navigate(`/restaurant/${r.id}`)}
+                                    onClick={() => navigate(`/restaurant/${r.id}`, { state: { returnTo } })}
                                     className="bg-white rounded-xl shadow-sm border-2 border-gray-300 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group flex flex-col h-full"
                                 >
                                     <div className="h-20 bg-gray-50 relative overflow-hidden flex items-center justify-center p-1">

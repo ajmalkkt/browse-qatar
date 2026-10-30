@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   getRestaurantDetail,
@@ -81,6 +81,11 @@ function MenuImageCard({ imageUrl, alt, index, isEditMode, onOpen, onDelete }: M
 export default function RestaurantDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.returnTo || (import.meta.env.VITE_MODERN_VIEW === "true" ? "/marketplace/restaurants" : "/restaurants-offers");
+  const restaurantOffersUrl = import.meta.env.VITE_MODERN_VIEW === "true"
+    ? `/marketplace/restaurants?restaurant=${id}`
+    : `/restaurants-offers/?restaurant=${id}`;
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
@@ -192,8 +197,8 @@ export default function RestaurantDetails() {
         <Utensils size={48} className="text-gray-300 mb-4" />
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Restaurant Not Found</h2>
         <p className="text-gray-600 mb-6 text-center max-w-md">We couldn't find this restaurant.</p>
-        <button onClick={() => navigate("/all-restaurants")} className="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition-colors">
-          Back to All Restaurants
+        <button onClick={() => navigate(returnTo)} className="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition-colors">
+          Back to Restaurants
         </button>
       </div>
     );
@@ -220,10 +225,10 @@ export default function RestaurantDetails() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-600" title="Back">
+            <button onClick={() => navigate(returnTo)} className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-600" title="Back">
               <ArrowLeft size={20} />
             </button>
-            <h1 onClick={() => navigate(-1)} className="text-sm font-bold text-gray-500 truncate">Home/{restaurant.name}</h1>
+            <h1 onClick={() => navigate(returnTo)} className="text-sm font-bold text-gray-500 truncate">Home/{restaurant.name}</h1>
           </div>
           <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-8 w-auto" />
         </div>
@@ -257,7 +262,7 @@ export default function RestaurantDetails() {
               </div>
               {!editMode && (
                 <div className="w-full sm:w-auto">
-                  <Link to={`/restaurants-offers/?restaurant=${id}`} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-sm w-full">
+                  <Link to={restaurantOffersUrl} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-sm w-full">
                     <Tag size={18} /><span>View Offers</span>
                   </Link>
                 </div>
@@ -320,7 +325,7 @@ export default function RestaurantDetails() {
                 <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Updated regularly with new menus</li>
                 <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Direct links to order or visit</li>
               </ul>
-              <Link to={`/restaurants-offers/?restaurant=${id}`} className="text-blue-600 font-semibold hover:underline flex items-center gap-1 text-sm">
+              <Link to={restaurantOffersUrl} className="text-blue-600 font-semibold hover:underline flex items-center gap-1 text-sm">
                 Check {restaurant.name} Offers Now <ExternalLink size={14} />
               </Link>
             </div>

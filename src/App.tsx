@@ -1,7 +1,10 @@
 import { Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import Home from "./components/home";
+import ModernHome from "./components/ModernHome";
+import { ModernMarketplaceDetail, ModernMarketplaceHome, ModernMarketplaceListing } from "./components/ModernMarketplace";
 import AdminImageManager from "./components/AdminImageManager";
+import ModernListing from "./components/ModernListing";
 import About from "./components/About";
 import MakeOffer from "./components/MakeOffer";
 import Favourites from "./components/Favourites";
@@ -25,14 +28,23 @@ import FAQ from "./components/FAQ";
 import RestaurantDetails from "./components/RestaurantDetails";
 
 function App() {
+  // Modern view flag is controlled only via Vite environment variable
+  // Set VITE_MODERN_VIEW=true in your .env to enable the modern experience.
+  const isModernViewEnabled = import.meta.env.VITE_MODERN_VIEW === "true";
+
   return (
     <VerticalProvider>
       <Suspense fallback={<p>Loading...</p>}>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
-          <div className="max-w-screen-lg w-full mx-auto px-4 sm:px-6 lg:px-8 bg-white rounded-xl shadow-xl border border-gray-200">
+        <div className={`min-h-screen ${isModernViewEnabled ? "bg-[#f5f6f7]" : "bg-gradient-to-br from-blue-50 via-white to-blue-100"} ${isModernViewEnabled ? "" : "flex items-center justify-center"}`}>
+          <div className={isModernViewEnabled ? "w-full" : "max-w-screen-lg w-full mx-auto px-4 sm:px-6 lg:px-8 bg-white rounded-xl shadow-xl border border-gray-200"}>
             <LoginModal /> {/* Add this here, outside Routes */}
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={isModernViewEnabled ? <ModernMarketplaceHome /> : <Home />} />
+              <Route path="/modern-home" element={<ModernHome />} />
+              <Route path="/marketplace/:vertical/:id" element={isModernViewEnabled ? <ModernMarketplaceDetail /> : <ListingDetail />} />
+              <Route path="/marketplace/:vertical" element={isModernViewEnabled ? <ModernMarketplaceListing /> : <ModernListing />} />
+              <Route path="/modern/:vertical/:id" element={<LegacyMarketplaceRedirect />} />
+              <Route path="/modern/:vertical" element={<LegacyMarketplaceRedirect />} />
               <Route path="/cuisines" element={<CuisinesPage />} />
               <Route path="/offer/:id" element={<OfferDetails />} />
               <Route path="/admin" element={<ProtectedRoute><AdminImageManager /></ProtectedRoute>} />
@@ -72,6 +84,12 @@ function App() {
       </Suspense>
     </VerticalProvider>
   );
+}
+
+function LegacyMarketplaceRedirect() {
+  const { vertical, id } = useParams();
+  const destination = id ? `/marketplace/${vertical}/${id}` : `/marketplace/${vertical}`;
+  return <Navigate to={`${destination}${window.location.search}`} replace />;
 }
 
 export default App;
