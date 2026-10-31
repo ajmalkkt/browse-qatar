@@ -8,7 +8,9 @@ import {
   Building2,
   CarFront,
   ChevronDown,
+  Facebook,
   Heart,
+  Instagram,
   CircleUserRound,
   Camera,
   FileText,
@@ -18,6 +20,7 @@ import {
   Menu,
   Package,
   Search,
+  Twitter,
   Share2,
   ShieldCheck,
   Sparkles,
@@ -86,6 +89,56 @@ const categoryImages: Record<string, string> = {
 };
 
 const categories = Object.values(verticalConfig).filter((item) => item.enabled);
+
+export function ModernMarketplaceFooter() {
+  return <footer className="border-t border-slate-200 bg-[#f3f8fc] text-slate-700">
+    <div className="mx-auto grid max-w-[1320px] gap-8 px-4 py-9 sm:px-6 sm:py-11 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:px-8">
+      <div>
+        <Link to="/" aria-label="Browse Qatar home" className="hidden items-center sm:inline-flex">
+          <img src="/bqLogo.png" alt="Browse Qatar" className="h-11 w-auto object-contain" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} />
+        </Link>
+        <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">Discover local deals, trusted services, and listings across Qatar.</p>
+        <div className="mt-4 flex items-center gap-2">
+          <a href="https://www.facebook.com/browseqatar" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Facebook" className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:border-blue-300 hover:text-blue-700"><Facebook size={17} /></a>
+          <a href="https://www.instagram.com/browseqatar/" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:border-pink-300 hover:text-pink-600"><Instagram size={17} /></a>
+          <a href="https://twitter.com/browseqatar" target="_blank" rel="noreferrer" aria-label="Browse Qatar on X" className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-400 hover:text-slate-900"><Twitter size={16} /></a>
+        </div>
+      </div>
+
+      <nav aria-label="Explore categories">
+        <h2 className="text-sm font-bold text-slate-900">Explore</h2>
+        <ul className="mt-3 space-y-2">
+          {categories.map((category) => <li key={category.id}><Link to={`/marketplace/${category.id}`} className="text-sm text-slate-500 transition hover:text-[#0878d1]">{category.id === "classifieds" ? "Classifieds" : category.name.replace(/ Buy & Sell| Deal/, "")}</Link></li>)}
+        </ul>
+      </nav>
+
+      <nav aria-label="Browse Qatar information">
+        <h2 className="text-sm font-bold text-slate-900">Browse Qatar</h2>
+        <ul className="mt-3 space-y-2">
+          <li><Link to="/about" className="text-sm text-slate-500 transition hover:text-[#0878d1]">About us</Link></li>
+          <li><Link to="/faq" className="text-sm text-slate-500 transition hover:text-[#0878d1]">Help & FAQ</Link></li>
+          <li><Link to="/terms" className="text-sm text-slate-500 transition hover:text-[#0878d1]">Terms & Conditions</Link></li>
+          <li><Link to="/favourites" className="text-sm text-slate-500 transition hover:text-[#0878d1]">Wishlist</Link></li>
+        </ul>
+      </nav>
+
+      <div>
+        <h2 className="text-sm font-bold text-slate-900">Get the app</h2>
+        <p className="mt-3 text-sm text-slate-500">Browse Qatar wherever you go.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a href="https://play.google.com/store" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-400 hover:text-slate-900"><img src="/android.png" alt="" className="h-5 w-5 object-contain" />Google Play</a>
+          <a href="https://www.apple.com/app-store/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-400 hover:text-slate-900"><img src="/apple.png" alt="" className="h-5 w-5 object-contain" />App Store</a>
+        </div>
+      </div>
+    </div>
+    <div className="border-t border-slate-200 bg-[#eaf2f8]">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-2 px-4 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+        <p>© {new Date().getFullYear()} Browse Qatar. All rights reserved.</p>
+        <p>Made for exploring Qatar.</p>
+      </div>
+    </div>
+  </footer>;
+}
 
 type RefineField = {
   label: string;
@@ -375,7 +428,7 @@ function MarketplaceHeader({ search, onSearch, vertical }: { search?: string; on
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-[#f3f8fc]/95 backdrop-blur-md">
         <div ref={menuRef} className="relative mx-auto flex max-w-[1320px] items-center gap-2 px-3 py-2 sm:gap-4 sm:px-6 sm:py-3 lg:px-8">
           <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-700 lg:hidden" aria-label="Open marketplace menu" aria-expanded={menuOpen}><Menu size={19} /></button>
           <Link to="/" className="flex shrink-0 items-center" aria-label="Browse Qatar home"><img src="/bqLogo.jpg" alt="Browse Qatar" className="h-10 w-auto max-w-[156px] object-contain" /></Link>
@@ -609,10 +662,11 @@ export function ModernMarketplaceHome() {
       </section>
       <MarketplacePostAction className="mt-8 flex w-full items-center justify-between gap-4 rounded-lg border border-blue-100 bg-[#e6f3ff] px-5 py-5 text-left text-slate-900 transition hover:bg-blue-50 sm:px-7"><span><span className="block text-lg font-bold">Have something to sell?</span><span className="mt-1 block text-sm text-slate-600">Reach people across Qatar with a new listing.</span></span><span className="flex shrink-0 items-center gap-2 rounded-md bg-[#0878d1] px-4 py-3 text-sm font-bold text-white">List it <ArrowRight size={16} /></span></MarketplacePostAction>
     </main>
+    <ModernMarketplaceFooter />
   </div>;
 }
 
-function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFilters, setRefineFilters, selectCuisine, selectCategory, mobileDrawer = false, onClose }: {
+function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFilters, setRefineFilters, selectCuisine, selectCategory, mobileDrawer = false, onClose, onApply, hasPendingChanges = false }: {
   vertical: string;
   cuisineFilter: string | null;
   categoryFilter: string | null;
@@ -622,8 +676,11 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
   selectCategory: (category: string | null) => void;
   mobileDrawer?: boolean;
   onClose?: () => void;
+  onApply?: () => void;
+  hasPendingChanges?: boolean;
 }) {
   const refineConfig = verticalRefineConfig[vertical];
+  const autoCloseChoices = vertical === "restaurants" || vertical === "classifieds";
   const updateFilter = (key: string, value: string) => {
     setRefineFilters((current) => {
       const next = { ...current };
@@ -631,6 +688,9 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
       else delete next[key];
       return next;
     });
+  };
+  const closeAfterChoice = () => {
+    if (mobileDrawer && autoCloseChoices) onClose?.();
   };
   const renderField = (field: RefineField) => {
     if (field.type === "range") {
@@ -644,7 +704,7 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
     }
     return <label key={field.key} className="block space-y-1.5">
       <span className="block text-xs font-medium text-slate-600">{field.label}</span>
-      {field.type === "select" ? <select value={refineFilters[field.key] || ""} onChange={(event) => updateFilter(field.key, event.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]">
+      {field.type === "select" ? <select value={refineFilters[field.key] || ""} onChange={(event) => { updateFilter(field.key, event.target.value); closeAfterChoice(); }} className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]">
         <option value="">All</option>
         {field.options?.map((option) => <option key={option} value={option}>{option}</option>)}
       </select> : <input type="text" value={refineFilters[field.key] || ""} onChange={(event) => updateFilter(field.key, event.target.value)} className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]" />}
@@ -662,19 +722,20 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
       </div>
       <div className="mt-4 flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-600"><MapPin size={16} /> Doha, Qatar</div>
       {vertical === "restaurants" ? <>
-        <div className="mt-5 flex items-center justify-between gap-2"><label className="text-sm font-medium text-slate-700">What's on your mind?</label>{cuisineFilter && <button type="button" onClick={() => selectCuisine(null)} className="text-xs font-semibold text-[#0878d1] hover:underline">Clear</button>}</div>
-        <div className="mt-2 grid grid-cols-2 gap-1.5">{cuisineLists.map((cuisine) => <button key={cuisine.name} type="button" onClick={() => selectCuisine(cuisine.name === cuisineFilter ? null : cuisine.name)} aria-pressed={cuisineFilter === cuisine.name} className={`flex min-w-0 items-center gap-2 rounded-md border px-2 py-2 text-left text-xs transition ${cuisineFilter === cuisine.name ? "border-[#0878d1] bg-blue-50 font-semibold text-[#0878d1]" : "border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50"}`}><img src={cuisine.img} alt="" className="h-8 w-8 shrink-0 rounded-full bg-slate-100 object-contain" /><span className="truncate">{cuisine.name}</span></button>)}</div>
+        <div className="mt-5 flex items-center justify-between gap-2"><label className="text-sm font-medium text-slate-700">What's on your mind?</label>{cuisineFilter && <button type="button" onClick={() => { selectCuisine(null); closeAfterChoice(); }} className="text-xs font-semibold text-[#0878d1] hover:underline">Clear</button>}</div>
+        <div className="mt-2 grid grid-cols-2 gap-1.5">{cuisineLists.map((cuisine) => <button key={cuisine.name} type="button" onClick={() => { selectCuisine(cuisine.name === cuisineFilter ? null : cuisine.name); closeAfterChoice(); }} aria-pressed={cuisineFilter === cuisine.name} className={`flex min-w-0 items-center gap-2 rounded-md border px-2 py-2 text-left text-xs transition ${cuisineFilter === cuisine.name ? "border-[#0878d1] bg-blue-50 font-semibold text-[#0878d1]" : "border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50"}`}><img src={cuisine.img} alt="" className="h-8 w-8 shrink-0 rounded-full bg-slate-100 object-contain" /><span className="truncate">{cuisine.name}</span></button>)}</div>
       </> : refineConfig ? <div className="mt-5 space-y-4">
-        <label className="block space-y-1.5"><span className="block text-xs font-medium text-slate-600">Category</span><select value={refineFilters.subcategory || ""} onChange={(event) => updateFilter("subcategory", event.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]"><option value="">All categories</option>{refineConfig.subcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}</select></label>
+        <label className="block space-y-1.5"><span className="block text-xs font-medium text-slate-600">Category</span><select value={refineFilters.subcategory || ""} onChange={(event) => { updateFilter("subcategory", event.target.value); closeAfterChoice(); }} className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]"><option value="">All categories</option>{refineConfig.subcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}</select></label>
         {refineConfig.secondaryField && renderField(refineConfig.secondaryField)}
         {refineConfig.fields.map(renderField)}
       </div> : <>
         <label className="mt-4 block text-sm font-medium text-slate-700">Category</label>
         <div className="mt-2 space-y-2">{vertical === "classifieds" ? <>
-          <button type="button" onClick={() => selectCategory(null)} aria-pressed={!categoryFilter} className={`block w-full text-left text-sm ${!categoryFilter ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>All categories</button>
-          {["Furniture", "Home Appliances", "Electronics", "Mobile Phones", "TVs", "Computers", "Books", "Clothing", "Sports", "Other"].map((item) => <button key={item} type="button" onClick={() => selectCategory(categoryFilter === item ? null : item)} aria-pressed={categoryFilter === item} className={`block w-full text-left text-sm ${categoryFilter === item ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item}</button>)}
+          <button type="button" onClick={() => { selectCategory(null); closeAfterChoice(); }} aria-pressed={!categoryFilter} className={`block w-full text-left text-sm ${!categoryFilter ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>All categories</button>
+          {["Furniture", "Home Appliances", "Electronics", "Mobile Phones", "TVs", "Computers", "Books", "Clothing", "Sports", "Other"].map((item) => <button key={item} type="button" onClick={() => { selectCategory(categoryFilter === item ? null : item); closeAfterChoice(); }} aria-pressed={categoryFilter === item} className={`block w-full text-left text-sm ${categoryFilter === item ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item}</button>)}
         </> : categories.map((item) => <Link key={item.id} to={`/marketplace/${item.id}`} className={`block text-sm ${vertical === item.id ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item.id === "classifieds" ? "Classifieds" : item.name}</Link>)}</div>
       </>}
+      {mobileDrawer && !autoCloseChoices && hasPendingChanges && <div className="sticky bottom-0 mt-5 border-t border-slate-200 bg-white pt-3"><button type="button" onClick={onApply} className="w-full rounded-md bg-[#0878d1] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Apply filters</button></div>}
       <div className="mt-5 border-t border-slate-100 pt-4"><p className="text-sm font-medium text-slate-700">Trust</p><p className="mt-2 flex items-center gap-2 text-xs text-slate-500"><ShieldCheck size={15} className="text-emerald-600" /> Browse Qatar local listings</p></div>
     </div>;
 
@@ -696,6 +757,7 @@ export function ModernMarketplaceListing() {
   const [randomSeed] = useState(() => Math.random());
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [refineFilters, setRefineFilters] = useState<Record<string, string>>({});
+  const [draftRefineFilters, setDraftRefineFilters] = useState<Record<string, string>>({});
   const { listings, loading, restaurantDirectory } = useMarketplaceListings(vertical);
   const config = verticalConfig[vertical];
   const categoryFilter = searchParams.get("category");
@@ -706,6 +768,7 @@ export function ModernMarketplaceListing() {
     setSort("latest");
     setSearch("");
     setRefineFilters({});
+    setDraftRefineFilters({});
   }, [vertical]);
 
   const refineConfig = verticalRefineConfig[vertical];
@@ -768,6 +831,61 @@ export function ModernMarketplaceListing() {
     else next.delete("category");
     setSearchParams(next, { replace: true });
   };
+  const autoApplyMobileFilters = vertical === "restaurants" || vertical === "classifieds";
+  const openFilters = () => {
+    if (!autoApplyMobileFilters) setDraftRefineFilters({ ...refineFilters });
+    setFiltersOpen(true);
+  };
+  const closeFilters = () => setFiltersOpen(false);
+  const applyDraftFilters = () => {
+    setRefineFilters({ ...draftRefineFilters });
+    setFiltersOpen(false);
+  };
+  const hasPendingFilterChanges = JSON.stringify(draftRefineFilters) !== JSON.stringify(refineFilters);
+  const activeFilterChips: Array<{ key: string; label: string; clear: () => void }> = [];
+  if (cuisineFilter) activeFilterChips.push({ key: "cuisine", label: cuisineFilter, clear: () => selectCuisine(null) });
+  if (categoryFilter) activeFilterChips.push({ key: "category", label: categoryFilter, clear: () => selectCategory(null) });
+  if (restaurantFilter) {
+    const restaurantName = restaurantDirectory.find((restaurant) => String(restaurant.id) === restaurantFilter)?.name;
+    activeFilterChips.push({
+      key: "restaurant",
+      label: restaurantName || `Restaurant ${restaurantFilter}`,
+      clear: () => {
+        const next = new URLSearchParams(searchParams);
+        next.delete("restaurant");
+        setSearchParams(next, { replace: true });
+      },
+    });
+  }
+  if (refineFilters.subcategory) activeFilterChips.push({ key: "subcategory", label: refineFilters.subcategory, clear: () => setRefineFilters((current) => ({ ...current, subcategory: "" })) });
+  const appliedFields = [...(refineConfig?.fields || []), ...(refineConfig?.secondaryField ? [refineConfig.secondaryField] : [])];
+  appliedFields.forEach((field) => {
+    const value = refineFilters[field.key];
+    if (value) activeFilterChips.push({ key: field.key, label: value, clear: () => setRefineFilters((current) => ({ ...current, [field.key]: "" })) });
+    if (field.type === "range") {
+      const minKey = `${field.key}Min`;
+      const maxKey = `${field.key}Max`;
+      const min = refineFilters[minKey];
+      const max = refineFilters[maxKey];
+      if (min || max) {
+        const rangeLabel = min && max ? `${min} - ${max}` : min ? `${min}+` : `Up to ${max}`;
+        activeFilterChips.push({
+          key: field.key,
+          label: `${rangeLabel}${field.unit ? ` ${field.unit}` : ""}`,
+          clear: () => setRefineFilters((current) => ({ ...current, [minKey]: "", [maxKey]: "" })),
+        });
+      }
+    }
+  });
+  const clearAllAppliedFilters = () => {
+    setRefineFilters({});
+    setDraftRefineFilters({});
+    const next = new URLSearchParams(searchParams);
+    next.delete("category");
+    next.delete("cuisine");
+    next.delete("restaurant");
+    setSearchParams(next, { replace: true });
+  };
   return <div className="min-h-screen bg-[#f5f6f7] text-slate-950">
     <MarketplaceHeader search={search} onSearch={setSearch} vertical={vertical} />
     <CategoryStrip active={vertical} />
@@ -781,8 +899,14 @@ export function ModernMarketplaceListing() {
         </div>
       </div>
       {vertical === "restaurants" && <RestaurantMarquee restaurants={restaurantDirectory} />}
-      <button type="button" onClick={() => setFiltersOpen(!filtersOpen)} className="sticky top-[60px] z-20 mb-3 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/95 px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur lg:hidden sm:mb-4 sm:py-2"><SlidersHorizontal size={16} /> Filters</button>
-      {filtersOpen && <VerticalRefinePanel vertical={vertical} cuisineFilter={cuisineFilter} categoryFilter={categoryFilter} refineFilters={refineFilters} setRefineFilters={setRefineFilters} selectCuisine={selectCuisine} selectCategory={selectCategory} mobileDrawer onClose={() => setFiltersOpen(false)} />}
+      <div className="sticky top-[60px] z-20 mb-2 flex min-w-0 items-center gap-1.5 bg-[#f5f6f7]/95 py-0 backdrop-blur lg:hidden sm:mb-3">
+        <button type="button" onClick={openFilters} className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm"><SlidersHorizontal size={14} /> Filters</button>
+        {activeFilterChips.length > 0 && <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap py-0" aria-label="Applied filters">
+          {activeFilterChips.map((chip) => <button key={chip.key} type="button" onClick={chip.clear} aria-label={`Remove filter ${chip.label}`} className="inline-flex max-w-[55vw] shrink-0 items-center gap-1 rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-800 hover:bg-blue-100"><span className="truncate">{chip.label}</span><X size={12} className="shrink-0" /></button>)}
+          <button type="button" onClick={clearAllAppliedFilters} className="shrink-0 px-1 py-0.5 text-[11px] font-semibold text-[#0878d1] hover:underline">Clear all</button>
+        </div>}
+      </div>
+      {filtersOpen && <VerticalRefinePanel vertical={vertical} cuisineFilter={cuisineFilter} categoryFilter={categoryFilter} refineFilters={autoApplyMobileFilters ? refineFilters : draftRefineFilters} setRefineFilters={autoApplyMobileFilters ? setRefineFilters : setDraftRefineFilters} selectCuisine={selectCuisine} selectCategory={selectCategory} mobileDrawer onClose={closeFilters} onApply={applyDraftFilters} hasPendingChanges={hasPendingFilterChanges} />}
       <div className="grid gap-6 lg:grid-cols-[230px_minmax(0,1fr)]">
         <VerticalRefinePanel vertical={vertical} cuisineFilter={cuisineFilter} categoryFilter={categoryFilter} refineFilters={refineFilters} setRefineFilters={setRefineFilters} selectCuisine={selectCuisine} selectCategory={selectCategory} />
         <section>
@@ -790,6 +914,7 @@ export function ModernMarketplaceListing() {
         </section>
       </div>
     </main>
+    <ModernMarketplaceFooter />
   </div>;
 }
 
@@ -837,5 +962,6 @@ export function ModernMarketplaceDetail() {
       </div> : <div className="rounded-lg border border-slate-200 bg-white px-5 py-12 text-center"><h1 className="text-xl font-bold">Listing not found</h1><p className="mt-2 text-sm text-slate-500">This listing may have been removed or is temporarily unavailable.</p><button type="button" onClick={() => navigate(`/marketplace/${vertical}`)} className="mt-5 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"><ArrowLeft size={16} /> Browse category</button></div>}
     </main>
     {listing && <ListingEnquiryPopup open={enquiryOpen} onClose={() => setEnquiryOpen(false)} listingId={listing.id ?? id} adTitle={listing.title || "this listing"} />}
+    <ModernMarketplaceFooter />
   </div>;
 }

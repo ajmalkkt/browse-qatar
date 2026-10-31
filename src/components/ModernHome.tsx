@@ -18,6 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { verticalConfig } from "../config/verticalConfig";
+import { ModernMarketplaceFooter } from "./ModernMarketplace";
 
 const iconMap: Record<string, typeof Compass> = {
   restaurants: UtensilsCrossed,
@@ -336,6 +337,7 @@ export default function ModernHome() {
           </div>
         </section>
       </main>
+      <ModernMarketplaceFooter />
     </div>
   );
 }
