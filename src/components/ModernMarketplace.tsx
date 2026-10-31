@@ -87,6 +87,86 @@ const categoryImages: Record<string, string> = {
 
 const categories = Object.values(verticalConfig).filter((item) => item.enabled);
 
+type RefineField = {
+  label: string;
+  key: string;
+  aliases: string[];
+  type: "text" | "select" | "range";
+  options?: string[];
+  unit?: string;
+};
+
+const verticalRefineConfig: Record<string, { subcategories: string[]; fields: RefineField[]; secondaryField?: RefineField }> = {
+  vehicles: {
+    subcategories: ["Cars", "Motorcycles & Bikes", "Commercial Vehicles", "Spare Parts & Accessories", "Boats & Marine"],
+    fields: [
+      { label: "Make", key: "make", aliases: ["make", "vehicleMake"], type: "text" },
+      { label: "Model", key: "model", aliases: ["model", "vehicleModel"], type: "text" },
+      { label: "Year", key: "year", aliases: ["year", "modelYear"], type: "range" },
+      { label: "KM", key: "km", aliases: ["km", "mileage", "kilometers", "odometer"], type: "range", unit: "km" },
+      { label: "Transmission", key: "transmission", aliases: ["transmission"], type: "select", options: ["Automatic", "Manual", "CVT", "Semi-Automatic"] },
+      { label: "Fuel", key: "fuel", aliases: ["fuel", "fuelType"], type: "select", options: ["Petrol", "Diesel", "Electric", "Hybrid"] },
+      { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR" },
+    ],
+  },
+  accommodations: {
+    subcategories: ["Rent (Apartment/Villa)", "Sale (Apartment/Villa)", "Commercial", "Shared/Partition", "Land & Plots"],
+    fields: [
+      { label: "Bedrooms", key: "bedrooms", aliases: ["bedrooms", "bedroom"], type: "range" },
+      { label: "Bathrooms", key: "bathrooms", aliases: ["bathrooms", "bathroom"], type: "range" },
+      { label: "Furnishing", key: "furnishing", aliases: ["furnishing", "furnished"], type: "select", options: ["Furnished", "Semi-furnished", "Unfurnished"] },
+      { label: "Size (sq ft)", key: "size", aliases: ["size", "sizeSqFt", "areaSqFt", "squareFeet"], type: "range", unit: "sq ft" },
+      { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR" },
+    ],
+  },
+  jobs: {
+    subcategories: ["Jobs Offered", "Jobs Wanted"],
+    secondaryField: { label: "Industry", key: "industry", aliases: ["industry"], type: "select", options: ["Accounting/Finance", "Customer Service", "IT/Telecom", "Sales/Marketing", "Drivers/Transport", "Domestic/Cleaning", "Hospitality/F&B", "Engineering/Construction"] },
+    fields: [
+      { label: "Type (FT/PT/Contract)", key: "jobType", aliases: ["jobType", "type", "employmentType"], type: "select", options: ["Full-time", "Part-time", "Contract", "Freelance"] },
+      { label: "Experience", key: "experience", aliases: ["experience", "yearsExperience", "experienceYears"], type: "text" },
+      { label: "Salary", key: "salary", aliases: ["salary", "pricing.discountedPrice", "discountedPrice"], type: "range", unit: "QAR" },
+    ],
+  },
+  services: {
+    subcategories: ["Home Maintenance", "Cleaning & Laundry", "Moving & Transport", "IT & Digital", "Events & Catering", "Beauty & Fitness", "Legal & Business"],
+    fields: [
+      { label: "Service Type", key: "serviceType", aliases: ["serviceType", "category", "serviceCategory"], type: "text" },
+      { label: "Location", key: "serviceLocation", aliases: ["location.city", "location.area", "city", "location", "address"], type: "text" },
+      { label: "Provider", key: "provider", aliases: ["provider", "providerType", "provider.type"], type: "select", options: ["Individual", "Agency"] },
+    ],
+  },
+};
+
+function valueAtPath(record: ListingRecord, path: string): unknown {
+  return path.split(".").reduce<unknown>((value, segment) => {
+    if (!value || typeof value !== "object") return undefined;
+    return (value as ListingRecord)[segment];
+  }, record);
+}
+
+function getListingFieldValue(listing: ListingRecord, aliases: string[]): unknown {
+  const sources = [listing, listing.attributes, listing.additionalAttributes, listing.pricing, listing.location]
+    .filter((source): source is ListingRecord => Boolean(source && typeof source === "object"));
+
+  for (const alias of aliases) {
+    const direct = valueAtPath(listing, alias);
+    if (direct !== undefined && direct !== null && direct !== "") return direct;
+    for (const source of sources) {
+      const value = source[alias];
+      if (value !== undefined && value !== null && value !== "") return value;
+    }
+  }
+  return undefined;
+}
+
+function numericValue(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value !== "string") return undefined;
+  const parsed = Number(value.replace(/[^\d.-]/g, ""));
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 function amountOf(listing: ListingRecord) {
   return listing.discountedPrice ?? listing.pricing?.discountedPrice ?? listing.price ?? listing.salary ?? null;
 }
@@ -222,7 +302,7 @@ function useMarketplaceListings(vertical?: string) {
                 return feed.listings.slice(0, 8);
               }
               const rows = await getVerticalService(category.id).getAll();
-              return (rows.length ? rows : (mockListings[category.id] || [])).slice(0, 3).map((item: ListingRecord) => ({ ...item, vertical: category.id }));
+              return (rows.length ? rows : mockListings[category.id] || []).slice(0, 3).map((item: ListingRecord) => ({ ...item, vertical: category.id }));
             } catch {
               return (mockListings[category.id] || []).slice(0, 3).map((item: ListingRecord) => ({ ...item, vertical: category.id }));
             }
@@ -530,6 +610,67 @@ export function ModernMarketplaceHome() {
   </div>;
 }
 
+function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFilters, setRefineFilters, selectCuisine, filtersOpen }: {
+  vertical: string;
+  cuisineFilter: string | null;
+  categoryFilter: string | null;
+  refineFilters: Record<string, string>;
+  setRefineFilters: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  selectCuisine: (cuisine: string | null) => void;
+  filtersOpen: boolean;
+}) {
+  const refineConfig = verticalRefineConfig[vertical];
+  const updateFilter = (key: string, value: string) => {
+    setRefineFilters((current) => {
+      const next = { ...current };
+      if (value) next[key] = value;
+      else delete next[key];
+      return next;
+    });
+  };
+  const renderField = (field: RefineField) => {
+    if (field.type === "range") {
+      return <div key={field.key} className="space-y-1.5">
+        <label className="block text-xs font-medium text-slate-600">{field.label}{field.unit ? ` (${field.unit})` : ""}</label>
+        <div className="grid grid-cols-2 gap-2">
+          <input type="number" inputMode="numeric" aria-label={`${field.label} minimum`} placeholder="Min" value={refineFilters[`${field.key}Min`] || ""} onChange={(event) => updateFilter(`${field.key}Min`, event.target.value)} className="min-w-0 rounded-md border border-slate-300 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]" />
+          <input type="number" inputMode="numeric" aria-label={`${field.label} maximum`} placeholder="Max" value={refineFilters[`${field.key}Max`] || ""} onChange={(event) => updateFilter(`${field.key}Max`, event.target.value)} className="min-w-0 rounded-md border border-slate-300 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]" />
+        </div>
+      </div>;
+    }
+    return <label key={field.key} className="block space-y-1.5">
+      <span className="block text-xs font-medium text-slate-600">{field.label}</span>
+      {field.type === "select" ? <select value={refineFilters[field.key] || ""} onChange={(event) => updateFilter(field.key, event.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]">
+        <option value="">All</option>
+        {field.options?.map((option) => <option key={option} value={option}>{option}</option>)}
+      </select> : <input type="text" value={refineFilters[field.key] || ""} onChange={(event) => updateFilter(field.key, event.target.value)} className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]" />}
+    </label>;
+  };
+  const clearFilters = () => setRefineFilters({});
+
+  return <aside className={`${filtersOpen ? "block" : "hidden"} lg:block`}>
+    <div className="rounded-lg border border-slate-200 bg-white p-4 lg:sticky lg:top-28">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="font-bold">Refine your search</h2>
+        {Object.values(refineFilters).some(Boolean) && <button type="button" onClick={clearFilters} className="text-xs font-semibold text-[#0878d1] hover:underline">Clear all</button>}
+      </div>
+      <div className="mt-4 flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-600"><MapPin size={16} /> Doha, Qatar</div>
+      {vertical === "restaurants" ? <>
+        <div className="mt-5 flex items-center justify-between gap-2"><label className="text-sm font-medium text-slate-700">What's on your mind?</label>{cuisineFilter && <button type="button" onClick={() => selectCuisine(null)} className="text-xs font-semibold text-[#0878d1] hover:underline">Clear</button>}</div>
+        <div className="mt-2 grid grid-cols-2 gap-1.5">{cuisineLists.map((cuisine) => <button key={cuisine.name} type="button" onClick={() => selectCuisine(cuisine.name === cuisineFilter ? null : cuisine.name)} aria-pressed={cuisineFilter === cuisine.name} className={`flex min-w-0 items-center gap-2 rounded-md border px-2 py-2 text-left text-xs transition ${cuisineFilter === cuisine.name ? "border-[#0878d1] bg-blue-50 font-semibold text-[#0878d1]" : "border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50"}`}><img src={cuisine.img} alt="" className="h-8 w-8 shrink-0 rounded-full bg-slate-100 object-contain" /><span className="truncate">{cuisine.name}</span></button>)}</div>
+      </> : refineConfig ? <div className="mt-5 space-y-4">
+        <label className="block space-y-1.5"><span className="block text-xs font-medium text-slate-600">Category</span><select value={refineFilters.subcategory || ""} onChange={(event) => updateFilter("subcategory", event.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]"><option value="">All categories</option>{refineConfig.subcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}</select></label>
+        {refineConfig.secondaryField && renderField(refineConfig.secondaryField)}
+        {refineConfig.fields.map(renderField)}
+      </div> : <>
+        <label className="mt-4 block text-sm font-medium text-slate-700">Category</label>
+        <div className="mt-2 space-y-2">{vertical === "classifieds" ? ["Furniture", "Home Appliances", "Electronics", "Mobile Phones", "TVs", "Computers"].map((item) => <Link key={item} to={`/marketplace/classifieds?category=${encodeURIComponent(item)}`} className={`block text-sm ${categoryFilter === item ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item}</Link>) : categories.map((item) => <Link key={item.id} to={`/marketplace/${item.id}`} className={`block text-sm ${vertical === item.id ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item.id === "classifieds" ? "Classifieds" : item.name}</Link>)}</div>
+      </>}
+      <div className="mt-5 border-t border-slate-100 pt-4"><p className="text-sm font-medium text-slate-700">Trust</p><p className="mt-2 flex items-center gap-2 text-xs text-slate-500"><ShieldCheck size={15} className="text-emerald-600" /> Browse Qatar local listings</p></div>
+    </div>
+  </aside>;
+}
+
 export function ModernMarketplaceListing() {
   const { vertical = "vehicles" } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -537,6 +678,7 @@ export function ModernMarketplaceListing() {
   const [sort, setSort] = useState("latest");
   const [randomSeed] = useState(() => Math.random());
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [refineFilters, setRefineFilters] = useState<Record<string, string>>({});
   const { listings, loading, restaurantDirectory } = useMarketplaceListings(vertical);
   const config = verticalConfig[vertical];
   const categoryFilter = searchParams.get("category");
@@ -546,7 +688,10 @@ export function ModernMarketplaceListing() {
   useEffect(() => {
     setSort("latest");
     setSearch("");
+    setRefineFilters({});
   }, [vertical]);
+
+  const refineConfig = verticalRefineConfig[vertical];
 
   const filtered = useMemo(() => {
     let rows = listings.filter((item) => {
@@ -556,7 +701,24 @@ export function ModernMarketplaceListing() {
       const cuisineText = `${item.cuisine || ""} ${item.category || ""} ${item.title || ""} ${item.description || ""}`.toLowerCase();
       const matchesCuisine = !cuisineFilter || cuisineText.includes(cuisineFilter.toLowerCase());
       const matchesRestaurant = !restaurantFilter || String(item.restaurantId) === restaurantFilter;
-      return matchesSearch && matchesCategory && matchesCuisine && matchesRestaurant;
+      const selectedSubcategory = refineFilters.subcategory;
+      const itemSubcategory = getListingFieldValue(item, ["subcategory", "category"]);
+      const matchesSubcategory = !selectedSubcategory || String(itemSubcategory || "").toLowerCase() === selectedSubcategory.toLowerCase();
+      const fields = [...(refineConfig?.fields || []), ...(refineConfig?.secondaryField ? [refineConfig.secondaryField] : [])];
+      const matchesAttributes = fields.every((field) => {
+        if (field.type === "range") {
+          const min = numericValue(refineFilters[`${field.key}Min`]);
+          const max = numericValue(refineFilters[`${field.key}Max`]);
+          if (min === undefined && max === undefined) return true;
+          const value = numericValue(getListingFieldValue(item, field.aliases));
+          return value !== undefined && (min === undefined || value >= min) && (max === undefined || value <= max);
+        }
+        const selected = refineFilters[field.key];
+        if (!selected) return true;
+        const actual = getListingFieldValue(item, field.aliases);
+        return String(actual ?? "").toLowerCase().includes(selected.toLowerCase());
+      });
+      return matchesSearch && matchesCategory && matchesCuisine && matchesRestaurant && matchesSubcategory && matchesAttributes;
     });
     if (categoryFilter && rows.length === 0) {
       rows = (mockListings[vertical] || []).filter((item) => `${item.category || ""} ${item.title || ""}`.toLowerCase().includes(categoryFilter.toLowerCase()));
@@ -574,7 +736,7 @@ export function ModernMarketplaceListing() {
       rows = [...rows.slice(offset), ...rows.slice(0, offset)];
     }
     return rows;
-  }, [categoryFilter, cuisineFilter, listings, randomSeed, restaurantFilter, search, sort]);
+  }, [categoryFilter, cuisineFilter, listings, randomSeed, refineConfig, refineFilters, restaurantFilter, search, sort]);
   const Icon = categoryIcons[vertical] || Building2;
 
   const selectCuisine = (cuisine: string | null) => {
@@ -598,7 +760,7 @@ export function ModernMarketplaceListing() {
       {vertical === "restaurants" && <RestaurantMarquee restaurants={restaurantDirectory} />}
       <button type="button" onClick={() => setFiltersOpen(!filtersOpen)} className="sticky top-[60px] z-20 mb-3 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/95 px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur lg:hidden sm:mb-4 sm:py-2"><SlidersHorizontal size={16} /> Filters</button>
       <div className="grid gap-6 lg:grid-cols-[230px_minmax(0,1fr)]">
-        <aside className={`${filtersOpen ? "block" : "hidden"} lg:block`}><div className="rounded-lg border border-slate-200 bg-white p-4 lg:sticky lg:top-28"><h2 className="font-bold">Refine your search</h2><label className="mt-4 block text-sm font-medium text-slate-700">Location</label><div className="mt-2 flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-600"><MapPin size={16} /> Doha, Qatar</div>{vertical === "restaurants" ? <><div className="mt-5 flex items-center justify-between gap-2"><label className="text-sm font-medium text-slate-700">What's on your mind?</label>{cuisineFilter && <button type="button" onClick={() => selectCuisine(null)} className="text-xs font-semibold text-[#0878d1] hover:underline">Clear</button>}</div><div className="mt-2 grid grid-cols-2 gap-1.5">{cuisineLists.map((cuisine) => <button key={cuisine.name} type="button" onClick={() => selectCuisine(cuisine.name === cuisineFilter ? null : cuisine.name)} aria-pressed={cuisineFilter === cuisine.name} className={`flex min-w-0 items-center gap-2 rounded-md border px-2 py-2 text-left text-xs transition ${cuisineFilter === cuisine.name ? "border-[#0878d1] bg-blue-50 font-semibold text-[#0878d1]" : "border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50"}`}><img src={cuisine.img} alt="" className="h-8 w-8 shrink-0 rounded-full bg-slate-100 object-contain" /><span className="truncate">{cuisine.name}</span></button>)}</div></> : <><label className="mt-4 block text-sm font-medium text-slate-700">Category</label><div className="mt-2 space-y-2">{vertical === "classifieds" ? ["Furniture", "Home Appliances", "Electronics", "Mobile Phones", "TVs", "Computers"].map((item) => <Link key={item} to={`/marketplace/classifieds?category=${encodeURIComponent(item)}`} className={`block text-sm ${categoryFilter === item ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item}</Link>) : categories.map((item) => <Link key={item.id} to={`/marketplace/${item.id}`} className={`block text-sm ${vertical === item.id ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item.id === "classifieds" ? "Classifieds" : item.name}</Link>)}</div></>}<div className="mt-5 border-t border-slate-100 pt-4"><p className="text-sm font-medium text-slate-700">Trust</p><p className="mt-2 flex items-center gap-2 text-xs text-slate-500"><ShieldCheck size={15} className="text-emerald-600" /> Browse Qatar local listings</p></div></div></aside>
+        <VerticalRefinePanel vertical={vertical} cuisineFilter={cuisineFilter} categoryFilter={categoryFilter} refineFilters={refineFilters} setRefineFilters={setRefineFilters} selectCuisine={selectCuisine} filtersOpen={filtersOpen} />
         <section>
           {loading ? <div className={vertical === "restaurants" ? "grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4" : "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4"}>{Array.from({ length: 8 }, (_, index) => <div key={index} className="aspect-[4/5] animate-pulse rounded-lg bg-slate-200" />)}</div> : filtered.length ? <div className={vertical === "restaurants" ? "grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4" : "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4"}>{filtered.map((item) => <ListingCard key={item.id} listing={item} vertical={vertical} />)}</div> : <div className="rounded-lg border border-slate-200 bg-white px-5 py-12 text-center"><Search className="mx-auto text-slate-300" size={32} /><h2 className="mt-3 font-bold">No listings found</h2><p className="mt-1 text-sm text-slate-500">Try another search or explore a different category.</p></div>}
         </section>
@@ -615,9 +777,11 @@ export function ModernMarketplaceDetail() {
   const [loading, setLoading] = useState(!location.state?.listing);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const category = verticalConfig[vertical];
+
   useEffect(() => {
     if (location.state?.listing) {
       setListing(location.state.listing);
+      setLoading(false);
       return;
     }
     let active = true;
@@ -637,6 +801,7 @@ export function ModernMarketplaceDetail() {
     load();
     return () => { active = false; };
   }, [id, location.state, vertical]);
+
   const amount = listing ? amountOf(listing) : null;
   return <div className="min-h-screen bg-[#f5f6f7] text-slate-950">
     <MarketplaceHeader vertical={vertical} />
