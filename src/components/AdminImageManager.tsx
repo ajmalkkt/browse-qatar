@@ -453,7 +453,7 @@ export default function ManageOffers() {
     if (!selectedRestaurant) return alert("Select a Provider/Restaurant first.");
     formData.set("providerId", selectedRestaurant);
 
-    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory'];
+    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory', 'providerType'];
     textFields.forEach(field => {
       if (listingForm[field]) formData.set(field, listingForm[field]);
     });
@@ -524,7 +524,7 @@ export default function ManageOffers() {
     if (!editingListing) return;
     const formData = new FormData();
     formData.set("providerId", String((editingListing as any).providerId));
-    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory'];
+    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory', 'providerType'];
     textFields.forEach(field => { if (listingForm[field]) formData.set(field, listingForm[field]); });
     formData.set("pricing", JSON.stringify({ originalPrice: listingForm.originalPrice, discountedPrice: listingForm.discountedPrice, unit: listingForm.unit, currency: listingForm.currency }));
     formData.set("location", JSON.stringify({ city: listingForm.city, country: listingForm.country, address: listingForm.address }));

@@ -9,6 +9,9 @@ export interface Vertical {
   color: string;
   route: string;
   providerTypes: string[];
+  subcategories?: string[];
+  industries?: string[];
+  filters?: Array<{ key: string; label: string; type: string; options?: string[]; unit?: string }>;
   additionalAttributes?: any[];
 }
 

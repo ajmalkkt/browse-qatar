@@ -44,6 +44,33 @@ export default function ListingForm({
     fetchVerticals();
   }, []);
 
+  const activeVertical = verticals.find((vertical) => vertical.id === listingForm.verticalId);
+
+  useEffect(() => {
+    if (!isEdit && activeVertical && !listingForm.category) {
+      setListingForm((current) => ({ ...current, category: activeVertical.name }));
+    }
+  }, [activeVertical, isEdit, listingForm.category, setListingForm]);
+
+  const handleVerticalChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const vertical = verticals.find((item) => item.id === event.target.value);
+    setListingForm((current) => ({
+      ...current,
+      verticalId: event.target.value,
+      category: vertical?.name || "",
+      subcategory: "",
+      providerType: "",
+      attributes: {},
+    }));
+  };
+
+  const updateAttribute = (name: string, value: string | number) => {
+    setListingForm((current) => ({
+      ...current,
+      attributes: { ...(current.attributes || {}), [name]: value },
+    }));
+  };
+
   return (
     <form onSubmit={handleListingUpload} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
       <div className="space-y-1">
@@ -53,7 +80,7 @@ export default function ListingForm({
         <select 
           name="verticalId" 
           value={listingForm.verticalId} 
-          onChange={handleListingFormChange} 
+          onChange={handleVerticalChange}
           disabled={isEdit}
           className={`w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white ${isEdit ? 'bg-gray-50 cursor-not-allowed text-gray-500' : ''}`}
         >
@@ -79,14 +106,25 @@ export default function ListingForm({
       
       <div className="space-y-1">
         <label className="text-xs font-semibold text-gray-500">Category</label>
-        <input 
-          name="category" 
-          value={listingForm.category} 
-          onChange={handleListingFormChange} 
-          placeholder="e.g.Sedan, Hotel, IT Services, etc."
-          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
-        />
+        <input value={activeVertical?.name || listingForm.category || ""} readOnly className="w-full rounded-lg border border-gray-200 bg-gray-50 p-2.5 text-sm text-gray-600" />
       </div>
+
+      {activeVertical && <>
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-gray-500">Subcategory *</label>
+          <select name="subcategory" value={listingForm.subcategory || ""} onChange={handleListingFormChange} required className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">-- Select Subcategory --</option>
+            {(activeVertical.subcategories || []).map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-gray-500">Provider Type</label>
+          <select name="providerType" value={listingForm.providerType || ""} onChange={handleListingFormChange} className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">-- Select Provider Type --</option>
+            {(activeVertical.providerTypes || []).map((providerType) => <option key={providerType} value={providerType}>{providerType}</option>)}
+          </select>
+        </div>
+      </>}
 
       <div className="space-y-1">
         <label className="text-xs font-semibold text-gray-500">
@@ -259,23 +297,15 @@ export default function ListingForm({
       </div>
 
       {/* Dynamic Attributes Based on Vertical */}
-      {(() => {
-        const activeVertical = verticals.find((v) => v.id === listingForm.verticalId);
-        if (!activeVertical || !activeVertical.additionalAttributes || activeVertical.additionalAttributes.length === 0) {
-          return null;
-        }
-        return (
+      {activeVertical?.additionalAttributes && activeVertical.additionalAttributes.length > 0 && (
           <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
             {activeVertical.additionalAttributes.map((attr: any) => {
-              const value = listingForm.attributes?.[attr.name] || "";
-              const handleChange = (val: any) => {
-                setListingForm((prev: any) => ({
-                  ...prev,
-                  attributes: {
-                    ...(prev.attributes || {}),
-                    [attr.name]: val,
-                  },
-                }));
+              const value = listingForm.attributes?.[attr.name] ?? "";
+              const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+                const nextValue = attr.type === "number" && event.target.value !== ""
+                  ? Number(event.target.value)
+                  : event.target.value;
+                updateAttribute(attr.name, nextValue);
               };
               
               return (
@@ -286,7 +316,7 @@ export default function ListingForm({
                   {attr.type === "select" ? (
                     <select
                       value={value}
-                      onChange={(e) => handleChange(e.target.value)}
+                      onChange={handleChange}
                       required={attr.required}
                       className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
                     >
@@ -299,9 +329,9 @@ export default function ListingForm({
                     </select>
                   ) : (
                     <input
-                      type={attr.type || "text"}
+                      type={attr.type === "number" ? "number" : "text"}
                       value={value}
-                      onChange={(e) => handleChange(e.target.value)}
+                      onChange={handleChange}
                       required={attr.required}
                       placeholder={`Enter ${attr.label.toLowerCase()}`}
                       className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
@@ -311,8 +341,7 @@ export default function ListingForm({
               );
             })}
           </div>
-        );
-      })()}
+      )}
 
       <div className="md:col-span-2 lg:col-span-3 space-y-1">
         <label className="text-xs font-semibold text-gray-500">Description</label>
