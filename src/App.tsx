@@ -1,8 +1,9 @@
 import { Suspense } from "react";
-import { Routes, Route, Navigate, useParams } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import Home from "./components/home";
 import ModernHome from "./components/ModernHome";
-import { ModernMarketplaceDetail, ModernMarketplaceHome, ModernMarketplaceListing } from "./components/ModernMarketplace";
+import BrowseQatarHomeV2 from "./components/BrowseQatarHomeV2";
+import { ModernMarketplaceDetail, ModernMarketplaceHome, ModernMarketplaceListing, ModernMarketplaceSearchResults } from "./components/ModernMarketplace";
 import AdminImageManager from "./components/AdminImageManager";
 import ModernListing from "./components/ModernListing";
 import About from "./components/About";
@@ -28,9 +29,10 @@ import FAQ from "./components/FAQ";
 import RestaurantDetails from "./components/RestaurantDetails";
 
 function App() {
-  // Modern view flag is controlled only via Vite environment variable
-  // Set VITE_MODERN_VIEW=true in your .env to enable the modern experience.
-  const isModernViewEnabled = import.meta.env.VITE_MODERN_VIEW === "true";
+  const location = useLocation();
+  // V2 takes precedence when both modern design flags are enabled.
+  const isModernViewV2Enabled = import.meta.env.VITE_MODERN_VIEW_V2 === "true";
+  const isModernViewEnabled = isModernViewV2Enabled || location.pathname === "/modern-v2" || import.meta.env.VITE_MODERN_VIEW === "true";
 
   return (
     <VerticalProvider>
@@ -39,8 +41,10 @@ function App() {
           <div className={isModernViewEnabled ? "w-full" : "max-w-screen-lg w-full mx-auto px-4 sm:px-6 lg:px-8 bg-white rounded-xl shadow-xl border border-gray-200"}>
             <LoginModal /> {/* Add this here, outside Routes */}
             <Routes>
-              <Route path="/" element={isModernViewEnabled ? <ModernMarketplaceHome /> : <Home />} />
+              <Route path="/" element={isModernViewV2Enabled ? <BrowseQatarHomeV2 /> : isModernViewEnabled ? <ModernMarketplaceHome /> : <Home />} />
+              <Route path="/modern-v2" element={<BrowseQatarHomeV2 />} />
               <Route path="/modern-home" element={<ModernHome />} />
+              <Route path="/marketplace/search" element={<ModernMarketplaceSearchResults />} />
               <Route path="/marketplace/:vertical/:id" element={isModernViewEnabled ? <ModernMarketplaceDetail /> : <ListingDetail />} />
               <Route path="/marketplace/:vertical" element={isModernViewEnabled ? <ModernMarketplaceListing /> : <ModernListing />} />
               <Route path="/modern/:vertical/:id" element={<LegacyMarketplaceRedirect />} />

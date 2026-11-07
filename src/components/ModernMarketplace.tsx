@@ -90,8 +90,9 @@ const categoryImages: Record<string, string> = {
 
 const categories = Object.values(verticalConfig).filter((item) => item.enabled);
 
-export function ModernMarketplaceFooter() {
-  return <footer className="border-t border-slate-200 bg-[#f3f8fc] text-slate-700">
+export function ModernMarketplaceFooter({ variant = "modern" }: { variant?: "modern" | "v2" }) {
+  const isV2 = variant === "v2";
+  return <footer className={`border-t text-slate-700 ${isV2 ? "border-[#ead9ca] bg-[#fff7e6]" : "border-slate-200 bg-[#f3f8fc]"}`}>
     <div className="mx-auto grid max-w-[1320px] gap-8 px-4 py-9 sm:px-6 sm:py-11 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:px-8">
       <div>
         <Link to="/" aria-label="Browse Qatar home" className="hidden items-center sm:inline-flex">
@@ -99,26 +100,26 @@ export function ModernMarketplaceFooter() {
         </Link>
         <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">Discover local deals, trusted services, and listings across Qatar.</p>
         <div className="mt-4 flex items-center gap-2">
-          <a href="https://www.facebook.com/browseqatar" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Facebook" className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:border-blue-300 hover:text-blue-700"><Facebook size={17} /></a>
-          <a href="https://www.instagram.com/browseqatar/" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:border-pink-300 hover:text-pink-600"><Instagram size={17} /></a>
-          <a href="https://twitter.com/browseqatar" target="_blank" rel="noreferrer" aria-label="Browse Qatar on X" className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-400 hover:text-slate-900"><Twitter size={16} /></a>
+          <a href="https://www.facebook.com/browseqatar" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Facebook" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-700"}`}><Facebook size={17} /></a>
+          <a href="https://www.instagram.com/browseqatar/" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Instagram" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-pink-300 hover:text-pink-600"}`}><Instagram size={17} /></a>
+          <a href="https://twitter.com/browseqatar" target="_blank" rel="noreferrer" aria-label="Browse Qatar on X" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-900"}`}><Twitter size={16} /></a>
         </div>
       </div>
 
       <nav aria-label="Explore categories">
         <h2 className="text-sm font-bold text-slate-900">Explore</h2>
         <ul className="mt-3 space-y-2">
-          {categories.map((category) => <li key={category.id}><Link to={`/marketplace/${category.id}`} className="text-sm text-slate-500 transition hover:text-[#0878d1]">{category.id === "classifieds" ? "Classifieds" : category.name.replace(/ Buy & Sell| Deal/, "")}</Link></li>)}
+          {categories.map((category) => <li key={category.id}><Link to={`/marketplace/${category.id}`} className={`text-sm transition ${isV2 ? "text-[#745e61] hover:text-[#941333]" : "text-slate-500 hover:text-[#0878d1]"}`}>{category.id === "classifieds" ? "Classifieds" : category.name.replace(/ Buy & Sell| Deal/, "")}</Link></li>)}
         </ul>
       </nav>
 
       <nav aria-label="Browse Qatar information">
         <h2 className="text-sm font-bold text-slate-900">Browse Qatar</h2>
         <ul className="mt-3 space-y-2">
-          <li><Link to="/about" className="text-sm text-slate-500 transition hover:text-[#0878d1]">About us</Link></li>
-          <li><Link to="/faq" className="text-sm text-slate-500 transition hover:text-[#0878d1]">Help & FAQ</Link></li>
-          <li><Link to="/terms" className="text-sm text-slate-500 transition hover:text-[#0878d1]">Terms & Conditions</Link></li>
-          <li><Link to="/favourites" className="text-sm text-slate-500 transition hover:text-[#0878d1]">Wishlist</Link></li>
+          <li><Link to="/about" className={`text-sm transition ${isV2 ? "text-[#745e61] hover:text-[#941333]" : "text-slate-500 hover:text-[#0878d1]"}`}>About us</Link></li>
+          <li><Link to="/faq" className={`text-sm transition ${isV2 ? "text-[#745e61] hover:text-[#941333]" : "text-slate-500 hover:text-[#0878d1]"}`}>Help & FAQ</Link></li>
+          <li><Link to="/terms" className={`text-sm transition ${isV2 ? "text-[#745e61] hover:text-[#941333]" : "text-slate-500 hover:text-[#0878d1]"}`}>Terms & Conditions</Link></li>
+          <li><Link to="/favourites" className={`text-sm transition ${isV2 ? "text-[#745e61] hover:text-[#941333]" : "text-slate-500 hover:text-[#0878d1]"}`}>Wishlist</Link></li>
         </ul>
       </nav>
 
@@ -131,8 +132,8 @@ export function ModernMarketplaceFooter() {
         </div>
       </div>
     </div>
-    <div className="border-t border-slate-200 bg-[#eaf2f8]">
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-2 px-4 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+    <div className={`border-t ${isV2 ? "border-[#ead9ca] bg-[#fff0c7]" : "border-slate-200 bg-[#eaf2f8]"}`}>
+      <div className={`mx-auto flex max-w-[1320px] flex-col gap-2 px-4 py-4 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 ${isV2 ? "text-[#76565b]" : "text-slate-500"}`}>
         <p>© {new Date().getFullYear()} Browse Qatar. All rights reserved.</p>
         <p>Made for exploring Qatar.</p>
       </div>
@@ -666,6 +667,38 @@ export function ModernMarketplaceHome() {
   </div>;
 }
 
+export function ModernMarketplaceSearchResults() {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("q") || searchParams.get("search") || "";
+  const [search, setSearch] = useState(query);
+  const { listings, loading } = useMarketplaceListings();
+
+  useEffect(() => setSearch(query), [query]);
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return [];
+    return listings.filter((item) => {
+      const verticalName = verticalConfig[item.vertical]?.name || item.vertical || "";
+      const searchable = `${item.title || ""} ${item.description || ""} ${locationOf(item)} ${item.category || ""} ${item.subcategory || ""} ${verticalName} ${item.restaurant?.name || ""} ${JSON.stringify(item.attributes || {})}`.toLowerCase();
+      return searchable.includes(term);
+    });
+  }, [listings, search]);
+
+  return <div className="min-h-screen bg-[#f5f6f7] text-slate-950">
+    <MarketplaceHeader search={search} onSearch={setSearch} />
+    <CategoryStrip />
+    <main className="mx-auto min-h-[45vh] max-w-[1320px] px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
+        <div><p className="text-xs font-bold uppercase tracking-wide text-[#0878d1]">Marketplace search</p><h1 className="mt-1 text-xl font-bold sm:text-2xl">{search ? `Results for “${search}”` : "Search listings"}</h1></div>
+        {!loading && search && <p className="text-sm text-slate-500">{filtered.length} listings</p>}
+      </div>
+      {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{Array.from({ length: 8 }, (_, index) => <div key={index} className="aspect-[4/5] animate-pulse rounded-lg bg-slate-200" />)}</div> : filtered.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{filtered.map((item) => <ListingCard key={`${item.vertical}-${item.id}`} listing={item} vertical={item.vertical || "vehicles"} />)}</div> : <div className="rounded-lg border border-slate-200 bg-white px-5 py-12 text-center"><Search className="mx-auto text-slate-300" size={32} /><h2 className="mt-3 font-bold">{search ? "No listings found" : "Enter a search to browse listings"}</h2><p className="mt-1 text-sm text-slate-500">Try another search or choose a category to explore.</p></div>}
+    </main>
+    <ModernMarketplaceFooter />
+  </div>;
+}
+
 function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFilters, setRefineFilters, selectCuisine, selectCategory, mobileDrawer = false, onClose, onApply, hasPendingChanges = false }: {
   vertical: string;
   cuisineFilter: string | null;
@@ -752,7 +785,8 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
 export function ModernMarketplaceListing() {
   const { vertical = "vehicles" } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [search, setSearch] = useState("");
+  const searchQuery = searchParams.get("search") || searchParams.get("q") || "";
+  const [search, setSearch] = useState(searchQuery);
   const [sort, setSort] = useState("latest");
   const [randomSeed] = useState(() => Math.random());
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -766,10 +800,10 @@ export function ModernMarketplaceListing() {
 
   useEffect(() => {
     setSort("latest");
-    setSearch("");
+    setSearch(searchQuery);
     setRefineFilters({});
     setDraftRefineFilters({});
-  }, [vertical]);
+  }, [vertical, searchQuery]);
 
   const refineConfig = verticalRefineConfig[vertical];
 
