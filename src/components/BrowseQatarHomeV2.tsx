@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
   BriefcaseBusiness,
   CarFront,
+  ChevronLeft,
+  ChevronRight,
   Heart,
   Home,
   Menu,
@@ -34,6 +36,9 @@ export default function BrowseQatarHomeV2() {
   const [search, setSearch] = useState(searchParams.get("q") || "");
   const auth = useAuth();
   const { openLogin } = useModal();
+  const categoryNavRef = useRef<HTMLElement>(null);
+  const [canScrollCategoriesLeft, setCanScrollCategoriesLeft] = useState(false);
+  const [canScrollCategoriesRight, setCanScrollCategoriesRight] = useState(false);
   const categories = useMemo(() => Object.values(verticalConfig)
     .filter((vertical) => vertical.enabled && categoryVisuals[vertical.id])
     .map((vertical) => ({ ...vertical, ...categoryVisuals[vertical.id] })), []);
@@ -41,6 +46,27 @@ export default function BrowseQatarHomeV2() {
   const visibleCategories = normalizedSearch
     ? categories.filter((category) => `${category.name} ${category.description}`.toLowerCase().includes(normalizedSearch))
     : categories;
+
+  useEffect(() => {
+    const nav = categoryNavRef.current;
+    if (!nav) return;
+    const updateScrollIndicators = () => {
+      setCanScrollCategoriesLeft(nav.scrollLeft > 2);
+      setCanScrollCategoriesRight(nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
+    };
+    updateScrollIndicators();
+    const resizeObserver = new ResizeObserver(updateScrollIndicators);
+    resizeObserver.observe(nav);
+    window.addEventListener("resize", updateScrollIndicators);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateScrollIndicators);
+    };
+  }, [categories.length]);
+
+  const scrollCategories = (direction: "left" | "right") => {
+    categoryNavRef.current?.scrollBy({ left: direction === "left" ? -180 : 180, behavior: "smooth" });
+  };
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -88,12 +114,26 @@ export default function BrowseQatarHomeV2() {
         </div>
       </div>
 
-      <nav aria-label="Browse categories" className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:mt-5 sm:justify-between sm:gap-3 sm:px-0">
-        {categories.map(({ id, name, icon: Icon }) => <Link key={id} to={categoryPath(id)} className="flex min-w-[76px] shrink-0 flex-col items-center gap-1 rounded-xl px-1.5 py-1 text-center text-[11px] font-semibold transition hover:bg-[#fff7e6] sm:min-w-0 sm:gap-1.5 sm:text-sm">
-          <span className="grid size-10 place-items-center rounded-full bg-[#fff0c7] text-[#941333] sm:size-14"><Icon className="size-5 sm:size-7" strokeWidth={2.6} aria-hidden="true" /></span>
-          <span>{id === "classifieds" ? "Classifieds" : name.replace(/ Buy & Sell| Deal/, "")}</span>
-        </Link>)}
-      </nav>
+      <div className="group/category-scroll relative -mx-4 mt-3 sm:mx-0 sm:mt-5">
+        <nav ref={categoryNavRef} id="v2-category-shortcuts" onScroll={(event) => {
+          const nav = event.currentTarget;
+          setCanScrollCategoriesLeft(nav.scrollLeft > 2);
+          setCanScrollCategoriesRight(nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
+        }} aria-label="Browse categories" className="flex gap-2 overflow-x-auto px-4 pb-1.5 pr-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:justify-between sm:gap-3 sm:overflow-visible sm:px-0 sm:pr-0">
+          {categories.map(({ id, name, icon: Icon }) => <Link key={id} to={categoryPath(id)} className="flex min-w-[76px] shrink-0 flex-col items-center gap-1 rounded-xl px-1.5 py-1 text-center text-[11px] font-semibold transition hover:bg-[#fff7e6] sm:min-w-0 sm:gap-1.5 sm:text-sm">
+            <span className="grid size-10 place-items-center rounded-full bg-[#fff0c7] text-[#941333] sm:size-14"><Icon className="size-5 sm:size-7" strokeWidth={2.6} aria-hidden="true" /></span>
+            <span>{id === "classifieds" ? "Classifieds" : name.replace(/ Buy & Sell| Deal/, "")}</span>
+          </Link>)}
+        </nav>
+        {canScrollCategoriesLeft && <>
+          <span className="pointer-events-none absolute bottom-1 left-0 top-0 w-12 bg-gradient-to-r from-[#fffdfa] via-[#fffdfa]/90 to-transparent sm:hidden" aria-hidden="true" />
+          <button type="button" onClick={() => scrollCategories("left")} aria-label="Scroll categories left" title="Previous categories" className="absolute left-1 top-1/2 z-10 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[#ead9ca] bg-white/95 text-[#941333] shadow-sm transition hover:bg-[#fff1c9] sm:hidden"><ChevronLeft size={18} /></button>
+        </>}
+        {canScrollCategoriesRight && <>
+          <span className="pointer-events-none absolute bottom-1 right-0 top-0 w-12 bg-gradient-to-l from-[#fffdfa] via-[#fffdfa]/90 to-transparent sm:hidden" aria-hidden="true" />
+          <button type="button" onClick={() => scrollCategories("right")} aria-label="Scroll categories right" title="More categories" className="absolute right-1 top-1/2 z-10 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[#ead9ca] bg-white/95 text-[#941333] shadow-sm transition hover:bg-[#fff1c9] sm:hidden"><ChevronRight size={18} /></button>
+        </>}
+      </div>
     </header>
 
     <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
