@@ -112,8 +112,8 @@ export default function BrowseQatarHomeV2() {
 
       <section id="interests" aria-labelledby="v2-interests-heading" className="pb-12 pt-7 sm:pt-9 lg:pt-10">
         <div className="mb-5 flex items-center gap-4 sm:mb-6"><span className="h-px flex-1 bg-[#8c1534]/70" aria-hidden="true" /><h2 id="v2-interests-heading" className="shrink-0 text-center text-lg font-black text-[#8c1534] sm:text-2xl">BROWSE BY INTEREST</h2><span className="h-px flex-1 bg-[#8c1534]/70" aria-hidden="true" /></div>
-        {visibleCategories.length > 0 ? <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
-          {visibleCategories.map(({ id, name, description, icon: Icon, image, imageAlt }) => <Link key={id} to={categoryPath(id)} className="group relative isolate aspect-[1.15/1] min-h-[148px] overflow-hidden rounded-[18px] bg-[#e8ded1] shadow-sm sm:aspect-[1.65/1] sm:min-h-[190px] sm:rounded-[22px]">
+        {visibleCategories.length > 0 ? <div className="grid grid-cols-1 min-[300px]:grid-cols-2 gap-x-[12px] gap-y-[16px]">
+          {visibleCategories.map(({ id, name, description, icon: Icon, image, imageAlt }) => <Link key={id} to={categoryPath(id)} className="group relative isolate aspect-[1.65/1] min-h-[148px] overflow-hidden rounded-[18px] bg-[#e8ded1] shadow-sm min-[300px]:aspect-[1.15/1] sm:aspect-[1.65/1] sm:min-h-[190px] sm:rounded-[22px]">
             <img src={image} alt={imageAlt} loading="lazy" className="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.04]" />
             <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" aria-hidden="true" />
             <span className="absolute left-3 top-3 grid size-10 place-items-center rounded-full bg-[#fff0c7] text-[#941333] shadow-sm sm:left-5 sm:top-5 sm:size-14"><Icon className="size-5 sm:size-7" strokeWidth={2.6} aria-hidden="true" /></span>
