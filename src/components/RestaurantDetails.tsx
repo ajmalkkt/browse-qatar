@@ -12,6 +12,7 @@ import {
   ShieldCheck, Tag, BookOpen, ChevronLeft, ChevronRight,
   Upload, Trash2, Plus, X, ImagePlus
 } from "lucide-react";
+import { ModernMarketplaceFooter } from "./ModernMarketplace";
 
 const MAX_MENU_FILES = 10;
 const BQ_PLACEHOLDER = "/bqLogo.jpg";
@@ -82,8 +83,9 @@ export default function RestaurantDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const returnTo = location.state?.returnTo || (import.meta.env.VITE_MODERN_VIEW === "true" ? "/marketplace/restaurants" : "/restaurants-offers");
-  const restaurantOffersUrl = import.meta.env.VITE_MODERN_VIEW === "true"
+  const isV2Theme = import.meta.env.VITE_MODERN_VIEW_V2 === "true" || import.meta.env.VITE_MODERN_VIEW === "true";
+  const returnTo = location.state?.returnTo || (isV2Theme ? "/marketplace/restaurants" : "/restaurants-offers");
+  const restaurantOffersUrl = isV2Theme
     ? `/marketplace/restaurants?restaurant=${id}`
     : `/restaurants-offers/?restaurant=${id}`;
   const [searchParams] = useSearchParams();
@@ -184,20 +186,20 @@ export default function RestaurantDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className={`min-h-screen flex justify-center items-center ${isV2Theme ? "bg-[#fffdfa]" : "bg-gray-50"}`}>
+        <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isV2Theme ? "border-[#941333]" : "border-blue-600"}`}></div>
       </div>
     );
   }
 
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className={`min-h-screen flex flex-col items-center justify-center p-4 ${isV2Theme ? "bg-[#fffdfa]" : "bg-gray-50"}`}>
         <Helmet><title>Restaurant Not Found | BrowseQatar</title></Helmet>
         <Utensils size={48} className="text-gray-300 mb-4" />
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Restaurant Not Found</h2>
         <p className="text-gray-600 mb-6 text-center max-w-md">We couldn't find this restaurant.</p>
-        <button onClick={() => navigate(returnTo)} className="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition-colors">
+        <button onClick={() => navigate(returnTo)} className={`text-white px-6 py-2 rounded-full font-medium transition-colors ${isV2Theme ? "bg-[#941333] hover:bg-[#6f1028]" : "bg-blue-600 hover:bg-blue-700"}`}>
           Back to Restaurants
         </button>
       </div>
@@ -209,7 +211,7 @@ export default function RestaurantDetails() {
   const canonicalUrl = `https://browseqatar.com/restaurant/${id}`;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${isV2Theme ? "bg-[#fffdfa] text-[#30252a]" : "bg-gray-50"}`}>
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -222,10 +224,10 @@ export default function RestaurantDetails() {
       </Helmet>
 
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+      <header className={`sticky top-0 z-20 shadow-sm ${isV2Theme ? "bg-[#fffdfa] border-b border-[#ead9ca]" : "bg-white border-b border-gray-200"}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(returnTo)} className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-600" title="Back">
+            <button onClick={() => navigate(returnTo)} className={`p-1 rounded-full transition-colors ${isV2Theme ? "hover:bg-[#fff1c9] text-[#6b5157]" : "hover:bg-gray-100 text-gray-600"}`} title="Back">
               <ArrowLeft size={20} />
             </button>
             <h1 onClick={() => navigate(returnTo)} className="text-sm font-bold text-gray-500 truncate">Home/{restaurant.name}</h1>
@@ -236,8 +238,8 @@ export default function RestaurantDetails() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-24">
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-          <div className="h-32 bg-gradient-to-r from-blue-500 to-indigo-600 relative"></div>
+        <div className={`rounded-2xl shadow-sm border overflow-hidden mb-6 ${isV2Theme ? "bg-[#fffdfa] border-[#ead9ca]" : "bg-white border-gray-200"}`}>
+          <div className={`h-32 relative ${isV2Theme ? "bg-gradient-to-r from-[#851432] via-[#a20e3c] to-[#d8a53b]" : "bg-gradient-to-r from-blue-500 to-indigo-600"}`}></div>
           <div className="px-6 pb-6 relative">
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-end mb-4">
               <div className="w-24 h-24 bg-white rounded-xl shadow-md border-4 border-white flex items-center justify-center p-2 shrink-0 -mt-12 relative z-10">
@@ -262,7 +264,7 @@ export default function RestaurantDetails() {
               </div>
               {!editMode && (
                 <div className="w-full sm:w-auto">
-                  <Link to={restaurantOffersUrl} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-sm w-full">
+                  <Link to={restaurantOffersUrl} className={`flex items-center justify-center gap-2 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-sm w-full ${isV2Theme ? "bg-[#941333] hover:bg-[#6f1028]" : "bg-blue-600 hover:bg-blue-700"}`}>
                     <Tag size={18} /><span>View Offers</span>
                   </Link>
                 </div>
@@ -273,7 +275,7 @@ export default function RestaurantDetails() {
                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Cuisines Served</h3>
                 <div className="flex flex-wrap gap-2">
                   {restaurant.cuisine.map((c: string, idx: number) => (
-                    <span key={idx} className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-100">{c}</span>
+                    <span key={idx} className={`px-3 py-1 rounded-full text-sm font-medium border ${isV2Theme ? "bg-[#fff0c7] text-[#851432] border-[#ead9ca]" : "bg-blue-50 text-blue-700 border-blue-100"}`}>{c}</span>
                   ))}
                 </div>
               </div>
@@ -285,7 +287,7 @@ export default function RestaurantDetails() {
         <div className="flex border-b border-gray-200 mb-6 bg-white rounded-t-xl shadow-sm px-2">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`flex items-center gap-2 px-6 py-3.5 text-sm font-semibold transition-colors border-b-2 ${activeTab === "overview" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            className={`flex items-center gap-2 px-6 py-3.5 text-sm font-semibold transition-colors border-b-2 ${activeTab === "overview" ? (isV2Theme ? "border-[#941333] text-[#941333]" : "border-blue-600 text-blue-600") : "border-transparent text-gray-500 hover:text-gray-700"}`}
           >
             <ShieldCheck size={16} /> Overview
           </button>
@@ -315,17 +317,17 @@ export default function RestaurantDetails() {
               </p>
             </div>
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center gap-3 mb-4 text-blue-600">
+              <div className={`flex items-center gap-3 mb-4 ${isV2Theme ? "text-[#941333]" : "text-blue-600"}`}>
                 <ShieldCheck size={24} />
                 <h3 className="text-xl font-bold text-gray-900">BrowseQatar Offers</h3>
               </div>
               <p className="text-gray-600 leading-relaxed text-sm mb-4">BrowseQatar connects you with the best dining deals across the country.</p>
               <ul className="text-sm text-gray-600 space-y-2 mb-4">
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Verified discounts and meal deals</li>
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Updated regularly with new menus</li>
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Direct links to order or visit</li>
+                <li className="flex items-center gap-2"><span className={`w-1.5 h-1.5 rounded-full ${isV2Theme ? "bg-[#a20e3c]" : "bg-blue-500"}`}></span> Verified discounts and meal deals</li>
+                <li className="flex items-center gap-2"><span className={`w-1.5 h-1.5 rounded-full ${isV2Theme ? "bg-[#a20e3c]" : "bg-blue-500"}`}></span> Updated regularly with new menus</li>
+                <li className="flex items-center gap-2"><span className={`w-1.5 h-1.5 rounded-full ${isV2Theme ? "bg-[#a20e3c]" : "bg-blue-500"}`}></span> Direct links to order or visit</li>
               </ul>
-              <Link to={restaurantOffersUrl} className="text-blue-600 font-semibold hover:underline flex items-center gap-1 text-sm">
+              <Link to={restaurantOffersUrl} className={`font-semibold hover:underline flex items-center gap-1 text-sm ${isV2Theme ? "text-[#941333]" : "text-blue-600"}`}>
                 Check {restaurant.name} Offers Now <ExternalLink size={14} />
               </Link>
             </div>
@@ -480,6 +482,7 @@ export default function RestaurantDetails() {
           </button>
         </div>
       )}
+      {isV2Theme && <ModernMarketplaceFooter variant="v2" />}
     </div>
   );
 }

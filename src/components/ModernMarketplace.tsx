@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from "reac
 import {
   ArrowLeft,
   ArrowRight,
-  BedDouble,
   BriefcaseBusiness,
   Building2,
   CarFront,
@@ -12,13 +11,14 @@ import {
   Heart,
   Instagram,
   CircleUserRound,
+  LayoutGrid,
   Camera,
   FileText,
   CircleHelp,
+  Home,
   LogOut,
   MapPin,
   Menu,
-  Package,
   Search,
   Twitter,
   Share2,
@@ -73,9 +73,9 @@ const mockListings: Record<string, ListingRecord[]> = {
 const categoryIcons: Record<string, typeof CarFront> = {
   restaurants: Utensils,
   vehicles: CarFront,
-  accommodations: BedDouble,
+  accommodations: Home,
   services: Wrench,
-  classifieds: Package,
+  classifieds: Tag,
   jobs: BriefcaseBusiness,
 };
 
@@ -259,7 +259,7 @@ async function loadRestaurantFeed() {
   };
 }
 
-function MarketplacePostAction({ children, className }: { children: React.ReactNode; className: string }) {
+export function MarketplacePostAction({ children, className }: { children: React.ReactNode; className: string }) {
   const navigate = useNavigate();
   const auth = useAuth();
   const { openLogin } = useModal();
@@ -282,11 +282,79 @@ function MarketplacePostAction({ children, className }: { children: React.ReactN
   return <button type="button" onClick={handleClick} className={className}>{children}</button>;
 }
 
-function PostingNudge({ vertical }: { vertical?: string }) {
+export function MarketplaceAccountMenu() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const auth = useAuth();
+  const { openLogin } = useModal();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [menuOpen]);
+
+  const handleManageOffers = () => {
+    const continueToManage = () => {
+      setMenuOpen(false);
+      window.setTimeout(() => navigate(window.innerWidth < 768 ? "/admin" : "/manage-offers"), 120);
+    };
+    if (auth.user) continueToManage();
+    else if (auth.provider === "FIREBASE") openLogin(continueToManage);
+    else auth.login();
+  };
+  const handleLogin = () => {
+    setMenuOpen(false);
+    if (auth.provider === "FIREBASE") openLogin();
+    else auth.login();
+  };
+  const handleLogout = async () => {
+    setMenuOpen(false);
+    try {
+      if (auth.provider === "FIREBASE") await auth.logout();
+      else await auth.logout({ redirectUri: window.location.origin });
+    } catch (error) {
+      console.error("Marketplace logout failed:", error);
+    }
+  };
+
+  return <div ref={menuRef} className="relative shrink-0">
+    <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid size-8 place-items-center rounded-full transition hover:bg-[#fff1c9] sm:size-10" aria-label={auth.user ? "Open account menu" : "Open login menu"} aria-expanded={menuOpen}>
+      <CircleUserRound className={`size-[18px] sm:size-6 ${auth.user ? "text-[#941333]" : "text-[#8c1534]"}`} strokeWidth={1.8} />
+    </button>
+    {menuOpen && <div className="absolute right-0 top-full z-50 mt-2 max-h-[calc(100dvh-4.5rem)] w-[min(360px,calc(100vw-1rem))] overflow-y-auto rounded-xl border border-[#ead9ca] bg-[#fffdfa] shadow-xl">
+      <div className="flex items-center gap-3 border-b border-[#f1e4d6] bg-[#fff7e6] px-4 py-4">
+        <span className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-[#fff0c7] text-[#941333]">{auth.user?.photoURL ? <img src={auth.user.photoURL} alt="" className="size-full object-cover" /> : <CircleUserRound size={28} />}</span>
+        <div className="min-w-0 flex-1">{auth.user ? <><p className="text-xs font-medium text-slate-500">My Account</p><p className="truncate text-sm font-semibold text-slate-900">{auth.user.displayName || auth.user.email || "Browse Qatar member"}</p></> : <><p className="text-base font-bold text-slate-900">Welcome to Browse Qatar</p><p className="mt-0.5 text-xs text-slate-500">Sign in to manage your account and listings.</p></>}</div>
+      </div>
+      {!auth.user && <div className="border-b border-[#f1e4d6] p-3"><button type="button" onClick={handleLogin} className="w-full rounded-md bg-[#941333] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#6f1028]">{ENABLE_SIGNUP ? "Login / Sign up" : "Login"}</button></div>}
+      <div className="p-2">
+        <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><Camera size={18} className="text-[#941333]" />Start selling</button>
+        <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><FileText size={18} className="text-[#941333]" />My Ads / Manage Offers</button>
+        <Link to="/favourites" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><Heart size={18} className="text-[#941333]" />Wishlist</Link>
+        <Link to="/faq" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><CircleHelp size={18} className="text-[#941333]" />Help</Link>
+      </div>
+      <div className="border-t border-[#ead9ca] p-2">
+        <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">Browse categories</p>
+        <div className="grid grid-cols-2 gap-1">{categories.map((item) => <Link key={item.id} to={`/marketplace/${item.id}`} onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-2 text-xs text-slate-600 hover:bg-[#fff1c9] hover:text-[#941333]">{item.id === "classifieds" ? "Classifieds" : item.name.replace(/ Buy & Sell| Deal/, "")}</Link>)}</div>
+      </div>
+      <div className="border-t border-[#ead9ca] p-2">
+        <Link to="/about" onClick={() => setMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]">About Us</Link>
+        {auth.user && <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-700"><LogOut size={18} />Log out</button>}
+      </div>
+    </div>}
+  </div>;
+}
+
+export function PostingNudge({ vertical }: { vertical?: string } = {}) {
   const location = useLocation();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const image = categoryImages[vertical || ""] || categoryImages.classifieds;
+  const CategoryIcon = categoryIcons[vertical || ""] || Tag;
 
   useEffect(() => {
     setVisible(false);
@@ -318,14 +386,14 @@ function PostingNudge({ vertical }: { vertical?: string }) {
 
   return (
     <aside className="fixed bottom-4 right-4 z-40 w-[min(360px,calc(100vw-2rem))] animate-in slide-in-from-bottom-3 fade-in duration-300 sm:bottom-6 sm:right-6" aria-label="Post a listing">
-      <div className="relative flex items-center gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 pr-10 shadow-xl shadow-slate-900/15">
-        <img src={image} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover" />
+      <div className="relative flex items-center gap-3 overflow-hidden rounded-xl border border-[#e8c8c6] bg-[#fffdfa] p-3 pr-10 shadow-xl shadow-[#5b1827]/15">
+        <span className="grid h-16 w-16 shrink-0 place-items-center rounded-lg bg-[#fff0c7] text-[#941333]"><CategoryIcon size={28} aria-hidden="true" /></span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-[#0878d1]">Have something to share?</p>
-          <p className="mt-1 text-sm font-bold leading-5 text-slate-900">List it on Browse Qatar</p>
-          <MarketplacePostAction className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#0878d1] hover:text-blue-800">Start posting <ArrowRight size={13} /></MarketplacePostAction>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-[#941333]">Have something to share?</p>
+          <p className="mt-1 text-sm font-bold leading-5 text-[#30252a]">List it on Browse Qatar</p>
+          <MarketplacePostAction className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#941333] hover:text-[#6f1028]">Start posting <ArrowRight size={13} /></MarketplacePostAction>
         </div>
-        <button type="button" onClick={() => { setDismissed(true); setVisible(false); }} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" aria-label="Dismiss posting prompt"><X size={15} /></button>
+        <button type="button" onClick={() => { setDismissed(true); setVisible(false); }} className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-[#806d70] transition hover:bg-[#fff1c9] hover:text-[#30252a]" aria-label="Dismiss posting prompt"><X size={15} /></button>
       </div>
     </aside>
   );
@@ -384,7 +452,7 @@ function useMarketplaceListings(vertical?: string) {
   return { listings, loading, restaurantDirectory };
 }
 
-function MarketplaceHeader({ search, onSearch, vertical }: { search?: string; onSearch?: (value: string) => void; vertical?: string }) {
+export function MarketplaceHeader({ search, onSearch, vertical }: { search?: string; onSearch?: (value: string) => void; vertical?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -429,27 +497,27 @@ function MarketplaceHeader({ search, onSearch, vertical }: { search?: string; on
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-[#f3f8fc]/95 backdrop-blur-md">
-        <div ref={menuRef} className="relative mx-auto flex max-w-[1320px] items-center gap-2 px-3 py-2 sm:gap-4 sm:px-6 sm:py-3 lg:px-8">
-          <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-700 lg:hidden" aria-label="Open marketplace menu" aria-expanded={menuOpen}><Menu size={19} /></button>
-          <Link to="/" className="flex shrink-0 items-center" aria-label="Browse Qatar home"><img src="/bqLogo.jpg" alt="Browse Qatar" className="h-10 w-auto max-w-[156px] object-contain" /></Link>
-          <button type="button" className="hidden h-11 min-w-[170px] items-center gap-2 rounded-lg border border-slate-300 px-3 text-left text-sm text-slate-700 md:flex"><MapPin size={18} className="shrink-0 text-[#0878d1]" /><span className="truncate">Doha, Qatar</span><ChevronDown size={16} className="ml-auto shrink-0 text-slate-400" /></button>
-          <form className="flex h-11 min-w-0 flex-1 items-center overflow-hidden rounded-lg border-2 border-slate-800 bg-white focus-within:border-[#0878d1]" onSubmit={(event) => event.preventDefault()}>
-            <Search size={19} className="ml-3 shrink-0 text-slate-500" />
-            <input value={search || ""} onChange={(event) => onSearch?.(event.target.value)} placeholder={vertical ? `Search ${verticalConfig[vertical]?.name || "listings"}` : "Search cars, offers, homes and more"} className="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400" />
-            <button type="submit" className="hidden h-full items-center gap-2 bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-[#0878d1] sm:flex"><Search size={16} /> Search</button>
+      <header className="sticky top-0 z-30 border-b border-[#ead9ca] bg-[#fffdfa]/95 backdrop-blur-md">
+        <div ref={menuRef} className="relative mx-auto flex max-w-[1320px] items-center gap-1 px-4 sm:gap-3 sm:px-6 sm:py-3 lg:gap-5 lg:px-8">
+          <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[#ead9ca] text-[#941333] lg:hidden" aria-label="Open marketplace menu" aria-expanded={menuOpen}><Menu size={19} /></button>
+          <Link to="/" className="flex shrink-0 items-center" aria-label="Browse Qatar home"><img src="/bqLogo.jpg" alt="Browse Qatar" className="h-auto w-[76px] object-contain min-[390px]:w-[96px] sm:w-[150px] lg:w-[180px]" /></Link>
+          <button type="button" className="hidden h-11 min-w-[170px] items-center gap-2 rounded-lg border border-[#e8c8c6] px-3 text-left text-sm text-[#30252a] md:flex"><MapPin size={18} className="shrink-0 text-[#941333]" /><span className="truncate">Doha, Qatar</span><ChevronDown size={16} className="ml-auto shrink-0 text-[#806d70]" /></button>
+          <form className="flex h-8 min-w-[56px] flex-1 items-center gap-1 overflow-hidden rounded-full border border-[#e8c8c6] bg-white px-1.5 shadow-[0_2px_10px_rgba(102,30,44,0.04)] focus-within:border-[#941333] sm:h-11 sm:min-w-[120px] sm:gap-2.5 sm:rounded-lg sm:border-2 sm:px-3.5 lg:ml-auto lg:max-w-[460px] lg:px-5" onSubmit={(event) => event.preventDefault()}>
+            <Search size={14} className="ml-0.5 shrink-0 text-[#941333] sm:ml-0 sm:size-[19px]" />
+            <input value={search || ""} onChange={(event) => onSearch?.(event.target.value)} placeholder={vertical ? `Search ${verticalConfig[vertical]?.name || "listings"}` : "Search cars, offers, homes and more"} className="h-full min-w-0 flex-1 border-0 bg-transparent px-1 text-xs text-[#30252a] outline-none placeholder:text-[#8b7b7f] sm:px-3 sm:text-sm" />
+            <button type="submit" className="hidden h-full items-center gap-2 bg-[#941333] px-4 text-sm font-semibold text-white transition hover:bg-[#6f1028] sm:flex"><Search size={16} /> Search</button>
           </form>
-          <Link to="/favourites" className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-700 transition hover:bg-slate-100 sm:h-10 sm:w-10" aria-label="Favorites"><Heart size={20} /></Link>
-          <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-700 transition hover:bg-slate-100 sm:h-10 sm:w-10" aria-label={auth.user ? "Open account menu" : "Open login menu"} aria-expanded={menuOpen}>
-            <CircleUserRound size={22} className={auth.user ? "text-[#0878d1]" : ""} />
+          <MarketplacePostAction className="inline-flex h-7 shrink-0 items-center gap-0.5 rounded-full border-2 border-[#941333] px-2.5 text-[10px] font-extrabold text-[#941333] shadow-sm transition hover:bg-[#fff0c7] min-[390px]:px-3 min-[390px]:text-[11px] sm:h-11 sm:gap-2 sm:px-4 sm:text-sm"><span className="text-sm leading-none sm:text-lg">+</span> SELL</MarketplacePostAction>
+          <Link to="/favourites" className="grid size-6 shrink-0 place-items-center rounded-full text-[#6b5157] transition hover:bg-[#fff1c9] sm:rounded-lg sm:size-10" aria-label="Favorites"><Heart size={18} className="sm:size-5" /></Link>
+          <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#6b5157] transition hover:bg-[#fff1c9] sm:h-10 sm:w-10" aria-label={auth.user ? "Open account menu" : "Open login menu"} aria-expanded={menuOpen}>
+            <CircleUserRound size={20} className={auth.user ? "text-[#941333]" : ""} />
           </button>
-          <MarketplacePostAction className="hidden h-11 shrink-0 items-center gap-2 rounded-full border-[3px] border-[#0878d1] px-4 text-sm font-bold text-slate-900 shadow-sm transition hover:bg-blue-50 sm:inline-flex"><span className="text-lg leading-none">+</span> SELL</MarketplacePostAction>
-          {menuOpen && <div className="absolute right-2 top-full z-50 mt-2 max-h-[calc(100dvh-4.5rem)] w-[min(360px,calc(100vw-1rem))] overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl sm:right-6 lg:right-8">
-            <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-4 py-4">
-              <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-blue-100 text-[#0878d1]">{auth.user?.photoURL ? <img src={auth.user.photoURL} alt="" className="h-full w-full object-cover" /> : <CircleUserRound size={28} />}</span>
+          {menuOpen && <div className="absolute right-2 top-full z-50 mt-2 max-h-[calc(100dvh-4.5rem)] w-[min(360px,calc(100vw-1rem))] overflow-y-auto rounded-xl border border-[#ead9ca] bg-[#fffdfa] shadow-xl sm:right-6 lg:right-8">
+            <div className="flex items-center gap-3 border-b border-[#f1e4d6] bg-[#fff7e6] px-4 py-4">
+              <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-[#fff0c7] text-[#941333]">{auth.user?.photoURL ? <img src={auth.user.photoURL} alt="" className="h-full w-full object-cover" /> : <CircleUserRound size={28} />}</span>
               <div className="min-w-0 flex-1">{auth.user ? <><p className="text-xs font-medium text-slate-500">My Account</p><p className="truncate text-sm font-semibold text-slate-900">{auth.user.displayName || auth.user.email || "Browse Qatar member"}</p></> : <><p className="text-base font-bold text-slate-900">Welcome to Browse Qatar</p><p className="mt-0.5 text-xs text-slate-500">Sign in to manage your account and listings.</p></>}</div>
             </div>
-            {!auth.user && <div className="border-b border-slate-100 p-3"><button type="button" onClick={handleLogin} className="w-full rounded-md bg-[#0878d1] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700">{ENABLE_SIGNUP ? "Login / Sign up" : "Login"}</button></div>}
+            {!auth.user && <div className="border-b border-[#f1e4d6] p-3"><button type="button" onClick={handleLogin} className="w-full rounded-md bg-[#941333] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#6f1028]">{ENABLE_SIGNUP ? "Login / Sign up" : "Login"}</button></div>}
             <div className="p-2">
               <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"><Camera size={18} className="text-slate-500" />Start selling</button>
               <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"><FileText size={18} className="text-slate-500" />My Ads / Manage Offers</button>
@@ -458,7 +526,7 @@ function MarketplaceHeader({ search, onSearch, vertical }: { search?: string; on
             </div>
             <div className="border-t border-slate-100 p-2">
               <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">Browse categories</p>
-              <div className="grid grid-cols-2 gap-1">{categories.map((item) => <Link key={item.id} to={`/marketplace/${item.id}`} onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-2 text-xs text-slate-600 hover:bg-blue-50 hover:text-[#0878d1]">{item.id === "classifieds" ? "Classifieds" : item.name.replace(/ Buy & Sell| Deal/, "")}</Link>)}</div>
+              <div className="grid grid-cols-2 gap-1">{categories.map((item) => <Link key={item.id} to={`/marketplace/${item.id}`} onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-2 text-xs text-slate-600 hover:bg-[#fff1c9] hover:text-[#941333]">{item.id === "classifieds" ? "Classifieds" : item.name.replace(/ Buy & Sell| Deal/, "")}</Link>)}</div>
             </div>
             <div className="border-t border-slate-100 p-2">
               <Link to="/about" onClick={() => setMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">About Us</Link>
@@ -591,7 +659,7 @@ function ListingCard({ listing, vertical }: { listing: ListingRecord; vertical: 
   </Link>;
 }
 
-function CategoryStrip({ active }: { active?: string }) {
+export function CategoryStrip({ active }: { active?: string }) {
   const [spotlightIndex, setSpotlightIndex] = useState(0);
 
   useEffect(() => {
@@ -604,25 +672,51 @@ function CategoryStrip({ active }: { active?: string }) {
   const spotlight = marketplaceSpotlight[spotlightIndex];
 
   return (
-    <nav id="marketplace-categories" aria-label="Marketplace categories" className="border-b border-slate-200 bg-white">
+    <nav id="marketplace-categories" aria-label="Marketplace categories" className="border-b border-[#ead9ca] bg-[#fffdfa]">
       <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 gap-2 overflow-x-auto py-2 sm:gap-3 sm:py-4 lg:gap-4">
           {categories.map((category) => {
             const Icon = categoryIcons[category.id] || Building2;
-            return <Link key={category.id} to={`/marketplace/${category.id}`} className={`flex w-[84px] shrink-0 flex-col items-center gap-1.5 rounded-lg p-1 text-center transition hover:bg-slate-50 sm:w-[92px] sm:gap-2 sm:p-2 ${active === category.id ? "bg-blue-50 text-[#0878d1]" : "text-slate-700"}`}>
-              <span className={`relative grid h-11 w-11 place-items-center overflow-hidden rounded-xl sm:h-14 sm:w-14 ${active === category.id ? "bg-white" : "bg-slate-100"}`}><img src={categoryImages[category.id]} alt="" className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = "none"; }} /><Icon size={22} className="relative z-10 rounded-full bg-white/90 p-1 text-slate-800" /></span>
+            return <Link key={category.id} to={`/marketplace/${category.id}`} className={`flex w-[84px] shrink-0 flex-col items-center gap-1.5 rounded-xl p-1 text-center transition hover:bg-[#fff7e6] sm:w-[92px] sm:gap-2 sm:p-2 ${active === category.id ? "bg-[#fff1c9] text-[#941333]" : "text-[#5d4c50]"}`}>
+              <span className={`grid h-11 w-11 place-items-center rounded-xl sm:h-14 sm:w-14 ${active === category.id ? "bg-[#941333] text-white shadow-md shadow-[#941333]/20" : "bg-[#fff0c7] text-[#941333]"}`}><Icon size={22} aria-hidden="true" /></span>
               <span className="line-clamp-2 text-xs font-semibold leading-4">{category.id === "classifieds" ? "Classifieds" : category.name.replace(/ Buy & Sell| Deal/, "")}</span>
             </Link>;
           })}
         </div>
-        <Link key={spotlight.title} to={`/marketplace/${spotlight.vertical}?category=${encodeURIComponent(spotlight.category)}`} className="group hidden h-[82px] w-[340px] shrink-0 items-center gap-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-2 transition hover:border-[#0878d1] hover:bg-blue-50 lg:flex xl:w-[390px]">
+        <Link key={spotlight.title} to={`/marketplace/${spotlight.vertical}?category=${encodeURIComponent(spotlight.category)}`} className="group hidden h-[82px] w-[340px] shrink-0 items-center gap-3 overflow-hidden rounded-xl border border-[#e8c8c6] bg-[#fff7e6] p-2 transition hover:border-[#941333] hover:bg-[#fff1c9] lg:flex xl:w-[390px]">
           <img src={spotlight.image} alt="" className="h-full w-[96px] shrink-0 rounded-md object-cover" />
-          <span aria-live="polite" className="min-w-0 flex-1"><span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#0878d1]"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#0878d1]" />Popular right now</span><span className="mt-1 block truncate text-sm font-bold text-slate-900">{spotlight.title}</span><span className="block truncate text-xs text-slate-500">{spotlight.detail}</span></span>
-          <ArrowRight size={17} className="mr-2 shrink-0 text-slate-500 transition group-hover:translate-x-1 group-hover:text-[#0878d1]" />
+          <span aria-live="polite" className="min-w-0 flex-1"><span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#941333]"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#a20e3c]" />Popular right now</span><span className="mt-1 block truncate text-sm font-bold text-[#30252a]">{spotlight.title}</span><span className="block truncate text-xs text-[#806d70]">{spotlight.detail}</span></span>
+          <ArrowRight size={17} className="mr-2 shrink-0 text-[#806d70] transition group-hover:translate-x-1 group-hover:text-[#941333]" />
         </Link>
       </div>
     </nav>
   );
+}
+
+function CategoryJump() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const updateVisibility = () => setVisible(window.scrollY > 360);
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    return () => window.removeEventListener("scroll", updateVisibility);
+  }, []);
+
+  if (!visible) return null;
+
+  return <button
+    type="button"
+    onClick={() => {
+      const categories = document.getElementById("marketplace-categories");
+      if (!categories) return;
+      const stickyHeaderOffset = window.innerWidth < 640 ? 56 : 72;
+      window.scrollTo({ top: window.scrollY + categories.getBoundingClientRect().top - stickyHeaderOffset, behavior: "smooth" });
+    }}
+    aria-label="Go to category navigation"
+    title="Browse categories"
+    className="fixed bottom-5 left-4 z-30 grid h-12 w-12 place-items-center rounded-full border border-[#e8c8c6] bg-gradient-to-br from-[#941333] to-[#b22b4a] text-white shadow-lg shadow-[#5b1827]/25 transition hover:-translate-y-0.5 hover:shadow-xl sm:bottom-7 sm:left-6"
+  ><LayoutGrid size={21} aria-hidden="true" /></button>;
 }
 
 export function ModernMarketplaceHome() {
@@ -630,7 +724,7 @@ export function ModernMarketplaceHome() {
   const [search, setSearch] = useState("");
   const { listings, loading } = useMarketplaceListings();
   const filtered = useMemo(() => listings.filter((item) => !search || `${item.title} ${item.description} ${locationOf(item)}`.toLowerCase().includes(search.toLowerCase())), [listings, search]);
-  return <div className="min-h-screen bg-[#f5f6f7] text-slate-950">
+  return <div className="min-h-screen bg-[#fffdfa] text-[#30252a]">
     <MarketplaceHeader search={search} onSearch={setSearch} />
     <CategoryStrip />
     <main className="mx-auto max-w-[1320px] px-4 pb-16 pt-5 sm:px-6 lg:px-8">
@@ -663,7 +757,7 @@ export function ModernMarketplaceHome() {
       </section>
       <MarketplacePostAction className="mt-8 flex w-full items-center justify-between gap-4 rounded-lg border border-blue-100 bg-[#e6f3ff] px-5 py-5 text-left text-slate-900 transition hover:bg-blue-50 sm:px-7"><span><span className="block text-lg font-bold">Have something to sell?</span><span className="mt-1 block text-sm text-slate-600">Reach people across Qatar with a new listing.</span></span><span className="flex shrink-0 items-center gap-2 rounded-md bg-[#0878d1] px-4 py-3 text-sm font-bold text-white">List it <ArrowRight size={16} /></span></MarketplacePostAction>
     </main>
-    <ModernMarketplaceFooter />
+    <ModernMarketplaceFooter variant="v2" />
   </div>;
 }
 
@@ -685,7 +779,7 @@ export function ModernMarketplaceSearchResults() {
     });
   }, [listings, search]);
 
-  return <div className="min-h-screen bg-[#f5f6f7] text-slate-950">
+  return <div className="min-h-screen bg-[#fffdfa] text-[#30252a]">
     <MarketplaceHeader search={search} onSearch={setSearch} />
     <CategoryStrip />
     <main className="mx-auto min-h-[45vh] max-w-[1320px] px-4 py-5 sm:px-6 lg:px-8">
@@ -695,7 +789,7 @@ export function ModernMarketplaceSearchResults() {
       </div>
       {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{Array.from({ length: 8 }, (_, index) => <div key={index} className="aspect-[4/5] animate-pulse rounded-lg bg-slate-200" />)}</div> : filtered.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{filtered.map((item) => <ListingCard key={`${item.vertical}-${item.id}`} listing={item} vertical={item.vertical || "vehicles"} />)}</div> : <div className="rounded-lg border border-slate-200 bg-white px-5 py-12 text-center"><Search className="mx-auto text-slate-300" size={32} /><h2 className="mt-3 font-bold">{search ? "No listings found" : "Enter a search to browse listings"}</h2><p className="mt-1 text-sm text-slate-500">Try another search or choose a category to explore.</p></div>}
     </main>
-    <ModernMarketplaceFooter />
+    <ModernMarketplaceFooter variant="v2" />
   </div>;
 }
 
@@ -728,48 +822,48 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
   const renderField = (field: RefineField) => {
     if (field.type === "range") {
       return <div key={field.key} className="space-y-1.5">
-        <label className="block text-xs font-medium text-slate-600">{field.label}{field.unit ? ` (${field.unit})` : ""}</label>
+        <label className="block text-xs font-semibold text-[#6b5157]">{field.label}{field.unit ? ` (${field.unit})` : ""}</label>
         <div className="grid grid-cols-2 gap-2">
-          <input type="number" inputMode="numeric" aria-label={`${field.label} minimum`} placeholder="Min" value={refineFilters[`${field.key}Min`] || ""} onChange={(event) => updateFilter(`${field.key}Min`, event.target.value)} className="min-w-0 rounded-md border border-slate-300 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]" />
-          <input type="number" inputMode="numeric" aria-label={`${field.label} maximum`} placeholder="Max" value={refineFilters[`${field.key}Max`] || ""} onChange={(event) => updateFilter(`${field.key}Max`, event.target.value)} className="min-w-0 rounded-md border border-slate-300 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]" />
+          <input type="number" inputMode="numeric" aria-label={`${field.label} minimum`} placeholder="Min" value={refineFilters[`${field.key}Min`] || ""} onChange={(event) => updateFilter(`${field.key}Min`, event.target.value)} className="min-w-0 rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15" />
+          <input type="number" inputMode="numeric" aria-label={`${field.label} maximum`} placeholder="Max" value={refineFilters[`${field.key}Max`] || ""} onChange={(event) => updateFilter(`${field.key}Max`, event.target.value)} className="min-w-0 rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15" />
         </div>
       </div>;
     }
     return <label key={field.key} className="block space-y-1.5">
-      <span className="block text-xs font-medium text-slate-600">{field.label}</span>
-      {field.type === "select" ? <select value={refineFilters[field.key] || ""} onChange={(event) => { updateFilter(field.key, event.target.value); closeAfterChoice(); }} className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]">
+      <span className="block text-xs font-semibold text-[#6b5157]">{field.label}</span>
+      {field.type === "select" ? <select value={refineFilters[field.key] || ""} onChange={(event) => { updateFilter(field.key, event.target.value); closeAfterChoice(); }} className="w-full rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15">
         <option value="">All</option>
         {field.options?.map((option) => <option key={option} value={option}>{option}</option>)}
-      </select> : <input type="text" value={refineFilters[field.key] || ""} onChange={(event) => updateFilter(field.key, event.target.value)} className="w-full rounded-md border border-slate-300 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]" />}
+      </select> : <input type="text" value={refineFilters[field.key] || ""} onChange={(event) => updateFilter(field.key, event.target.value)} className="w-full rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15" />}
     </label>;
   };
   const clearFilters = () => setRefineFilters({});
 
-  const panel = <div className={`rounded-lg border border-slate-200 bg-white p-4 ${mobileDrawer ? "max-h-[82dvh] overflow-y-auto rounded-t-xl pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl" : "lg:sticky lg:top-28"}`}>
+  const panel = <div className={`rounded-2xl border border-[#e8c8c6] bg-gradient-to-br from-[#fff7e6] via-[#fffdfa] to-[#fff0c7]/70 p-4 shadow-[0_8px_24px_rgba(111,16,40,0.08)] ${mobileDrawer ? "max-h-[82dvh] overflow-y-auto rounded-t-xl pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl" : "lg:sticky lg:top-28"}`}>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="font-bold">Refine your search</h2>
+        <h2 className="font-bold text-[#851432]">Refine your search</h2>
         <div className="flex items-center gap-3">
-          {Object.values(refineFilters).some(Boolean) && <button type="button" onClick={clearFilters} className="text-xs font-semibold text-[#0878d1] hover:underline">Clear all</button>}
+          {Object.values(refineFilters).some(Boolean) && <button type="button" onClick={clearFilters} className="text-xs font-semibold text-[#941333] hover:underline">Clear all</button>}
           {mobileDrawer && <button type="button" onClick={onClose} aria-label="Close filters" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-slate-100"><X size={18} /></button>}
         </div>
       </div>
-      <div className="mt-4 flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-600"><MapPin size={16} /> Doha, Qatar</div>
+      <div className="mt-4 flex items-center gap-2 rounded-lg border border-[#e8c8c6] bg-[#fffdfa]/80 px-3 py-2 text-sm text-[#6b5157]"><MapPin size={16} className="text-[#941333]" /> Doha, Qatar</div>
       {vertical === "restaurants" ? <>
-        <div className="mt-5 flex items-center justify-between gap-2"><label className="text-sm font-medium text-slate-700">What's on your mind?</label>{cuisineFilter && <button type="button" onClick={() => { selectCuisine(null); closeAfterChoice(); }} className="text-xs font-semibold text-[#0878d1] hover:underline">Clear</button>}</div>
-        <div className="mt-2 grid grid-cols-2 gap-1.5">{cuisineLists.map((cuisine) => <button key={cuisine.name} type="button" onClick={() => { selectCuisine(cuisine.name === cuisineFilter ? null : cuisine.name); closeAfterChoice(); }} aria-pressed={cuisineFilter === cuisine.name} className={`flex min-w-0 items-center gap-2 rounded-md border px-2 py-2 text-left text-xs transition ${cuisineFilter === cuisine.name ? "border-[#0878d1] bg-blue-50 font-semibold text-[#0878d1]" : "border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50"}`}><img src={cuisine.img} alt="" className="h-8 w-8 shrink-0 rounded-full bg-slate-100 object-contain" /><span className="truncate">{cuisine.name}</span></button>)}</div>
+        <div className="mt-5 flex items-center justify-between gap-2"><label className="text-sm font-semibold text-[#6b5157]">What's on your mind?</label>{cuisineFilter && <button type="button" onClick={() => { selectCuisine(null); closeAfterChoice(); }} className="text-xs font-semibold text-[#941333] hover:underline">Clear</button>}</div>
+        <div className="mt-2 grid grid-cols-2 gap-1.5">{cuisineLists.map((cuisine) => <button key={cuisine.name} type="button" onClick={() => { selectCuisine(cuisine.name === cuisineFilter ? null : cuisine.name); closeAfterChoice(); }} aria-pressed={cuisineFilter === cuisine.name} className={`flex min-w-0 items-center gap-2 rounded-lg border px-2 py-2 text-left text-xs transition ${cuisineFilter === cuisine.name ? "border-[#941333] bg-[#fff0c7] font-semibold text-[#851432] shadow-sm" : "border-[#f1e4d6] bg-white/70 text-slate-600 hover:border-[#d7aeb0] hover:bg-[#fff1c9]"}`}><img src={cuisine.img} alt="" className="h-8 w-8 shrink-0 rounded-full bg-slate-100 object-contain" /><span className="truncate">{cuisine.name}</span></button>)}</div>
       </> : refineConfig ? <div className="mt-5 space-y-4">
-        <label className="block space-y-1.5"><span className="block text-xs font-medium text-slate-600">Category</span><select value={refineFilters.subcategory || ""} onChange={(event) => { updateFilter("subcategory", event.target.value); closeAfterChoice(); }} className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#0878d1]"><option value="">All categories</option>{refineConfig.subcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}</select></label>
+        <label className="block space-y-1.5"><span className="block text-xs font-semibold text-[#6b5157]">Category</span><select value={refineFilters.subcategory || ""} onChange={(event) => { updateFilter("subcategory", event.target.value); closeAfterChoice(); }} className="w-full rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15"><option value="">All categories</option>{refineConfig.subcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}</select></label>
         {refineConfig.secondaryField && renderField(refineConfig.secondaryField)}
         {refineConfig.fields.map(renderField)}
       </div> : <>
-        <label className="mt-4 block text-sm font-medium text-slate-700">Category</label>
+        <label className="mt-4 block text-sm font-semibold text-[#6b5157]">Category</label>
         <div className="mt-2 space-y-2">{vertical === "classifieds" ? <>
           <button type="button" onClick={() => { selectCategory(null); closeAfterChoice(); }} aria-pressed={!categoryFilter} className={`block w-full text-left text-sm ${!categoryFilter ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>All categories</button>
           {["Furniture", "Home Appliances", "Electronics", "Mobile Phones", "TVs", "Computers", "Books", "Clothing", "Sports", "Other"].map((item) => <button key={item} type="button" onClick={() => { selectCategory(categoryFilter === item ? null : item); closeAfterChoice(); }} aria-pressed={categoryFilter === item} className={`block w-full text-left text-sm ${categoryFilter === item ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item}</button>)}
         </> : categories.map((item) => <Link key={item.id} to={`/marketplace/${item.id}`} className={`block text-sm ${vertical === item.id ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item.id === "classifieds" ? "Classifieds" : item.name}</Link>)}</div>
       </>}
-      {mobileDrawer && !autoCloseChoices && hasPendingChanges && <div className="sticky bottom-0 mt-5 border-t border-slate-200 bg-white pt-3"><button type="button" onClick={onApply} className="w-full rounded-md bg-[#0878d1] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Apply filters</button></div>}
-      <div className="mt-5 border-t border-slate-100 pt-4"><p className="text-sm font-medium text-slate-700">Trust</p><p className="mt-2 flex items-center gap-2 text-xs text-slate-500"><ShieldCheck size={15} className="text-emerald-600" /> Browse Qatar local listings</p></div>
+      {mobileDrawer && !autoCloseChoices && hasPendingChanges && <div className="sticky bottom-0 mt-5 border-t border-[#ead9ca] bg-[#fffdfa] pt-3"><button type="button" onClick={onApply} className="w-full rounded-lg bg-[#941333] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6f1028]">Apply filters</button></div>}
+      <div className="mt-5 border-t border-[#ead9ca] pt-4"><p className="text-sm font-semibold text-[#6b5157]">Trust</p><p className="mt-2 flex items-center gap-2 text-xs text-slate-500"><ShieldCheck size={15} className="text-[#941333]" /> Browse Qatar local listings</p></div>
     </div>;
 
   if (mobileDrawer) {
@@ -920,24 +1014,25 @@ export function ModernMarketplaceListing() {
     next.delete("restaurant");
     setSearchParams(next, { replace: true });
   };
-  return <div className="min-h-screen bg-[#f5f6f7] text-slate-950">
+  return <div className="min-h-screen bg-[#fffdfa] text-[#30252a]">
     <MarketplaceHeader search={search} onSearch={setSearch} vertical={vertical} />
     <CategoryStrip active={vertical} />
+    <CategoryJump />
     <main className="mx-auto max-w-[1320px] px-4 py-3 sm:px-6 sm:py-5 lg:px-8">
-      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500 sm:mb-5"><Link to="/" className="hover:text-[#0878d1]">Home</Link><span>/</span><span className="text-slate-700">{config?.name || vertical}</span></div>
-      <div className="mb-2 flex flex-nowrap items-center justify-between gap-1 border-b border-slate-200 pb-2 sm:mb-3 sm:gap-4">
-        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-blue-50 text-[#0878d1] sm:h-9 sm:w-9 sm:rounded-lg"><Icon size={17} /></span><div className="min-w-0"><h1 className="truncate text-sm font-bold leading-tight sm:text-xl">{config?.name || vertical}</h1><p className="truncate text-[10px] leading-4 text-slate-500 sm:text-xs">{filtered.length} listings around Qatar</p></div></div>
+      <div className="mb-3 flex items-center gap-2 text-xs text-[#806d70] sm:mb-5"><Link to="/" className="hover:text-[#941333]">Home</Link><span>/</span><span className="text-[#5d464c]">{config?.name || vertical}</span></div>
+      <div className="mb-2 flex flex-nowrap items-center justify-between gap-1 border-b border-[#ead9ca] pb-2 sm:mb-3 sm:gap-4">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#fff0c7] text-[#941333] sm:h-9 sm:w-9"><Icon size={17} /></span><div className="min-w-0"><h1 className="truncate text-sm font-bold leading-tight text-[#3b252b] sm:text-xl">{config?.name || vertical}</h1><p className="truncate text-[10px] leading-4 text-[#806d70] sm:text-xs">{filtered.length} listings around Qatar</p></div></div>
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <button type="button" onClick={() => setSort("best-value")} title="Best value deals" aria-label="Best value deals" className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1.5 text-[10px] font-semibold transition sm:px-2.5 sm:text-xs ${sort === "best-value" ? "border-amber-400 bg-amber-50 text-amber-800" : "border-amber-200 bg-white text-amber-700 hover:bg-amber-50"}`}><Sparkles size={14} className="animate-pulse" /><span>Best Value Deals</span></button>
           <label className="flex shrink-0 items-center gap-1 text-[0px] text-slate-600 sm:gap-2 sm:text-sm"><span className="hidden sm:inline">Sort by</span><select aria-label="Sort by" value={sort} onChange={(event) => setSort(event.target.value)} className="w-[78px] rounded-md border border-slate-300 bg-white px-1.5 py-1.5 text-xs text-slate-800 sm:w-auto sm:px-3 sm:py-2 sm:text-sm">{vertical === "restaurants" ? <><option value="latest">Latest</option>{ENABLE_RANDOM_SORT && <option value="random">Random</option>}<option value="best-value">Best Value</option><option value="price-asc">Low to High</option><option value="price-desc">High to Low</option></> : <><option value="latest">Latest</option><option value="best-value">Best Value</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></>}</select></label>
         </div>
       </div>
       {vertical === "restaurants" && <RestaurantMarquee restaurants={restaurantDirectory} />}
-      <div className="sticky top-[60px] z-20 mb-2 flex min-w-0 items-center gap-1.5 bg-[#f5f6f7]/95 py-0 backdrop-blur lg:hidden sm:mb-3">
-        <button type="button" onClick={openFilters} className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm"><SlidersHorizontal size={14} /> Filters</button>
+      <div className="sticky top-[60px] z-20 mb-2 flex min-w-0 items-center gap-1.5 bg-[#fffdfa]/95 py-1 backdrop-blur lg:hidden sm:mb-3">
+        <button type="button" onClick={openFilters} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#d7aeb0] bg-gradient-to-r from-[#941333] to-[#b22b4a] px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-[#941333]/20"><SlidersHorizontal size={14} /> Filters</button>
         {activeFilterChips.length > 0 && <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap py-0" aria-label="Applied filters">
-          {activeFilterChips.map((chip) => <button key={chip.key} type="button" onClick={chip.clear} aria-label={`Remove filter ${chip.label}`} className="inline-flex max-w-[55vw] shrink-0 items-center gap-1 rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-800 hover:bg-blue-100"><span className="truncate">{chip.label}</span><X size={12} className="shrink-0" /></button>)}
-          <button type="button" onClick={clearAllAppliedFilters} className="shrink-0 px-1 py-0.5 text-[11px] font-semibold text-[#0878d1] hover:underline">Clear all</button>
+          {activeFilterChips.map((chip) => <button key={chip.key} type="button" onClick={chip.clear} aria-label={`Remove filter ${chip.label}`} className="inline-flex max-w-[55vw] shrink-0 items-center gap-1 rounded-full border border-[#e8c8c6] bg-[#fff0c7] px-2 py-0.5 text-[11px] font-medium text-[#851432] hover:bg-[#fbe7b2]"><span className="truncate">{chip.label}</span><X size={12} className="shrink-0" /></button>)}
+          <button type="button" onClick={clearAllAppliedFilters} className="shrink-0 px-1 py-0.5 text-[11px] font-semibold text-[#941333] hover:underline">Clear all</button>
         </div>}
       </div>
       {filtersOpen && <VerticalRefinePanel vertical={vertical} cuisineFilter={cuisineFilter} categoryFilter={categoryFilter} refineFilters={autoApplyMobileFilters ? refineFilters : draftRefineFilters} setRefineFilters={autoApplyMobileFilters ? setRefineFilters : setDraftRefineFilters} selectCuisine={selectCuisine} selectCategory={selectCategory} mobileDrawer onClose={closeFilters} onApply={applyDraftFilters} hasPendingChanges={hasPendingFilterChanges} />}
@@ -948,7 +1043,7 @@ export function ModernMarketplaceListing() {
         </section>
       </div>
     </main>
-    <ModernMarketplaceFooter />
+    <ModernMarketplaceFooter variant="v2" />
   </div>;
 }
 
@@ -960,6 +1055,7 @@ export function ModernMarketplaceDetail() {
   const [loading, setLoading] = useState(!location.state?.listing);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const category = verticalConfig[vertical];
+  const CategoryIcon = categoryIcons[vertical] || Building2;
 
   useEffect(() => {
     if (location.state?.listing) {
@@ -986,16 +1082,18 @@ export function ModernMarketplaceDetail() {
   }, [id, location.state, vertical]);
 
   const amount = listing ? amountOf(listing) : null;
-  return <div className="min-h-screen bg-[#f5f6f7] text-slate-950">
+  return <div className="min-h-screen bg-[#fffdfa] text-[#30252a]">
     <MarketplaceHeader vertical={vertical} />
+    <CategoryStrip active={vertical} />
+    <CategoryJump />
     <main className="mx-auto max-w-[1120px] px-4 py-5 sm:px-6 lg:px-8">
-      <button type="button" onClick={() => navigate(`/marketplace/${vertical}`)} className="mb-5 inline-flex items-center gap-2 rounded-md px-2 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white hover:text-[#0878d1]"><ArrowLeft size={18} /> Back to {category?.name || "listings"}</button>
+      <button type="button" onClick={() => navigate(`/marketplace/${vertical}`)} className="mb-5 inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-[#6b5157] transition hover:bg-[#fff1c9] hover:text-[#941333]"><ArrowLeft size={18} /> Back to {category?.name || "listings"}</button>
       {loading ? <div className="grid gap-6 rounded-lg bg-white p-5 md:grid-cols-2"><div className="aspect-[4/3] animate-pulse rounded bg-slate-200" /><div className="h-64 animate-pulse rounded bg-slate-100" /></div> : listing ? <div className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(300px,0.7fr)]">
-        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white"><div className="aspect-[4/3] bg-slate-100"><img src={imageOf(listing)} alt={listing.title || "Listing"} className="h-full w-full object-cover" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} /></div><div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-sm text-slate-500"><span>{category?.name || vertical}</span><button type="button" className="inline-flex items-center gap-2 rounded-md px-2 py-1 hover:bg-slate-100"><Share2 size={16} /> Share</button></div></section>
-        <aside className="h-fit rounded-lg border border-slate-200 bg-white p-5"><p className="text-xs font-semibold uppercase tracking-wide text-[#0878d1]">{listing.category || category?.name}</p><h1 className="mt-2 text-2xl font-bold leading-tight">{listing.title || "Listing details"}</h1>{amount !== null && <p className="mt-4 text-3xl font-bold">{listing.pricing?.currency || "QAR"} {Number(amount).toLocaleString()}</p>}<p className="mt-3 flex items-center gap-2 text-sm text-slate-500"><MapPin size={16} />{locationOf(listing)}</p><div className="mt-5 border-t border-slate-100 pt-4"><h2 className="font-bold">Description</h2><p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{listing.description || "Contact the seller for more information about this listing."}</p></div><button type="button" onClick={() => setEnquiryOpen(true)} className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-[#0878d1] px-4 py-3 font-bold text-white transition hover:bg-blue-700"><Tag size={17} /> Contact seller</button><p className="mt-3 text-center text-xs text-slate-400">Browse Qatar marketplace</p></aside>
+        <section className="overflow-hidden rounded-xl border border-[#ead9ca] bg-[#fffdfa] shadow-sm"><div className="aspect-[4/3] bg-[#fff7e6]"><img src={imageOf(listing)} alt={listing.title || "Listing"} className="h-full w-full object-cover" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} /></div><div className="flex items-center justify-between border-t border-[#ead9ca] px-4 py-3 text-sm text-[#6b5157]"><span className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff0c7] text-[#941333]"><CategoryIcon size={17} /></span>{category?.name || vertical}</span><button type="button" className="inline-flex items-center gap-2 rounded-md px-2 py-1 hover:bg-[#fff1c9]"><Share2 size={16} /> Share</button></div></section>
+        <aside className="h-fit rounded-xl border border-[#ead9ca] bg-[#fffdfa] p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-[#941333]">{listing.category || category?.name}</p><h1 className="mt-2 text-2xl font-bold leading-tight text-[#30252a]">{listing.title || "Listing details"}</h1>{amount !== null && <p className="mt-4 text-3xl font-bold text-[#851432]">{listing.pricing?.currency || "QAR"} {Number(amount).toLocaleString()}</p>}<p className="mt-3 flex items-center gap-2 text-sm text-[#806d70]"><MapPin size={16} />{locationOf(listing)}</p><div className="mt-5 border-t border-[#ead9ca] pt-4"><h2 className="font-bold text-[#30252a]">Description</h2><p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{listing.description || "Contact the seller for more information about this listing."}</p></div><button type="button" onClick={() => setEnquiryOpen(true)} className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#941333] px-4 py-3 font-bold text-white transition hover:bg-[#6f1028]"><Tag size={17} /> Contact seller</button><p className="mt-3 text-center text-xs text-[#806d70]">Browse Qatar marketplace</p></aside>
       </div> : <div className="rounded-lg border border-slate-200 bg-white px-5 py-12 text-center"><h1 className="text-xl font-bold">Listing not found</h1><p className="mt-2 text-sm text-slate-500">This listing may have been removed or is temporarily unavailable.</p><button type="button" onClick={() => navigate(`/marketplace/${vertical}`)} className="mt-5 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"><ArrowLeft size={16} /> Browse category</button></div>}
     </main>
     {listing && <ListingEnquiryPopup open={enquiryOpen} onClose={() => setEnquiryOpen(false)} listingId={listing.id ?? id} adTitle={listing.title || "this listing"} />}
-    <ModernMarketplaceFooter />
+    <ModernMarketplaceFooter variant="v2" />
   </div>;
 }

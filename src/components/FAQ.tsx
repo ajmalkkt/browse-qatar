@@ -2,10 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, HelpCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { ModernMarketplaceFooter } from "./ModernMarketplace";
 
 export default function FAQ() {
+    const isV2Theme = import.meta.env.VITE_MODERN_VIEW_V2 === "true" || import.meta.env.VITE_MODERN_VIEW === "true";
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className={`min-h-screen flex flex-col ${isV2Theme ? "bg-[#fffdfa] text-[#30252a]" : "bg-gray-50"}`}>
             <Helmet>
                 <title>FAQ | Browse Qatar</title>
                 <meta
@@ -65,15 +67,15 @@ export default function FAQ() {
             </Helmet>
 
             {/* Header */}
-            <div className="bg-white shadow-sm sticky top-0 z-50">
+            <div className={`shadow-sm sticky top-0 z-50 ${isV2Theme ? "bg-[#fffdfa] border-b border-[#ead9ca]" : "bg-white"}`}>
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-blue-600">
+                    <Link to="/" className={`flex items-center gap-2 ${isV2Theme ? "text-[#6b5157] hover:text-[#941333]" : "text-gray-600 hover:text-blue-600"}`}>
                         <ArrowLeft size={20} />
                         <span className="hidden sm:inline">Back</span>
                     </Link>
 
                     <div className="flex items-center gap-2">
-                        <HelpCircle className="text-blue-600" size={24} />
+                        <HelpCircle className={isV2Theme ? "text-[#941333]" : "text-blue-600"} size={24} />
                         <h1 className="text-xl font-bold">FAQ</h1>
                     </div>
 
@@ -82,16 +84,16 @@ export default function FAQ() {
             </div>
 
             {/* Content */}
-            <main className="flex-1 py-6 px-4 bg-gradient-to-b from-orange-50 to-yellow-50">
-                <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-6 border space-y-5">
+            <main className={`flex-1 py-6 px-4 ${isV2Theme ? "bg-gradient-to-b from-[#fff7e6] to-[#fffdfa]" : "bg-gradient-to-b from-orange-50 to-yellow-50"}`}>
+                <div className={`max-w-3xl mx-auto shadow-xl rounded-2xl p-6 border space-y-5 ${isV2Theme ? "bg-[#fffdfa] border-[#ead9ca]" : "bg-white"}`}>
 
-                    <h1 className="text-xl font-bold text-green-900 text-center mb-4">
+                    <h1 className={`text-xl font-bold text-center mb-4 ${isV2Theme ? "text-[#851432]" : "text-green-900"}`}>
                         Frequently Asked Questions
                     </h1>
 
                     {/* About */}
                     <div>
-                        <h3 className="font-semibold text-green-800">What is Browse Qatar?</h3>
+                        <h3 className={`font-semibold ${isV2Theme ? "text-[#941333]" : "text-green-800"}`}>What is Browse Qatar?</h3>
                         <p>
                             Browse Qatar is a platform that helps you discover the best food offers,
                             dining deals, and restaurant promotions across Qatar.
@@ -100,13 +102,13 @@ export default function FAQ() {
 
                     {/* Free */}
                     <div>
-                        <h3 className="font-semibold text-green-800">Is it free to use?</h3>
+                        <h3 className={`font-semibold ${isV2Theme ? "text-[#941333]" : "text-green-800"}`}>Is it free to use?</h3>
                         <p>Yes, the platform is completely free for customers.</p>
                     </div>
 
                     {/* Login */}
                     <div>
-                        <h3 className="font-semibold text-green-800">Do I need to login?</h3>
+                        <h3 className={`font-semibold ${isV2Theme ? "text-[#941333]" : "text-green-800"}`}>Do I need to login?</h3>
                         <p>
                             If you are a <strong>business partner</strong>, you may need to login to add your
                             offers and promotions.
@@ -119,7 +121,7 @@ export default function FAQ() {
 
                     {/* Offers */}
                     <div>
-                        <h3 className="font-semibold text-green-800">How do I use an offer?</h3>
+                        <h3 className={`font-semibold ${isV2Theme ? "text-[#941333]" : "text-green-800"}`}>How do I use an offer?</h3>
                         <p>
                             You can visit the restaurant or follow the instructions provided with each deal.
                         </p>
@@ -127,7 +129,7 @@ export default function FAQ() {
 
                     {/* Updates */}
                     <div>
-                        <h3 className="font-semibold text-green-800">Are offers updated regularly?</h3>
+                        <h3 className={`font-semibold ${isV2Theme ? "text-[#941333]" : "text-green-800"}`}>Are offers updated regularly?</h3>
                         <p>
                             Yes, offers are updated frequently to ensure accuracy and availability.
                         </p>
@@ -135,7 +137,7 @@ export default function FAQ() {
 
                     {/* Registration */}
                     <div>
-                        <h3 className="font-semibold text-green-800">How can I register my business?</h3>
+                        <h3 className={`font-semibold ${isV2Theme ? "text-[#941333]" : "text-green-800"}`}>How can I register my business?</h3>
                         <p>
                             You can register your business by submitting an enquiry through our platform.
                         </p>
@@ -147,7 +149,7 @@ export default function FAQ() {
 
                     {/* Contact */}
                     <div>
-                        <h3 className="font-semibold text-green-800">How can I contact Browse Qatar?</h3>
+                        <h3 className={`font-semibold ${isV2Theme ? "text-[#941333]" : "text-green-800"}`}>How can I contact Browse Qatar?</h3>
                         <p>
                             Use the enquiry form available on the platform to send us your request.
                         </p>
@@ -160,9 +162,9 @@ export default function FAQ() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-white py-6 text-center text-sm text-gray-500 border-t">
+            {isV2Theme ? <ModernMarketplaceFooter variant="v2" /> : <footer className="bg-white py-6 text-center text-sm text-gray-500 border-t">
                 © {new Date().getFullYear()} BrowseQatar. All rights reserved.
-            </footer>
+            </footer>}
         </div>
     );
 }

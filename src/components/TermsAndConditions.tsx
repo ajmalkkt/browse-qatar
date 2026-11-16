@@ -2,39 +2,41 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Shield, Leaf, FileText, Lock, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ModernMarketplaceFooter } from "./ModernMarketplace";
 
 const TermsAndConditions = () => {
     const navigate = useNavigate();
+    const isV2Theme = import.meta.env.VITE_MODERN_VIEW_V2 === "true" || import.meta.env.VITE_MODERN_VIEW === "true";
 
     return (
-        <div className="min-h-screen bg-white font-sans text-gray-800">
+        <div className={`min-h-screen font-sans ${isV2Theme ? "bg-[#fffdfa] text-[#30252a]" : "bg-white text-gray-800"}`}>
             <Helmet>
                 <title>Terms of Use | Browse Qatar - Dining Offers Platform</title>
                 <meta name="description" content="Read the terms and conditions for using Browse Qatar. Learn about our platform nature, eco-friendly mission, and data privacy policies." />
                 <link rel="canonical" href="https://browseqatar.com/terms" />
             </Helmet>
             {/* Header */}
-            <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
+            <header className={`sticky top-0 z-10 ${isV2Theme ? "bg-[#fffdfa] border-b border-[#ead9ca]" : "bg-white border-b border-gray-100"}`}>
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => navigate('/')}
-                            className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600"
+                            className={`p-2 rounded-full transition-colors ${isV2Theme ? "text-[#6b5157] hover:bg-[#fff1c9] hover:text-[#941333]" : "text-gray-600 hover:bg-gray-50"}`}
                         >
                             <ArrowLeft size={20} />
                         </button>
                         <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-6 w-auto" />
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Terms of Use</h1>
+                        <h1 className={`text-xl font-bold tracking-tight ${isV2Theme ? "text-[#851432]" : "text-gray-900"}`}>Terms of Use</h1>
 
                     </div>
                 </div>
             </header>
 
-            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <main className={`max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${isV2Theme ? "bg-[#fffdfa]" : ""}`}>
 
                 {/* Intro Section */}
                 <div className="mb-12 text-center">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Welcome to BrowseQatar</h2>
+                    <h2 className={`text-3xl font-bold mb-4 ${isV2Theme ? "text-[#851432]" : "text-gray-900"}`}>Welcome to BrowseQatar</h2>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                         We are committed to creating a transparent, safe, and eco-friendly platform.
                         Please read our terms carefully to understand our mutual agreement.
@@ -43,9 +45,9 @@ const TermsAndConditions = () => {
 
                 <div className="grid gap-8">
                     {/* 1. Platform Nature */}
-                    <section className="bg-blue-50/50 rounded-2xl p-8 border border-blue-100">
+                    <section className={`${isV2Theme ? "bg-[#fff7e6] border-[#ead9ca]" : "bg-blue-50/50 border-blue-100"} rounded-2xl p-8 border`}>
                         <div className="flex items-start gap-4">
-                            <div className="bg-blue-100 p-3 rounded-xl text-blue-600">
+                            <div className={`${isV2Theme ? "bg-[#fff0c7] text-[#941333]" : "bg-blue-100 text-blue-600"} p-3 rounded-xl`}>
                                 <Users size={24} />
                             </div>
                             <div>
@@ -58,9 +60,9 @@ const TermsAndConditions = () => {
                     </section>
 
                     {/* 2. Eco-Friendly Mission */}
-                    <section className="bg-green-50/50 rounded-2xl p-8 border border-green-100">
+                    <section className={`${isV2Theme ? "bg-[#fff7e6] border-[#ead9ca]" : "bg-green-50/50 border-green-100"} rounded-2xl p-8 border`}>
                         <div className="flex items-start gap-4">
-                            <div className="bg-green-100 p-3 rounded-xl text-green-600">
+                            <div className={`${isV2Theme ? "bg-[#fff0c7] text-[#941333]" : "bg-green-100 text-green-600"} p-3 rounded-xl`}>
                                 <Leaf size={24} />
                             </div>
                             <div>
@@ -73,9 +75,9 @@ const TermsAndConditions = () => {
                     </section>
 
                     {/* 3. Content Policy */}
-                    <section className="bg-red-50/50 rounded-2xl p-8 border border-red-100">
+                    <section className={`${isV2Theme ? "bg-[#fff7e6] border-[#ead9ca]" : "bg-red-50/50 border-red-100"} rounded-2xl p-8 border`}>
                         <div className="flex items-start gap-4">
-                            <div className="bg-red-100 p-3 rounded-xl text-red-600">
+                            <div className={`${isV2Theme ? "bg-[#fff0c7] text-[#941333]" : "bg-red-100 text-red-600"} p-3 rounded-xl`}>
                                 <Shield size={24} />
                             </div>
                             <div>
@@ -96,9 +98,9 @@ const TermsAndConditions = () => {
                     </section>
 
                     {/* 4. Privacy & Data Use */}
-                    <section className="bg-purple-50/50 rounded-2xl p-8 border border-purple-100">
+                    <section className={`${isV2Theme ? "bg-[#fff7e6] border-[#ead9ca]" : "bg-purple-50/50 border-purple-100"} rounded-2xl p-8 border`}>
                         <div className="flex items-start gap-4">
-                            <div className="bg-purple-100 p-3 rounded-xl text-purple-600">
+                            <div className={`${isV2Theme ? "bg-[#fff0c7] text-[#941333]" : "bg-purple-100 text-purple-600"} p-3 rounded-xl`}>
                                 <Lock size={24} />
                             </div>
                             <div>
@@ -115,9 +117,9 @@ const TermsAndConditions = () => {
                     </section>
 
                     {/* 5. Limitation of Liability */}
-                    <section className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                    <section className={`${isV2Theme ? "bg-[#fff7e6] border-[#ead9ca]" : "bg-gray-50 border-gray-100"} rounded-2xl p-8 border`}>
                         <div className="flex items-start gap-4">
-                            <div className="bg-gray-200 p-3 rounded-xl text-gray-600">
+                            <div className={`${isV2Theme ? "bg-[#fff0c7] text-[#941333]" : "bg-gray-200 text-gray-600"} p-3 rounded-xl`}>
                                 <FileText size={24} />
                             </div>
                             <div>
@@ -136,6 +138,7 @@ const TermsAndConditions = () => {
                     </p>
                 </div>
             </main>
+            {isV2Theme && <ModernMarketplaceFooter variant="v2" />}
         </div>
     );
 };

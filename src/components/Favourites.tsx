@@ -7,8 +7,10 @@ import TopHeader from "./TopHeader";
 import { getAllRestaurants } from "../services/restaurantService";
 import { useEffect, useState } from "react";
 import EnquiryPopup from "./EnquiryPopup";
+import { CategoryStrip, MarketplaceHeader, ModernMarketplaceFooter } from "./ModernMarketplace";
 
 export default function Favourites() {
+  const isV2Theme = import.meta.env.VITE_MODERN_VIEW_V2 === "true" || import.meta.env.VITE_MODERN_VIEW === "true";
   const navigate = useNavigate();
   const { favorites, toggleFavorite, refreshFavorites, isLoading } = useFavoritesContext();
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,20 +77,23 @@ export default function Favourites() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen ${isV2Theme ? "bg-[#fffdfa] text-[#30252a]" : "bg-background"}`}>
       <Helmet>
         <title>My Favorite Offers | Browse Qatar - Best Dining Deals Saved</title>
         <meta name="description" content="View and manage your favorite dining deals, food offers, and restaurant discounts in Qatar. Save the best buffet and lunch offers to your personal list on Browse Qatar." />
         <link rel="canonical" href="https://browseqatar.com/favourites" />
       </Helmet>
-      <TopHeader
+      {isV2Theme ? <>
+        <MarketplaceHeader search={searchQuery} onSearch={handleSearch} />
+        <CategoryStrip />
+      </> : <TopHeader
         onSearch={handleSearch}
         selectedCountry={selectedCountry}
         onSelectCountry={setSelectedCountry}
         onAddBusiness={() => setEnquiryOpen(true)}
         onSearchClick={() => { }}
         searchQuery={searchQuery}
-      />
+      />}
 
       <main className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
@@ -99,7 +104,7 @@ export default function Favourites() {
           >
             <ArrowLeft className="h-6 w-6" />
           </button>
-          <h1 className="text-2xl font-bold">My Favorite Offers</h1>
+          <h1 className={`text-2xl font-bold ${isV2Theme ? "text-[#851432]" : ""}`}>My Favorite Offers</h1>
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={handleManualRefresh}
@@ -117,7 +122,7 @@ export default function Favourites() {
           <div className="flex flex-col items-center justify-center py-12 px-4 max-w-4xl mx-auto">
             <div className="text-center">
               <h2 className="text-2xl font-bold mb-4 text-gray-900">Your Favorite Food Offers in Qatar</h2>
-              <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 mb-8 text-left">
+              <div className={`${isV2Theme ? "bg-[#fff7e6] border-[#ead9ca]" : "bg-blue-50/50 border-blue-100"} p-6 rounded-2xl border mb-8 text-left`}>
                 <p className="text-gray-700 leading-relaxed mb-4">
                   Planning your next meal in Doha? <strong>Browse Qatar</strong> makes it easy to keep track of the
                   <strong> best food offers in Qatar today</strong>. By clicking the heart icon on any deal, you can save
@@ -148,7 +153,7 @@ export default function Favourites() {
 
               <button
                 onClick={() => navigate("/")}
-                className="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition-all shadow-md font-bold"
+                className={`${isV2Theme ? "bg-[#941333] hover:bg-[#6f1028]" : "bg-blue-600 hover:bg-blue-700"} text-white px-8 py-3 rounded-xl transition-all shadow-md font-bold`}
               >
                 Start Browsing Best Offers
               </button>
@@ -171,7 +176,7 @@ export default function Favourites() {
         )}
       </main>
 
-      <footer className="bg-muted py-6 px-4 mt-12">
+      {isV2Theme ? <ModernMarketplaceFooter variant="v2" /> : <footer className="bg-muted py-6 px-4 mt-12">
         <div className="container mx-auto text-center text-muted-foreground">
           <div className="flex items-center justify-center gap-3">
             <p className="m-0">© {new Date().getFullYear()} BrowseQatar Offers Platform. All rights reserved.</p>
@@ -182,7 +187,7 @@ export default function Favourites() {
             </div>
           </div>
         </div>
-      </footer>
+      </footer>}
       <EnquiryPopup open={enquiryOpen} onClose={() => setEnquiryOpen(false)} />
     </div>
   );

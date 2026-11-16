@@ -12,14 +12,11 @@ import {
   Search,
   ShieldCheck,
   Tag,
-  UserRound,
   Utensils,
   Wrench,
 } from "lucide-react";
 import { verticalConfig } from "../config/verticalConfig";
-import { ModernMarketplaceFooter } from "./ModernMarketplace";
-import useAuth from "../auth/useAuth";
-import { useModal } from "../contexts/ModalContext";
+import { MarketplaceAccountMenu, MarketplacePostAction, ModernMarketplaceFooter, PostingNudge } from "./ModernMarketplace";
 
 const categoryVisuals: Record<string, { description: string; icon: typeof Utensils; image: string; imageAlt: string }> = {
   restaurants: { description: "Great food. Amazing offers.", icon: Utensils, image: "/images/restaurants.png", imageAlt: "A plate of chicken machboos with aromatic rice" },
@@ -34,8 +31,6 @@ export default function BrowseQatarHomeV2() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") || "");
-  const auth = useAuth();
-  const { openLogin } = useModal();
   const categoryNavRef = useRef<HTMLElement>(null);
   const [canScrollCategoriesLeft, setCanScrollCategoriesLeft] = useState(false);
   const [canScrollCategoriesRight, setCanScrollCategoriesRight] = useState(false);
@@ -74,20 +69,14 @@ export default function BrowseQatarHomeV2() {
     navigate(query ? `/marketplace/search?q=${encodeURIComponent(query)}` : "/marketplace/search");
   };
 
-  const openAccount = () => {
-    if (auth.user) navigate("/manage-offers");
-    else if (auth.provider === "FIREBASE") openLogin();
-    else auth.login();
-  };
-
   const categoryPath = (verticalId: string) => {
     const query = search.trim();
     return `/marketplace/${verticalId}${query ? `?search=${encodeURIComponent(query)}` : ""}`;
   };
 
   return <main className="min-h-screen bg-[#fffdfa] text-[#24171b]">
-    <header className="sticky top-0 z-40 mx-auto max-w-[1440px] bg-[#fffdfa]/95 px-4 pt-2 backdrop-blur-md sm:px-6 sm:pt-3 lg:px-10 lg:pt-4">
-      <div className="flex flex-nowrap items-center gap-1.5 sm:gap-3 lg:gap-5">
+    <header className="sticky top-0 z-40 w-full bg-[#fffdfa]/95 px-4 pt-2 backdrop-blur-md sm:px-6 sm:pt-3 lg:px-10 lg:pt-4">
+      <div className="flex flex-nowrap items-center gap-1 sm:gap-3 lg:gap-5">
         <details className="group relative shrink-0">
           <summary aria-label="Toggle navigation menu" className="grid size-9 cursor-pointer list-none place-items-center rounded-xl bg-[#fff1c9] text-[#941333] transition hover:bg-[#fbe7b2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#941333] sm:size-11 [&::-webkit-details-marker]:hidden">
             <Menu className="size-5 sm:size-6" aria-hidden="true" />
@@ -98,19 +87,20 @@ export default function BrowseQatarHomeV2() {
         </details>
 
         <Link to="/" className="flex min-w-0 shrink-0 items-center" aria-label="Browse Qatar home">
-          <img src="/images/bqLogo.png" alt="Browse Qatar" className="h-auto w-[84px] object-contain min-[390px]:w-[104px] sm:w-[150px] lg:w-[190px]" />
+          <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-auto w-[76px] object-contain min-[390px]:w-[96px] sm:w-[150px] lg:w-[180px]" />
         </Link>
 
-        <form role="search" onSubmit={submitSearch} className="flex h-9 min-w-[56px] flex-1 items-center gap-1.5 rounded-full border border-[#e8c8c6] bg-white px-2 shadow-[0_2px_10px_rgba(102,30,44,0.04)] focus-within:border-[#941333] sm:h-11 sm:min-w-[120px] sm:gap-2.5 sm:px-3.5 lg:ml-auto lg:max-w-[460px] lg:px-5">
-          <Search className="size-4 shrink-0 text-[#941333] sm:size-5" aria-hidden="true" />
+        <form role="search" onSubmit={submitSearch} className="flex h-8 min-w-[56px] flex-1 items-center gap-1 rounded-full border border-[#e8c8c6] bg-white px-1.5 shadow-[0_2px_10px_rgba(102,30,44,0.04)] focus-within:border-[#941333] sm:h-11 sm:min-w-[120px] sm:gap-2.5 sm:px-3.5 lg:ml-auto lg:max-w-[460px] lg:px-5">
+          <Search className="size-3.5 shrink-0 text-[#941333] sm:size-5" aria-hidden="true" />
           <label htmlFor="v2-marketplace-search" className="sr-only">Search listings</label>
           <input id="v2-marketplace-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search..." className="min-w-0 flex-1 bg-transparent text-xs text-[#30252a] outline-none placeholder:text-[#777078] sm:text-sm" />
           <button type="submit" className="sr-only">Search</button>
         </form>
 
-        <div className="ml-auto flex shrink-0 items-center gap-0.5 text-[#8c1534] sm:gap-1.5 lg:gap-4">
+        <div className="ml-auto flex shrink-0 items-center gap-0 text-[#8c1534] sm:gap-1.5 lg:gap-4">
+          <MarketplacePostAction className="inline-flex h-7 shrink-0 items-center gap-0.5 rounded-full border-2 border-[#941333] px-2.5 text-[10px] font-extrabold text-[#941333] shadow-sm transition hover:bg-[#fff0c7] min-[390px]:px-3 min-[390px]:text-[11px] sm:h-11 sm:gap-2 sm:px-4 sm:text-sm"><span className="text-sm leading-none sm:text-lg">+</span> SELL</MarketplacePostAction>
           <Link to="/favourites" aria-label="Saved listings" className="grid size-8 place-items-center rounded-full transition hover:bg-[#fff1c9] sm:size-10"><Heart className="size-[18px] sm:size-6" strokeWidth={1.8} /></Link>
-          <button type="button" onClick={openAccount} aria-label={auth.user ? "Open account" : "Sign in"} className="grid size-8 place-items-center rounded-full transition hover:bg-[#fff1c9] sm:size-10"><UserRound className="size-[18px] sm:size-6" strokeWidth={1.8} /></button>
+          <MarketplaceAccountMenu />
         </div>
       </div>
 
@@ -136,7 +126,7 @@ export default function BrowseQatarHomeV2() {
       </div>
     </header>
 
-    <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
+    <div className="w-full px-4 sm:px-6 lg:px-10">
       <section id="home" aria-labelledby="v2-hero-heading" className="mt-4 grid min-h-[190px] grid-cols-[1.05fr_0.95fr] overflow-hidden rounded-[24px] bg-[#fff0c9] sm:mt-6 md:mt-7 md:min-h-[400px]">
         <div className="relative z-10 flex flex-col items-start px-2.5 py-4 min-[360px]:px-3 min-[390px]:px-4 sm:px-8 sm:py-8 md:justify-center md:px-8 lg:px-11 lg:py-10">
           <p className="mb-2 flex items-center gap-1 text-[8px] font-extrabold text-[#8c1534] sm:mb-3 sm:gap-2 sm:text-sm"><ShieldCheck className="size-3 shrink-0 sm:size-5" strokeWidth={2.3} aria-hidden="true" />QATAR, CLOSER TO YOU</p>
@@ -163,5 +153,6 @@ export default function BrowseQatarHomeV2() {
       </section>
     </div>
     <ModernMarketplaceFooter variant="v2" />
+    <PostingNudge />
   </main>;
 }
