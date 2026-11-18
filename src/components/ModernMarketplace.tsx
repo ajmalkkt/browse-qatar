@@ -15,12 +15,15 @@ import {
   CircleUserRound,
   LayoutGrid,
   Camera,
+  Check,
   FileText,
   CircleHelp,
   Home,
   LogOut,
   MapPin,
+  MessageCircle,
   Menu,
+  Phone,
   Search,
   Twitter,
   Share2,
@@ -35,6 +38,9 @@ import {
 import { getAllOffers } from "../services/offerService";
 import { getAllRestaurants } from "../services/restaurantService";
 import { getVerticalService } from "../services/verticalServiceFactory";
+import { getAllVerticals } from "../services/verticalService";
+import type { Vertical as ApiVertical } from "../services/verticalService";
+import { getProviderById } from "../services/providerService";
 import { verticalConfig } from "../config/verticalConfig";
 import { marketplaceSpotlight } from "../config/marketplaceSpotlight";
 import { cuisineLists, ENABLE_RANDOM_SORT, ENABLE_SIGNUP, SHOW_DISCOUNTED_PRICE } from "../config/appConfig";
@@ -97,10 +103,15 @@ export function ModernMarketplaceFooter({ variant = "modern" }: { variant?: "mod
   return <footer className={`border-t text-slate-700 ${isV2 ? "border-[#ead9ca] bg-[#fff7e6]" : "border-slate-200 bg-[#f3f8fc]"}`}>
     <div className="mx-auto grid max-w-[1320px] gap-8 px-4 py-9 sm:px-6 sm:py-11 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:px-8">
       <div>
+        <div className="flex items-center gap-3 sm:block">
+        <Link to="/" aria-label="Browse Qatar home" className="mb-3 inline-flex shrink-0 items-center sm:hidden">
+          <img src="/logo.jpg" alt="Browse Qatar" className="size-12 shrink-0 rounded-full object-cover" />
+        </Link>
         <Link to="/" aria-label="Browse Qatar home" className="hidden items-center sm:inline-flex">
           <img src="/bqLogo.png" alt="Browse Qatar" className="h-11 w-auto object-contain" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} />
         </Link>
-        <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">Discover local deals, trusted services, and listings across Qatar.</p>
+        <p className="mt-0 min-w-0 flex-1 text-xs leading-5 text-slate-500 sm:mt-3 sm:max-w-sm sm:flex-none sm:text-sm sm:leading-6">Discover local deals, trusted services, and listings across Qatar.</p>
+        </div>
         <div className="mt-4 flex items-center gap-2">
           <a href="https://www.facebook.com/browseqatar" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Facebook" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-700"}`}><Facebook size={17} /></a>
           <a href="https://www.instagram.com/browseqatar/" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Instagram" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-pink-300 hover:text-pink-600"}`}><Instagram size={17} /></a>
@@ -147,23 +158,24 @@ type RefineField = {
   label: string;
   key: string;
   aliases: string[];
-  type: "text" | "select" | "range";
+  type: "text" | "select" | "range" | "multiselect";
   options?: string[];
   unit?: string;
+  group?: string;
 };
 
 const verticalRefineConfig: Record<string, { subcategories: string[]; fields: RefineField[]; secondaryField?: RefineField }> = {
   vehicles: {
     subcategories: ["Cars", "Motorcycles & Bikes", "Commercial Vehicles", "Spare Parts & Accessories", "Boats & Marine"],
     fields: [
-      { label: "Vehicle Type", key: "bodyType", aliases: ["bodyType", "vehicleType"], type: "select", options: ["Sedan", "SUV", "Coupe", "Hatchback", "Pickup", "Van"] },
-      { label: "Make", key: "make", aliases: ["make", "vehicleMake"], type: "text" },
-      { label: "Model", key: "model", aliases: ["model", "vehicleModel"], type: "text" },
-      { label: "Year", key: "year", aliases: ["year", "modelYear"], type: "range" },
-      { label: "KM", key: "km", aliases: ["km", "mileage", "kilometers", "odometer"], type: "range", unit: "km" },
-      { label: "Transmission", key: "transmission", aliases: ["transmission"], type: "select", options: ["Automatic", "Manual", "CVT", "Semi-Automatic"] },
-      { label: "Fuel", key: "fuel", aliases: ["fuel", "fuelType"], type: "select", options: ["Petrol", "Diesel", "Electric", "Hybrid"] },
-      { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR" },
+      { label: "Vehicle Type", key: "bodyType", aliases: ["bodyType", "vehicleType"], type: "select", options: ["Sedan", "SUV", "Coupe", "Hatchback", "Pickup", "Van"], group: "Cars" },
+      { label: "Make", key: "make", aliases: ["make", "vehicleMake"], type: "text", group: "Makes" },
+      { label: "Model", key: "model", aliases: ["model", "vehicleModel"], type: "text", group: "Model" },
+      { label: "Year", key: "year", aliases: ["year", "modelYear"], type: "range", group: "Vehicle" },
+      { label: "KM", key: "km", aliases: ["km", "mileage", "kilometers", "odometer"], type: "range", unit: "km", group: "Vehicle" },
+      { label: "Transmission", key: "transmission", aliases: ["transmission"], type: "select", options: ["Automatic", "Manual", "CVT", "Semi-Automatic"], group: "Performance" },
+      { label: "Fuel", key: "fuel", aliases: ["fuel", "fuelType"], type: "select", options: ["Petrol", "Diesel", "Electric", "Hybrid"], group: "Performance" },
+      { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR", group: "Price" },
     ],
   },
   accommodations: {
@@ -195,6 +207,46 @@ const verticalRefineConfig: Record<string, { subcategories: string[]; fields: Re
     ],
   },
 };
+
+function humanizeAttribute(key: string) {
+  return key.replace(/([A-Z])/g, " $1").replace(/[_-]/g, " ").replace(/^./, (value) => value.toUpperCase());
+}
+
+function buildRefineFields(vertical: string, metadata?: ApiVertical | null): RefineField[] {
+  const refineConfig = verticalRefineConfig[vertical];
+  const configured = [...(refineConfig?.fields || []), ...(refineConfig?.secondaryField ? [refineConfig.secondaryField] : [])];
+  const localAttributes = verticalConfig[vertical]?.additionalAttributes || [];
+  const remoteAttributes = metadata?.additionalAttributes || [];
+  const remoteFilters = metadata?.filters || [];
+  const attributeFields = [...localAttributes, ...remoteAttributes].map((attribute) => ({
+    label: attribute.label || humanizeAttribute(attribute.name),
+    key: attribute.name,
+    aliases: [attribute.name, ...(attribute.aliases || [])],
+    type: attribute.type === "select" ? "select" as const : attribute.type === "multiselect" ? "multiselect" as const : attribute.type === "number" || attribute.type === "range" ? "range" as const : "text" as const,
+    options: attribute.options,
+    unit: attribute.unit,
+    group: attribute.group || attribute.category || attribute.section || "Additional details",
+  }));
+  const filterFields = remoteFilters.map((filter) => ({
+    label: filter.label || humanizeAttribute(filter.key),
+    key: filter.key,
+    aliases: [filter.key, ...(filter.aliases || [])],
+    type: filter.type === "select" ? "select" as const : filter.type === "multiselect" ? "multiselect" as const : filter.type === "number" || filter.type === "range" ? "range" as const : "text" as const,
+    options: filter.options,
+    unit: filter.unit,
+    group: filter.group || filter.category || filter.section || "More filters",
+  }));
+  const fields = [...configured, ...attributeFields, ...filterFields];
+  const uniqueFields = new Map<string, RefineField>();
+  fields.forEach((field) => {
+    const aliases = new Set([field.key, ...field.aliases]);
+    const alreadyRepresented = Array.from(uniqueFields.values()).some((existing) =>
+      [existing.key, ...existing.aliases].some((alias) => aliases.has(alias))
+    );
+    if (!alreadyRepresented) uniqueFields.set(field.key, field);
+  });
+  return Array.from(uniqueFields.values());
+}
 
 function valueAtPath(record: ListingRecord, path: string): unknown {
   return path.split(".").reduce<unknown>((value, segment) => {
@@ -238,6 +290,30 @@ function locationOf(listing: ListingRecord) {
 
 function imageOf(listing: ListingRecord) {
   return listing.imageUrl || listing.images?.[0] || listing.thumbnail || "/bqLogo.jpg";
+}
+
+function imagesOf(listing: ListingRecord) {
+  const candidates = [
+    listing.imageUrl,
+    listing.thumbnail,
+    ...(Array.isArray(listing.galleryUrls) ? listing.galleryUrls : []),
+    ...(Array.isArray(listing.imageUrls) ? listing.imageUrls : []),
+    ...(Array.isArray(listing.images) ? listing.images : []),
+  ];
+  return Array.from(new Set(candidates.filter((url): url is string => typeof url === "string" && url.trim().length > 0)));
+}
+
+function listingAttributesOf(listing: ListingRecord) {
+  const attributes = listing.attributes && typeof listing.attributes === "object" && !Array.isArray(listing.attributes) ? listing.attributes : {};
+  const additionalAttributes = listing.additionalAttributes && typeof listing.additionalAttributes === "object" && !Array.isArray(listing.additionalAttributes) ? listing.additionalAttributes : {};
+  return { ...attributes, ...additionalAttributes };
+}
+
+function displayAttribute(value: unknown): string {
+  if (Array.isArray(value)) return value.map(displayAttribute).filter(Boolean).join(", ");
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (value === undefined || value === null) return "";
+  return String(value).trim();
 }
 
 async function loadRestaurantFeed() {
@@ -842,8 +918,10 @@ export function ModernMarketplaceSearchResults() {
   </div>;
 }
 
-function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFilters, setRefineFilters, selectCuisine, selectCategory, mobileDrawer = false, onClose, onApply, hasPendingChanges = false }: {
+function VerticalRefinePanel({ vertical, metadata, fields, cuisineFilter, categoryFilter, refineFilters, setRefineFilters, selectCuisine, selectCategory, mobileDrawer = false, onClose, onApply, hasPendingChanges = false }: {
   vertical: string;
+  metadata?: ApiVertical | null;
+  fields: RefineField[];
   cuisineFilter: string | null;
   categoryFilter: string | null;
   refineFilters: Record<string, string>;
@@ -856,7 +934,15 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
   hasPendingChanges?: boolean;
 }) {
   const refineConfig = verticalRefineConfig[vertical];
+  const refineFields = fields;
+  const subcategories = refineConfig?.subcategories || metadata?.subcategories || [];
+  const fieldGroups = Array.from(refineFields.reduce((groups, field) => {
+    const group = field.group || "More filters";
+    groups.set(group, [...(groups.get(group) || []), field]);
+    return groups;
+  }, new Map<string, RefineField[]>()));
   const autoCloseChoices = vertical === "restaurants" || vertical === "classifieds";
+  const [optionSearch, setOptionSearch] = useState<Record<string, string>>({});
   const updateFilter = (key: string, value: string) => {
     setRefineFilters((current) => {
       const next = { ...current };
@@ -877,6 +963,22 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
           <input type="number" inputMode="numeric" aria-label={`${field.label} maximum`} placeholder="Max" value={refineFilters[`${field.key}Max`] || ""} onChange={(event) => updateFilter(`${field.key}Max`, event.target.value)} className="min-w-0 rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15" />
         </div>
       </div>;
+    }
+    if (field.type === "multiselect") {
+      const selectedValues = (refineFilters[field.key] || "").split(",").filter(Boolean);
+      const visibleOptions = (field.options || []).filter((option) => option.toLowerCase().includes((optionSearch[field.key] || "").toLowerCase()));
+      return <fieldset key={field.key} className="space-y-2">
+        <legend className="block text-xs font-semibold text-[#6b5157]">{field.label}</legend>
+        {(field.options?.length || 0) > 5 && <input type="search" value={optionSearch[field.key] || ""} onChange={(event) => setOptionSearch((current) => ({ ...current, [field.key]: event.target.value }))} placeholder={`Search ${field.label.toLowerCase()}...`} aria-label={`Search ${field.label}`} className="w-full rounded-lg border border-[#e8c8c6] bg-white px-2.5 py-2 text-xs outline-none focus:border-[#941333]" />}
+        {visibleOptions.map((option) => <label key={option} className="flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" checked={selectedValues.includes(option)} onChange={(event) => {
+            const nextValues = event.target.checked ? [...selectedValues, option] : selectedValues.filter((value) => value !== option);
+            updateFilter(field.key, nextValues.join(","));
+            closeAfterChoice();
+          }} className="size-4 rounded border-[#d7aeb0] accent-[#941333]" />
+          {option}
+        </label>)}
+      </fieldset>;
     }
     return <label key={field.key} className="block space-y-1.5">
       <span className="block text-xs font-semibold text-[#6b5157]">{field.label}</span>
@@ -900,10 +1002,23 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
       {vertical === "restaurants" ? <>
         <div className="mt-5 flex items-center justify-between gap-2"><label className="text-sm font-semibold text-[#6b5157]">What's on your mind?</label>{cuisineFilter && <button type="button" onClick={() => { selectCuisine(null); closeAfterChoice(); }} className="text-xs font-semibold text-[#941333] hover:underline">Clear</button>}</div>
         <div className="mt-2 grid grid-cols-2 gap-1.5">{cuisineLists.map((cuisine) => <button key={cuisine.name} type="button" onClick={() => { selectCuisine(cuisine.name === cuisineFilter ? null : cuisine.name); closeAfterChoice(); }} aria-pressed={cuisineFilter === cuisine.name} className={`flex min-w-0 items-center gap-2 rounded-lg border px-2 py-2 text-left text-xs transition ${cuisineFilter === cuisine.name ? "border-[#941333] bg-[#fff0c7] font-semibold text-[#851432] shadow-sm" : "border-[#f1e4d6] bg-white/70 text-slate-600 hover:border-[#d7aeb0] hover:bg-[#fff1c9]"}`}><img src={cuisine.img} alt="" className="h-8 w-8 shrink-0 rounded-full bg-slate-100 object-contain" /><span className="truncate">{cuisine.name}</span></button>)}</div>
-      </> : refineConfig ? <div className="mt-5 space-y-4">
-        <label className="block space-y-1.5"><span className="block text-xs font-semibold text-[#6b5157]">Category</span><select value={refineFilters.subcategory || ""} onChange={(event) => { updateFilter("subcategory", event.target.value); closeAfterChoice(); }} className="w-full rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15"><option value="">All categories</option>{refineConfig.subcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}</select></label>
-        {refineConfig.secondaryField && renderField(refineConfig.secondaryField)}
-        {refineConfig.fields.map(renderField)}
+      </> : refineConfig || refineFields.length > 0 ? <div className="mt-5 space-y-2">
+        {subcategories.length > 0 && <details className="group rounded-xl border border-[#f1e4d6] bg-white/70">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-3 text-sm font-semibold text-[#50343b] [&::-webkit-details-marker]:hidden">
+            Category <ChevronDown size={16} className="text-[#941333] transition group-open:rotate-180" />
+          </summary>
+          <div className="border-t border-[#f1e4d6] p-3">
+            <select value={refineFilters.subcategory || ""} onChange={(event) => { updateFilter("subcategory", event.target.value); closeAfterChoice(); }} className="w-full rounded-lg border border-[#e8c8c6] bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15">
+              <option value="">All categories</option>{subcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
+            </select>
+          </div>
+        </details>}
+        {fieldGroups.map(([group, fields]) => <details key={group} className="group rounded-xl border border-[#f1e4d6] bg-white/70">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-3 text-sm font-semibold text-[#50343b] [&::-webkit-details-marker]:hidden">
+            {group} <ChevronDown size={16} className="text-[#941333] transition group-open:rotate-180" />
+          </summary>
+          <div className="space-y-4 border-t border-[#f1e4d6] p-3">{fields.map(renderField)}</div>
+        </details>)}
       </div> : <>
         <label className="mt-4 block text-sm font-semibold text-[#6b5157]">Category</label>
         <div className="mt-2 space-y-2">{vertical === "classifieds" ? <>
@@ -928,6 +1043,7 @@ function VerticalRefinePanel({ vertical, cuisineFilter, categoryFilter, refineFi
 export function ModernMarketplaceListing() {
   const { vertical = "vehicles" } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [verticalMetadata, setVerticalMetadata] = useState<ApiVertical | null>(null);
   const searchQuery = searchParams.get("search") || searchParams.get("q") || "";
   const [search, setSearch] = useState(searchQuery);
   const [sort, setSort] = useState("latest");
@@ -942,13 +1058,38 @@ export function ModernMarketplaceListing() {
   const restaurantFilter = searchParams.get("restaurant");
 
   useEffect(() => {
+    let active = true;
+    setVerticalMetadata(null);
+    getAllVerticals()
+      .then((items) => {
+        if (active) setVerticalMetadata(items.find((item) => item.id === vertical) || null);
+      })
+      .catch((error) => console.error("Could not load marketplace filter definitions:", error));
+    return () => { active = false; };
+  }, [vertical]);
+
+  useEffect(() => {
     setSort("latest");
     setSearch(searchQuery);
     setRefineFilters({});
     setDraftRefineFilters({});
   }, [vertical, searchQuery]);
 
-  const refineConfig = verticalRefineConfig[vertical];
+  const refineFields = useMemo(() => buildRefineFields(vertical, verticalMetadata).map((field) => {
+    const listingOptions = Array.from(new Set(listings.flatMap((item) => {
+      const value = getListingFieldValue(item, field.aliases);
+      const values = Array.isArray(value) ? value : [value];
+      return values.filter((option): option is string | number => typeof option === "string" || typeof option === "number").map(String);
+    }))).sort((a, b) => a.localeCompare(b));
+    const listingDrivenVehicleFilters = ["make", "model", "trim", "engineSize", "wheelDrive", "fuelType", "cylinders", "transmission", "color", "insideColor", "doors", "seats", "seatType"];
+    if (vertical === "vehicles" && listingDrivenVehicleFilters.includes(field.key) && listingOptions.length) {
+      return { ...field, type: "multiselect" as const, options: listingOptions };
+    }
+    if ((field.type === "select" || field.type === "multiselect") && !field.options?.length && listingOptions.length) {
+      return { ...field, options: listingOptions };
+    }
+    return field;
+  }), [listings, vertical, verticalMetadata]);
 
   const filtered = useMemo(() => {
     let rows = listings.filter((item) => {
@@ -961,8 +1102,7 @@ export function ModernMarketplaceListing() {
       const selectedSubcategory = refineFilters.subcategory;
       const itemSubcategory = getListingFieldValue(item, ["subcategory", "category"]);
       const matchesSubcategory = !selectedSubcategory || String(itemSubcategory || "").toLowerCase() === selectedSubcategory.toLowerCase();
-      const fields = [...(refineConfig?.fields || []), ...(refineConfig?.secondaryField ? [refineConfig.secondaryField] : [])];
-      const matchesAttributes = fields.every((field) => {
+      const matchesAttributes = refineFields.every((field) => {
         if (field.type === "range") {
           const min = numericValue(refineFilters[`${field.key}Min`]);
           const max = numericValue(refineFilters[`${field.key}Max`]);
@@ -973,6 +1113,11 @@ export function ModernMarketplaceListing() {
         const selected = refineFilters[field.key];
         if (!selected) return true;
         const actual = getListingFieldValue(item, field.aliases);
+        if (field.type === "multiselect") {
+          const selectedValues = selected.split(",").filter(Boolean);
+          const actualValues = Array.isArray(actual) ? actual.map(String) : String(actual ?? "").split(/[,|]/).map((value) => value.trim());
+          return selectedValues.every((value) => actualValues.some((actualValue) => actualValue.toLowerCase() === value.toLowerCase()));
+        }
         return String(actual ?? "").toLowerCase().includes(selected.toLowerCase());
       });
       return matchesSearch && matchesCategory && matchesCuisine && matchesRestaurant && matchesSubcategory && matchesAttributes;
@@ -993,7 +1138,7 @@ export function ModernMarketplaceListing() {
       rows = [...rows.slice(offset), ...rows.slice(0, offset)];
     }
     return rows;
-  }, [categoryFilter, cuisineFilter, listings, randomSeed, refineConfig, refineFilters, restaurantFilter, search, sort]);
+  }, [categoryFilter, cuisineFilter, listings, randomSeed, refineFields, refineFilters, restaurantFilter, search, sort]);
   const Icon = categoryIcons[vertical] || Building2;
 
   const selectCuisine = (cuisine: string | null) => {
@@ -1035,10 +1180,9 @@ export function ModernMarketplaceListing() {
     });
   }
   if (refineFilters.subcategory) activeFilterChips.push({ key: "subcategory", label: refineFilters.subcategory, clear: () => setRefineFilters((current) => ({ ...current, subcategory: "" })) });
-  const appliedFields = [...(refineConfig?.fields || []), ...(refineConfig?.secondaryField ? [refineConfig.secondaryField] : [])];
-  appliedFields.forEach((field) => {
+  refineFields.forEach((field) => {
     const value = refineFilters[field.key];
-    if (value) activeFilterChips.push({ key: field.key, label: value, clear: () => setRefineFilters((current) => ({ ...current, [field.key]: "" })) });
+    if (value) activeFilterChips.push({ key: field.key, label: `${field.label}: ${value.split(",").join(", ")}`, clear: () => setRefineFilters((current) => ({ ...current, [field.key]: "" })) });
     if (field.type === "range") {
       const minKey = `${field.key}Min`;
       const maxKey = `${field.key}Max`;
@@ -1084,9 +1228,9 @@ export function ModernMarketplaceListing() {
           <button type="button" onClick={clearAllAppliedFilters} className="shrink-0 px-1 py-0.5 text-[11px] font-semibold text-[#941333] hover:underline">Clear all</button>
         </div>}
       </div>
-      {filtersOpen && <VerticalRefinePanel vertical={vertical} cuisineFilter={cuisineFilter} categoryFilter={categoryFilter} refineFilters={autoApplyMobileFilters ? refineFilters : draftRefineFilters} setRefineFilters={autoApplyMobileFilters ? setRefineFilters : setDraftRefineFilters} selectCuisine={selectCuisine} selectCategory={selectCategory} mobileDrawer onClose={closeFilters} onApply={applyDraftFilters} hasPendingChanges={hasPendingFilterChanges} />}
+      {filtersOpen && <VerticalRefinePanel vertical={vertical} metadata={verticalMetadata} fields={refineFields} cuisineFilter={cuisineFilter} categoryFilter={categoryFilter} refineFilters={autoApplyMobileFilters ? refineFilters : draftRefineFilters} setRefineFilters={autoApplyMobileFilters ? setRefineFilters : setDraftRefineFilters} selectCuisine={selectCuisine} selectCategory={selectCategory} mobileDrawer onClose={closeFilters} onApply={applyDraftFilters} hasPendingChanges={hasPendingFilterChanges} />}
       <div className="grid gap-6 lg:grid-cols-[230px_minmax(0,1fr)]">
-        <VerticalRefinePanel vertical={vertical} cuisineFilter={cuisineFilter} categoryFilter={categoryFilter} refineFilters={refineFilters} setRefineFilters={setRefineFilters} selectCuisine={selectCuisine} selectCategory={selectCategory} />
+        <VerticalRefinePanel vertical={vertical} metadata={verticalMetadata} fields={refineFields} cuisineFilter={cuisineFilter} categoryFilter={categoryFilter} refineFilters={refineFilters} setRefineFilters={setRefineFilters} selectCuisine={selectCuisine} selectCategory={selectCategory} />
         <section>
           {loading ? <div className={vertical === "restaurants" ? "grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4" : "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4"}>{Array.from({ length: 8 }, (_, index) => <div key={index} className="aspect-[4/5] animate-pulse rounded-lg bg-slate-200" />)}</div> : filtered.length ? <div className={vertical === "restaurants" ? "grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4" : "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4"}>{filtered.map((item) => <ListingCard key={item.id} listing={item} vertical={vertical} />)}</div> : <div className="rounded-lg border border-slate-200 bg-white px-5 py-12 text-center"><Search className="mx-auto text-slate-300" size={32} /><h2 className="mt-3 font-bold">No listings found</h2><p className="mt-1 text-sm text-slate-500">Try another search or explore a different category.</p></div>}
         </section>
@@ -1101,18 +1245,21 @@ export function ModernMarketplaceDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const [listing, setListing] = useState<ListingRecord | null>(location.state?.listing || null);
+  const [provider, setProvider] = useState<ListingRecord | null>(null);
+  const [verticalMetadata, setVerticalMetadata] = useState<ApiVertical | null>(null);
   const [loading, setLoading] = useState(!location.state?.listing);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(0);
   const category = verticalConfig[vertical];
   const CategoryIcon = categoryIcons[vertical] || Building2;
 
   useEffect(() => {
+    let active = true;
     if (location.state?.listing) {
       setListing(location.state.listing);
       setLoading(false);
-      return;
+      return () => { active = false; };
     }
-    let active = true;
     async function load() {
       setLoading(true);
       try {
@@ -1120,7 +1267,8 @@ export function ModernMarketplaceDetail() {
         const found = await service.getById(id);
         const mock = (mockListings[vertical] || []).find((item) => String(item.id) === id);
         if (active) setListing(found || mock || null);
-      } catch {
+      } catch (error) {
+        console.error(`Could not load ${vertical} listing ${id}:`, error);
         if (active) setListing((mockListings[vertical] || []).find((item) => String(item.id) === id) || null);
       } finally {
         if (active) setLoading(false);
@@ -1130,17 +1278,158 @@ export function ModernMarketplaceDetail() {
     return () => { active = false; };
   }, [id, location.state, vertical]);
 
+  useEffect(() => {
+    setSelectedImage(0);
+    setProvider(null);
+    if (!listing) return;
+    const embeddedProvider = listing.provider && typeof listing.provider === "object" ? listing.provider as ListingRecord : null;
+    setProvider(embeddedProvider);
+    const providerId = String(listing.providerId || "");
+    if (!/^\d+$/.test(providerId)) return;
+    let active = true;
+    getProviderById(Number(providerId))
+      .then((result: ListingRecord) => { if (active) setProvider(result); })
+      .catch((error: unknown) => console.warn("Could not load listing seller contact details:", error));
+    return () => { active = false; };
+  }, [listing]);
+
+  useEffect(() => {
+    let active = true;
+    getAllVerticals()
+      .then((items) => { if (active) setVerticalMetadata(items.find((item) => item.id === vertical) || null); })
+      .catch((error) => console.error("Could not load listing attribute definitions:", error));
+    return () => { active = false; };
+  }, [vertical]);
+
   const amount = listing ? amountOf(listing) : null;
+  const images = listing ? imagesOf(listing) : [];
+  const attributes = listing ? listingAttributesOf(listing) : {};
+  const definitions = [
+    ...(verticalConfig[vertical]?.additionalAttributes || []),
+    ...(verticalMetadata?.additionalAttributes || []),
+  ];
+  const attributeLabels = new Map(definitions.map((attribute) => [attribute.name, attribute]));
+  const groupedAttributes = Object.entries(attributes).reduce((groups, [key, value]) => {
+    if (value === undefined || value === null || value === "") return groups;
+    const definition = attributeLabels.get(key);
+    const defaultGroup = ["make", "model", "trim", "year"].includes(key) ? "Vehicle"
+      : ["mileage", "engineSize", "wheelDrive", "fuelType", "cylinders", "transmission"].includes(key) ? "Performance"
+        : ["color", "insideColor", "doors", "seats", "seatType"].includes(key) ? "Style"
+          : ["convenience", "entertainment", "exteriorFeatures"].includes(key) ? "Features" : "Other details";
+    const group = definition?.group || defaultGroup;
+    groups.set(group, [...(groups.get(group) || []), { key, label: definition?.label || humanizeAttribute(key), value }]);
+    return groups;
+  }, new Map<string, Array<{ key: string; label: string; value: unknown }>>());
+  const primaryFields = vertical === "vehicles"
+    ? [
+      { key: "mileage", label: "Mileage", aliases: ["mileage", "km", "odometer"] },
+      { key: "fuelType", label: "Fuel", aliases: ["fuelType", "fuel"] },
+      { key: "engineSize", label: "Engine", aliases: ["engineSize", "engine"] },
+      { key: "cylinders", label: "Cylinders", aliases: ["cylinders", "cylinder"] },
+    ].map((field) => ({ ...field, value: field.aliases.map((key) => attributes[key]).find((value) => value !== undefined && value !== null && value !== "") }))
+      .filter((field) => field.value !== undefined)
+    : Object.entries(attributes).filter(([, value]) => value !== undefined && value !== null && value !== "").slice(0, 4)
+      .map(([key, value]) => ({ key, label: attributeLabels.get(key)?.label || humanizeAttribute(key), value }));
+  const phone = listing && [listing.contactPhone, listing.phone, listing.providerPhone, listing.contact?.phone, provider?.phone].find((value) => typeof value === "string" && value.trim()) as string | undefined;
+  const whatsapp = listing && [listing.whatsapp, listing.whatsApp, listing.whatsappNumber, listing.contact?.whatsapp, provider?.whatsapp, provider?.phone, phone].find((value) => typeof value === "string" && value.trim()) as string | undefined;
+  const whatsappDigits = whatsapp?.replace(/\D/g, "");
+  const formattedAmount = amount === null ? "" : numericValue(amount)?.toLocaleString() || String(amount);
+  const currency = listing?.pricing?.currency || listing?.currency || "QAR";
+
   return <div className="min-h-screen bg-[#fffdfa] text-[#30252a]">
     <MarketplaceHeader vertical={vertical} />
     <CategoryStrip active={vertical} />
     <CategoryJump />
-    <main className="mx-auto max-w-[1120px] px-4 py-5 sm:px-6 lg:px-8">
-      <button type="button" onClick={() => navigate(`/marketplace/${vertical}`)} className="mb-5 inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-[#6b5157] transition hover:bg-[#fff1c9] hover:text-[#941333]"><ArrowLeft size={18} /> Back to {category?.name || "listings"}</button>
-      {loading ? <div className="grid gap-6 rounded-lg bg-white p-5 md:grid-cols-2"><div className="aspect-[4/3] animate-pulse rounded bg-slate-200" /><div className="h-64 animate-pulse rounded bg-slate-100" /></div> : listing ? <div className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(300px,0.7fr)]">
+    <main className="mx-auto max-w-[1320px] px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <button type="button" onClick={() => navigate(`/marketplace/${vertical}`)} className="mb-3 inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-[#6b5157] transition hover:bg-[#fff1c9] hover:text-[#941333]"><ArrowLeft size={18} /> Back to {category?.name || "listings"}</button>
+      {loading ? <div className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(300px,0.7fr)]"><div className="aspect-[16/10] animate-pulse rounded-2xl bg-slate-200" /><div className="h-80 animate-pulse rounded-2xl bg-slate-100" /></div> : listing ? vertical === "restaurants" ? <div className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(300px,0.7fr)]">
         <section className="overflow-hidden rounded-xl border border-[#ead9ca] bg-[#fffdfa] shadow-sm"><div className="aspect-[4/3] bg-[#fff7e6]"><img src={imageOf(listing)} alt={listing.title || "Listing"} className="h-full w-full object-cover" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} /></div><div className="flex items-center justify-between border-t border-[#ead9ca] px-4 py-3 text-sm text-[#6b5157]"><span className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff0c7] text-[#941333]"><CategoryIcon size={17} /></span>{category?.name || vertical}</span><button type="button" className="inline-flex items-center gap-2 rounded-md px-2 py-1 hover:bg-[#fff1c9]"><Share2 size={16} /> Share</button></div></section>
-        <aside className="h-fit rounded-xl border border-[#ead9ca] bg-[#fffdfa] p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-[#941333]">{listing.category || category?.name}</p><h1 className="mt-2 text-2xl font-bold leading-tight text-[#30252a]">{listing.title || "Listing details"}</h1>{amount !== null && <p className="mt-4 text-3xl font-bold text-[#851432]">{listing.pricing?.currency || "QAR"} {Number(amount).toLocaleString()}</p>}<p className="mt-3 flex items-center gap-2 text-sm text-[#806d70]"><MapPin size={16} />{locationOf(listing)}</p><div className="mt-5 border-t border-[#ead9ca] pt-4"><h2 className="font-bold text-[#30252a]">Description</h2><p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{listing.description || "Contact the seller for more information about this listing."}</p></div><button type="button" onClick={() => setEnquiryOpen(true)} className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#941333] px-4 py-3 font-bold text-white transition hover:bg-[#6f1028]"><Tag size={17} /> Contact seller</button><p className="mt-3 text-center text-xs text-[#806d70]">Browse Qatar marketplace</p></aside>
-      </div> : <div className="rounded-lg border border-slate-200 bg-white px-5 py-12 text-center"><h1 className="text-xl font-bold">Listing not found</h1><p className="mt-2 text-sm text-slate-500">This listing may have been removed or is temporarily unavailable.</p><button type="button" onClick={() => navigate(`/marketplace/${vertical}`)} className="mt-5 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"><ArrowLeft size={16} /> Browse category</button></div>}
+        <aside className="h-fit rounded-xl border border-[#ead9ca] bg-[#fffdfa] p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-[#941333]">{listing.category || category?.name}</p><h1 className="mt-2 text-2xl font-bold leading-tight text-[#30252a]">{listing.title || "Listing details"}</h1>{amount !== null && <p className="mt-4 text-3xl font-bold text-[#851432]">{currency} {formattedAmount}</p>}<p className="mt-3 flex items-center gap-2 text-sm text-[#806d70]"><MapPin size={16} />{locationOf(listing)}</p><div className="mt-5 border-t border-[#ead9ca] pt-4"><h2 className="font-bold text-[#30252a]">Description</h2><p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{listing.description || "Contact the seller for more information about this listing."}</p></div><button type="button" onClick={() => setEnquiryOpen(true)} className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#941333] px-4 py-3 font-bold text-white transition hover:bg-[#6f1028]"><Tag size={17} /> Contact seller</button><p className="mt-3 text-center text-xs text-[#806d70]">Browse Qatar marketplace</p></aside>
+      </div> : <div className="space-y-5">
+        <section className="relative isolate flex h-24 items-center overflow-hidden rounded-2xl border border-[#ead9ca] bg-[#341a24] shadow-sm sm:h-32">
+          <img src={category?.featuredImage || categoryImages[vertical] || imageOf(listing)} alt="" className="absolute inset-0 -z-20 size-full object-cover opacity-70" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#35121f]/95 via-[#581c31]/75 to-transparent" />
+          <div className="w-full overflow-hidden px-5 py-3 sm:px-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffe0a2] sm:text-xs">Browse Qatar spotlight · Sponsored</p>
+            <div className="mt-1 whitespace-nowrap text-lg font-black text-white sm:text-2xl">
+              <span className="inline-block animate-marquee">Discover trusted {vertical === "vehicles" ? "cars and vehicles" : (category?.name || "local listings").toLowerCase()} across Qatar&nbsp; · &nbsp;Find your next great deal&nbsp; · &nbsp;</span>
+            </div>
+          </div>
+          <span className="absolute bottom-2 right-3 rounded-full border border-white/40 bg-black/20 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wide text-white/90 sm:right-5 sm:text-[10px]">Ad placement</span>
+        </section>
+
+        <div className="border-b border-[#ead9ca] pb-4">
+          <div className="flex items-center gap-2 text-xs text-[#806d70]"><Link to="/" className="hover:text-[#941333]">Home</Link><span>/</span><Link to={`/marketplace/${vertical}`} className="hover:text-[#941333]">{category?.name || vertical}</Link><span>/</span><span className="truncate text-slate-500">Listing #{listing.id}</span></div>
+          <div className="mt-3 flex items-start gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#fff0c7] text-[#941333] sm:size-12"><CategoryIcon size={22} /></span>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#941333]">{listing.category || listing.subcategory || category?.name}</p>
+              <h1 className="mt-1 text-xl font-black leading-tight text-[#30252a] sm:text-3xl">{listing.title || "Listing details"}</h1>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {primaryFields.map((field) => <span key={field.key} className="inline-flex items-center gap-1 rounded-full border border-[#d7aeb0] bg-[#fff7e6] px-2.5 py-1 text-[11px] font-semibold text-[#6b333e] sm:text-xs"><Check size={12} className="text-[#941333]" />{field.label}: {displayAttribute(field.value)}</span>)}
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#d7aeb0] bg-[#fff7e6] px-2.5 py-1 text-[11px] font-semibold text-[#6b333e] sm:text-xs"><MapPin size={12} className="text-[#941333]" />{locationOf(listing)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.75fr)] lg:gap-6">
+          <div className="space-y-5">
+            <section className="overflow-hidden rounded-2xl border border-[#ead9ca] bg-white shadow-sm">
+              <div className="relative aspect-[4/3] bg-[#f2e9e5] sm:aspect-[16/10]">
+                {images.length > 0 ? <img src={images[selectedImage] || images[0]} alt={`${listing.title || "Listing"} photo ${selectedImage + 1}`} className="size-full object-contain" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} /> : <div className="grid size-full place-items-center text-[#806d70]"><CategoryIcon size={48} /><span className="mt-2 text-sm">No photos added yet</span></div>}
+                {listing.promoted || listing.isPromoted || listing.featured ? <span className="absolute left-3 top-3 rounded-md bg-[#941333] px-2.5 py-1 text-xs font-bold text-white shadow">Promoted</span> : null}
+                {images.length > 1 && <>
+                  <button type="button" onClick={() => setSelectedImage((index) => (index - 1 + images.length) % images.length)} aria-label="Previous photo" className="absolute left-3 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#851432] shadow hover:bg-white"><ArrowLeft size={18} /></button>
+                  <button type="button" onClick={() => setSelectedImage((index) => (index + 1) % images.length)} aria-label="Next photo" className="absolute right-3 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#851432] shadow hover:bg-white"><ArrowRight size={18} /></button>
+                  <span className="absolute bottom-3 right-3 rounded-full bg-black/65 px-2.5 py-1 text-xs font-semibold text-white">{selectedImage + 1} / {images.length}</span>
+                </>}
+              </div>
+              {images.length > 1 && <div className="flex gap-2 overflow-x-auto border-t border-[#f1e4d6] p-3">
+                {images.map((url, index) => <button key={`${url}-${index}`} type="button" onClick={() => setSelectedImage(index)} aria-label={`View photo ${index + 1}`} aria-pressed={selectedImage === index} className={`size-[76px] shrink-0 overflow-hidden rounded-lg border-2 transition sm:size-20 ${selectedImage === index ? "border-[#941333] shadow" : "border-transparent opacity-75 hover:opacity-100"}`}><img src={url} alt="" className="size-full object-cover" /></button>)}
+              </div>}
+              <div className="flex items-center justify-between border-t border-[#ead9ca] px-4 py-3 text-xs text-[#6b5157]"><span className="flex items-center gap-2"><Camera size={15} className="text-[#941333]" />{images.length} photos</span><span>Listing ID #{listing.id}</span></div>
+            </section>
+
+            {groupedAttributes.size > 0 && <div className="space-y-4">
+              {Array.from(groupedAttributes).map(([group, values]) => <section key={group} className="overflow-hidden rounded-2xl border border-[#ead9ca] bg-white shadow-sm">
+                <h2 className="border-b border-[#f1e4d6] bg-gradient-to-r from-[#fff7e6] to-white px-4 py-3 text-base font-bold text-[#50343b] sm:px-5">{group === "Vehicle" ? "Basic details" : group}</h2>
+                <dl className="divide-y divide-[#f1e4d6] px-4 sm:px-5">
+                  {values.map((attribute) => <div key={attribute.key} className="flex flex-col gap-1 py-3 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-5">
+                    <dt className="font-medium text-[#806d70]">{attribute.label}</dt>
+                    <dd className="max-w-[65%] text-left font-semibold text-[#30252a] sm:text-right">
+                      {["convenience", "entertainment", "exteriorFeatures"].includes(attribute.key) ? <span className="flex flex-wrap gap-1.5 sm:justify-end">{displayAttribute(attribute.value).split(/[,|\n]/).map((feature) => feature.trim()).filter(Boolean).map((feature) => <span key={feature} className="rounded-full bg-[#fff1c9] px-2.5 py-1 text-xs text-[#6b333e]">{feature}</span>)}</span> : displayAttribute(attribute.value)}
+                    </dd>
+                  </div>)}
+                </dl>
+              </section>)}
+            </div>}
+          </div>
+
+          <aside className="space-y-4 lg:sticky lg:top-24">
+            <section className="rounded-2xl border border-[#ead9ca] bg-white p-5 shadow-[0_8px_24px_rgba(111,16,40,0.08)] sm:p-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#941333]">{listing.category || listing.subcategory || category?.name}</p>
+              <h2 className="mt-2 text-xl font-bold leading-snug text-[#30252a]">{listing.title || "Listing details"}</h2>
+              <p className="mt-2 flex items-center gap-2 text-sm text-[#806d70]"><MapPin size={16} className="shrink-0 text-[#941333]" />{locationOf(listing)}</p>
+              <div className="mt-4 rounded-xl bg-gradient-to-r from-[#fff7e6] to-[#fff0c7] p-4">
+                <p className="text-xs font-medium text-[#806d70]">Price</p>
+                <p className="mt-1 text-3xl font-black text-[#851432]">{amount !== null ? `${currency} ${formattedAmount}` : "Contact for price"}</p>
+                {listing.pricing?.unit && <p className="mt-1 text-xs text-[#806d70]">Per {listing.pricing.unit}</p>}
+              </div>
+              <div className="mt-4 grid gap-2">
+                {phone ? <a href={`tel:${phone}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#941333] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#6f1028]"><Phone size={17} />Call seller</a> : <button type="button" onClick={() => setEnquiryOpen(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#941333] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#6f1028]"><Phone size={17} />Request a call</button>}
+                {whatsappDigits ? <a href={`https://wa.me/${whatsappDigits}`} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#19a567] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#138552]"><MessageCircle size={18} />WhatsApp seller</a> : <button type="button" onClick={() => setEnquiryOpen(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#b8e4ce] bg-[#effaf4] px-4 py-3 text-sm font-bold text-[#137246] transition hover:bg-[#e2f5ea]"><MessageCircle size={18} />Contact seller</button>}
+              </div>
+              {phone && <p className="mt-3 text-center text-xs text-[#806d70]">Seller contact: {phone}</p>}
+              <div className="mt-5 border-t border-[#f1e4d6] pt-4">
+                <h3 className="text-sm font-bold text-[#30252a]">Description</h3>
+                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#66565a]">{listing.description || "Contact the seller for more information about this listing."}</p>
+              </div>
+              <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-[#806d70]"><ShieldCheck size={14} className="text-[#941333]" /> Browse Qatar local listing</p>
+            </section>
+          </aside>
+        </div>
+      </div> : <div className="rounded-2xl border border-slate-200 bg-white px-5 py-12 text-center"><h1 className="text-xl font-bold">Listing not found</h1><p className="mt-2 text-sm text-slate-500">This listing may have been removed or is temporarily unavailable.</p><button type="button" onClick={() => navigate(`/marketplace/${vertical}`)} className="mt-5 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"><ArrowLeft size={16} /> Browse category</button></div>}
     </main>
     {listing && <ListingEnquiryPopup open={enquiryOpen} onClose={() => setEnquiryOpen(false)} listingId={listing.id ?? id} adTitle={listing.title || "this listing"} />}
     <ModernMarketplaceFooter variant="v2" />

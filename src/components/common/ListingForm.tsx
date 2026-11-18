@@ -1,6 +1,7 @@
 import { getAllVerticals, Vertical } from "../../services/verticalService";
 import React,{useState, useEffect} from "react";
 import { countryMap, REQUIRE_API_KEY_FOR_ADS } from "../../config/appConfig";
+import { verticalConfig } from "../../config/verticalConfig";
 
 interface ListingFormProps {
   listingForm: any;
@@ -45,6 +46,17 @@ export default function ListingForm({
   }, []);
 
   const activeVertical = verticals.find((vertical) => vertical.id === listingForm.verticalId);
+  const configuredAttributes = verticalConfig[listingForm.verticalId]?.additionalAttributes || [];
+  const attributeDefinitions = Array.from(
+    new Map(
+      [...configuredAttributes, ...(activeVertical?.additionalAttributes || [])].map((attribute) => [attribute.name, attribute])
+    ).values()
+  );
+  const groupedAttributeDefinitions = Array.from(attributeDefinitions.reduce((groups, attribute) => {
+    const group = attribute.group || attribute.category || attribute.section || "Additional details";
+    groups.set(group, [...(groups.get(group) || []), attribute]);
+    return groups;
+  }, new Map<string, typeof attributeDefinitions>()));
 
   useEffect(() => {
     if (!isEdit && activeVertical && !listingForm.category) {
@@ -297,11 +309,18 @@ export default function ListingForm({
       </div>
 
       {/* Dynamic Attributes Based on Vertical */}
-      {activeVertical?.additionalAttributes && activeVertical.additionalAttributes.length > 0 && (
-          <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-            {activeVertical.additionalAttributes.map((attr: any) => {
+      {attributeDefinitions.length > 0 && (
+          <div className="md:col-span-2 lg:col-span-3 space-y-4 rounded-lg border border-gray-100 bg-gray-50 p-4">
+            <div>
+              <h3 className="text-sm font-bold text-gray-700">Additional details <span className="ml-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">Optional</span></h3>
+              <p className="mt-1 text-xs text-gray-500">Add specifications to help people find and compare this listing.</p>
+            </div>
+            {groupedAttributeDefinitions.map(([group, attributes]) => <section key={group} className="space-y-3">
+              <h4 className="border-b border-gray-200 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500">{group}</h4>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {attributes.map((attr) => {
               const value = listingForm.attributes?.[attr.name] ?? "";
-              const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+              const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
                 const nextValue = attr.type === "number" && event.target.value !== ""
                   ? Number(event.target.value)
                   : event.target.value;
@@ -325,8 +344,17 @@ export default function ListingForm({
                         <option key={opt} value={opt}>
                           {opt}
                         </option>
-                      ))}
+                        ))}
                     </select>
+                  ) : attr.type === "textarea" ? (
+                    <textarea
+                        value={value}
+                        onChange={handleChange}
+                        required={attr.required}
+                        rows={3}
+                        placeholder={`Enter ${attr.label.toLowerCase()} (comma-separated)`}
+                        className="w-full resize-y rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   ) : (
                     <input
                       type={attr.type === "number" ? "number" : "text"}
@@ -340,6 +368,8 @@ export default function ListingForm({
                 </div>
               );
             })}
+              </div>
+            </section>)}
           </div>
       )}
 

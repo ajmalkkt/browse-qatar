@@ -11,8 +11,8 @@ export interface Vertical {
   providerTypes: string[];
   subcategories?: string[];
   industries?: string[];
-  filters?: Array<{ key: string; label: string; type: string; options?: string[]; unit?: string }>;
-  additionalAttributes?: any[];
+  filters?: Array<{ key: string; label: string; type: string; options?: string[]; unit?: string; group?: string; category?: string; section?: string; aliases?: string[] }>;
+  additionalAttributes?: Array<{ name: string; label: string; type: string; options?: string[]; unit?: string; group?: string; category?: string; section?: string; aliases?: string[]; required?: boolean }>;
 }
 
 export const getAllVerticals = async (): Promise<Vertical[]> => {
