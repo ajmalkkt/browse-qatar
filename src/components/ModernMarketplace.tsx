@@ -7,6 +7,8 @@ import {
   Building2,
   CarFront,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Facebook,
   Heart,
   Instagram,
@@ -497,21 +499,30 @@ export function MarketplaceHeader({ search, onSearch, vertical }: { search?: str
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-[#ead9ca] bg-[#fffdfa]/95 backdrop-blur-md">
-        <div ref={menuRef} className="relative mx-auto flex max-w-[1320px] items-center gap-1 px-4 sm:gap-3 sm:px-6 sm:py-3 lg:gap-5 lg:px-8">
-          <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[#ead9ca] text-[#941333] lg:hidden" aria-label="Open marketplace menu" aria-expanded={menuOpen}><Menu size={19} /></button>
-          <Link to="/" className="flex shrink-0 items-center" aria-label="Browse Qatar home"><img src="/bqLogo.jpg" alt="Browse Qatar" className="h-auto w-[76px] object-contain min-[390px]:w-[96px] sm:w-[150px] lg:w-[180px]" /></Link>
-          <button type="button" className="hidden h-11 min-w-[170px] items-center gap-2 rounded-lg border border-[#e8c8c6] px-3 text-left text-sm text-[#30252a] md:flex"><MapPin size={18} className="shrink-0 text-[#941333]" /><span className="truncate">Doha, Qatar</span><ChevronDown size={16} className="ml-auto shrink-0 text-[#806d70]" /></button>
-          <form className="flex h-8 min-w-[56px] flex-1 items-center gap-1 overflow-hidden rounded-full border border-[#e8c8c6] bg-white px-1.5 shadow-[0_2px_10px_rgba(102,30,44,0.04)] focus-within:border-[#941333] sm:h-11 sm:min-w-[120px] sm:gap-2.5 sm:rounded-lg sm:border-2 sm:px-3.5 lg:ml-auto lg:max-w-[460px] lg:px-5" onSubmit={(event) => event.preventDefault()}>
+      <header className="sticky top-0 z-40 w-full border-b border-[#ead9ca] bg-[#fffdfa]/95 px-4 pt-2 backdrop-blur-md sm:px-6 sm:pt-3 lg:px-10 lg:pt-4">
+        <div ref={menuRef} className="relative flex flex-nowrap items-center gap-1 sm:gap-3 lg:gap-5">
+          <details className="group relative shrink-0 lg:hidden">
+            <summary aria-label="Toggle category navigation" className="grid size-9 cursor-pointer list-none place-items-center rounded-xl bg-[#fff1c9] text-[#941333] transition hover:bg-[#fbe7b2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#941333] sm:size-11 [&::-webkit-details-marker]:hidden">
+              <Menu className="size-5 sm:size-6" aria-hidden="true" />
+            </summary>
+            <nav aria-label="Main navigation" className="absolute left-0 top-[calc(100%+0.75rem)] z-50 flex w-56 flex-col gap-1 rounded-2xl border border-[#f1e4d6] bg-white p-3 shadow-lg">
+              <Link to="/" onClick={(event) => event.currentTarget.closest("details")?.removeAttribute("open")} className="rounded-full bg-[#fff5dc] px-4 py-2 text-sm font-semibold text-[#7e1831] transition hover:bg-[#f9e8c3]">Home</Link>
+              {categories.map((category) => <Link key={category.id} to={`/marketplace/${category.id}`} onClick={(event) => event.currentTarget.closest("details")?.removeAttribute("open")} className="rounded-full bg-[#fff5dc] px-4 py-2 text-sm font-semibold text-[#7e1831] transition hover:bg-[#f9e8c3]">{category.id === "classifieds" ? "Classifieds" : category.name.replace(/ Buy & Sell| Deal/, "")}</Link>)}
+            </nav>
+          </details>
+          <Link to="/" className="flex min-w-0 shrink-0 items-center" aria-label="Browse Qatar home"><img src="/bqLogo.jpg" alt="Browse Qatar" className="h-auto w-[76px] object-contain min-[390px]:w-[96px] sm:w-[150px] lg:w-[180px]" /></Link>
+          <form className="flex h-8 min-w-[56px] flex-1 items-center gap-1 overflow-hidden rounded-full border border-[#e8c8c6] bg-white px-1.5 shadow-[0_2px_10px_rgba(102,30,44,0.04)] focus-within:border-[#941333] sm:h-11 sm:min-w-[120px] sm:gap-2.5 sm:rounded-lg sm:border-2 sm:py-0 sm:pl-3.5 sm:pr-0 lg:ml-auto lg:max-w-[460px]" onSubmit={(event) => event.preventDefault()}>
             <Search size={14} className="ml-0.5 shrink-0 text-[#941333] sm:ml-0 sm:size-[19px]" />
-            <input value={search || ""} onChange={(event) => onSearch?.(event.target.value)} placeholder={vertical ? `Search ${verticalConfig[vertical]?.name || "listings"}` : "Search cars, offers, homes and more"} className="h-full min-w-0 flex-1 border-0 bg-transparent px-1 text-xs text-[#30252a] outline-none placeholder:text-[#8b7b7f] sm:px-3 sm:text-sm" />
-            <button type="submit" className="hidden h-full items-center gap-2 bg-[#941333] px-4 text-sm font-semibold text-white transition hover:bg-[#6f1028] sm:flex"><Search size={16} /> Search</button>
+            <input value={search || ""} onChange={(event) => onSearch?.(event.target.value)} placeholder={vertical ? `Search ${verticalConfig[vertical]?.name || "listings"}` : "Search cars, offers, homes and more"} className="h-full min-w-0 flex-1 border-0 bg-transparent px-1 text-xs text-[#30252a] outline-none placeholder:text-[#8b7b7f] sm:px-3 sm:pr-2 sm:text-sm" />
+            <button type="submit" className="hidden h-full shrink-0 items-center gap-2 bg-[#941333] px-4 text-sm font-semibold text-white transition hover:bg-[#6f1028] sm:flex"><Search size={16} /> Search</button>
           </form>
+          <div className="ml-auto flex shrink-0 items-center gap-0 text-[#8c1534] sm:gap-1.5 lg:gap-4">
           <MarketplacePostAction className="inline-flex h-7 shrink-0 items-center gap-0.5 rounded-full border-2 border-[#941333] px-2.5 text-[10px] font-extrabold text-[#941333] shadow-sm transition hover:bg-[#fff0c7] min-[390px]:px-3 min-[390px]:text-[11px] sm:h-11 sm:gap-2 sm:px-4 sm:text-sm"><span className="text-sm leading-none sm:text-lg">+</span> SELL</MarketplacePostAction>
-          <Link to="/favourites" className="grid size-6 shrink-0 place-items-center rounded-full text-[#6b5157] transition hover:bg-[#fff1c9] sm:rounded-lg sm:size-10" aria-label="Favorites"><Heart size={18} className="sm:size-5" /></Link>
-          <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#6b5157] transition hover:bg-[#fff1c9] sm:h-10 sm:w-10" aria-label={auth.user ? "Open account menu" : "Open login menu"} aria-expanded={menuOpen}>
+          <Link to="/favourites" className="grid size-8 shrink-0 place-items-center rounded-full text-[#6b5157] transition hover:bg-[#fff1c9] sm:rounded-lg sm:size-10" aria-label="Favorites"><Heart size={18} className="sm:size-5" /></Link>
+          <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[#6b5157] transition hover:bg-[#fff1c9] sm:rounded-lg sm:h-10 sm:w-10" aria-label={auth.user ? "Open account menu" : "Open login menu"} aria-expanded={menuOpen}>
             <CircleUserRound size={20} className={auth.user ? "text-[#941333]" : ""} />
           </button>
+          </div>
           {menuOpen && <div className="absolute right-2 top-full z-50 mt-2 max-h-[calc(100dvh-4.5rem)] w-[min(360px,calc(100vw-1rem))] overflow-y-auto rounded-xl border border-[#ead9ca] bg-[#fffdfa] shadow-xl sm:right-6 lg:right-8">
             <div className="flex items-center gap-3 border-b border-[#f1e4d6] bg-[#fff7e6] px-4 py-4">
               <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-[#fff0c7] text-[#941333]">{auth.user?.photoURL ? <img src={auth.user.photoURL} alt="" className="h-full w-full object-cover" /> : <CircleUserRound size={28} />}</span>
@@ -530,6 +541,7 @@ export function MarketplaceHeader({ search, onSearch, vertical }: { search?: str
             </div>
             <div className="border-t border-slate-100 p-2">
               <Link to="/about" onClick={() => setMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">About Us</Link>
+              <Link to="/" onClick={() => setMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]">Back to Home</Link>
               {auth.user && <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-700"><LogOut size={18} />Log out</button>}
             </div>
           </div>}
@@ -661,6 +673,16 @@ function ListingCard({ listing, vertical }: { listing: ListingRecord; vertical: 
 
 export function CategoryStrip({ active }: { active?: string }) {
   const [spotlightIndex, setSpotlightIndex] = useState(0);
+  const categoryNavRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollIndicators = () => {
+    const nav = categoryNavRef.current;
+    if (!nav) return;
+    setCanScrollLeft(nav.scrollLeft > 2);
+    setCanScrollRight(nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
+  };
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -669,19 +691,46 @@ export function CategoryStrip({ active }: { active?: string }) {
     return () => window.clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const nav = categoryNavRef.current;
+    if (!nav) return;
+    updateScrollIndicators();
+    const resizeObserver = new ResizeObserver(updateScrollIndicators);
+    resizeObserver.observe(nav);
+    window.addEventListener("resize", updateScrollIndicators);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateScrollIndicators);
+    };
+  }, []);
+
+  const scrollCategories = (direction: "left" | "right") => {
+    categoryNavRef.current?.scrollBy({ left: direction === "left" ? -180 : 180, behavior: "smooth" });
+  };
+
   const spotlight = marketplaceSpotlight[spotlightIndex];
 
   return (
     <nav id="marketplace-categories" aria-label="Marketplace categories" className="border-b border-[#ead9ca] bg-[#fffdfa]">
-      <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 gap-2 overflow-x-auto py-2 sm:gap-3 sm:py-4 lg:gap-4">
+      <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-3 px-4 sm:gap-6 sm:px-6 lg:px-8">
+        <div className="group/category-scroll relative min-w-0 flex-1">
+        <div ref={categoryNavRef} onScroll={updateScrollIndicators} className="flex min-w-0 gap-2 overflow-x-auto py-2 pr-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-3 sm:overflow-visible sm:py-4 sm:pr-0 lg:gap-4">
           {categories.map((category) => {
             const Icon = categoryIcons[category.id] || Building2;
-            return <Link key={category.id} to={`/marketplace/${category.id}`} className={`flex w-[84px] shrink-0 flex-col items-center gap-1.5 rounded-xl p-1 text-center transition hover:bg-[#fff7e6] sm:w-[92px] sm:gap-2 sm:p-2 ${active === category.id ? "bg-[#fff1c9] text-[#941333]" : "text-[#5d4c50]"}`}>
-              <span className={`grid h-11 w-11 place-items-center rounded-xl sm:h-14 sm:w-14 ${active === category.id ? "bg-[#941333] text-white shadow-md shadow-[#941333]/20" : "bg-[#fff0c7] text-[#941333]"}`}><Icon size={22} aria-hidden="true" /></span>
-              <span className="line-clamp-2 text-xs font-semibold leading-4">{category.id === "classifieds" ? "Classifieds" : category.name.replace(/ Buy & Sell| Deal/, "")}</span>
+            return <Link key={category.id} to={`/marketplace/${category.id}`} className={`flex min-w-[76px] shrink-0 flex-col items-center gap-1 rounded-xl px-1.5 py-1 text-center text-[11px] font-semibold transition hover:bg-[#fff7e6] sm:min-w-0 sm:gap-1.5 sm:text-sm ${active === category.id ? "text-[#941333]" : "text-[#5d4c50]"}`}>
+              <span className="grid size-10 place-items-center rounded-full bg-[#fff0c7] text-[#941333] sm:size-14"><Icon className="size-5 sm:size-7" strokeWidth={2.6} aria-hidden="true" /></span>
+              <span>{category.id === "classifieds" ? "Classifieds" : category.name.replace(/ Buy & Sell| Deal/, "")}</span>
             </Link>;
           })}
+        </div>
+        {canScrollLeft && <>
+          <span className="pointer-events-none absolute bottom-1 left-0 top-0 w-12 bg-gradient-to-r from-[#fffdfa] via-[#fffdfa]/90 to-transparent sm:hidden" aria-hidden="true" />
+          <button type="button" onClick={() => scrollCategories("left")} aria-label="Scroll categories left" title="Previous categories" className="absolute left-1 top-1/2 z-10 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[#ead9ca] bg-white/95 text-[#941333] shadow-sm transition hover:bg-[#fff1c9] sm:hidden"><ChevronLeft size={18} /></button>
+        </>}
+        {canScrollRight && <>
+          <span className="pointer-events-none absolute bottom-1 right-0 top-0 w-12 bg-gradient-to-l from-[#fffdfa] via-[#fffdfa]/90 to-transparent sm:hidden" aria-hidden="true" />
+          <button type="button" onClick={() => scrollCategories("right")} aria-label="Scroll categories right" title="More categories" className="absolute right-1 top-1/2 z-10 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[#ead9ca] bg-white/95 text-[#941333] shadow-sm transition hover:bg-[#fff1c9] sm:hidden"><ChevronRight size={18} /></button>
+        </>}
         </div>
         <Link key={spotlight.title} to={`/marketplace/${spotlight.vertical}?category=${encodeURIComponent(spotlight.category)}`} className="group hidden h-[82px] w-[340px] shrink-0 items-center gap-3 overflow-hidden rounded-xl border border-[#e8c8c6] bg-[#fff7e6] p-2 transition hover:border-[#941333] hover:bg-[#fff1c9] lg:flex xl:w-[390px]">
           <img src={spotlight.image} alt="" className="h-full w-[96px] shrink-0 rounded-md object-cover" />
