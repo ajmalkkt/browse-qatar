@@ -158,7 +158,7 @@ function MarketplaceCampaignSlot({ vertical, placement = "desktop" }: { vertical
 
   const triggerClassName = placement === "mobile"
       ? "inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2 py-1.5 text-[10px] font-bold text-green-800 transition hover:border-green-400 hover:bg-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
-      : "flex h-[76px] min-w-0 w-full max-w-[620px] items-center gap-4 overflow-hidden rounded-xl border border-green-200 bg-gradient-to-r from-[#f0fdf4] via-[#f7fff7] to-[#dcfce7] px-5 text-left shadow-sm transition hover:border-green-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2";
+      : "flex h-[58px] min-w-0 w-full items-center gap-3 overflow-hidden rounded-xl border border-green-200 bg-gradient-to-r from-[#f0fdf4] via-[#f7fff7] to-[#dcfce7] px-4 text-left shadow-sm transition hover:border-green-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2";
   const trigger = campaign.action.type === "popup"
       ? <button type="button" onClick={() => setIsOpen(true)} aria-haspopup="dialog" className={triggerClassName}>{triggerContent}</button>
       : <a href={campaign.action.url} target={campaign.action.openInNewTab ? "_blank" : undefined} rel={campaign.action.openInNewTab ? "noreferrer" : undefined} className={triggerClassName}>{triggerContent}</a>;
@@ -1464,7 +1464,7 @@ export function ModernMarketplaceListing() {
     <CategoryStrip active={vertical} />
     <CategoryJump />
     <main className="mx-auto max-w-[1320px] px-4 py-3 sm:px-6 sm:py-5 lg:px-8">
-      <div className="mb-3 flex min-w-0 items-center justify-between gap-2 text-xs text-[#806d70] sm:mb-5">
+      <div className="mb-1 flex min-w-0 items-center justify-between gap-2 text-xs text-[#806d70] sm:mb-5">
         <div className="flex min-w-0 items-center gap-2 overflow-hidden">
           <Link to="/" className="shrink-0 hover:text-[#941333]">Home</Link>
           <span className="shrink-0">/</span>
@@ -1472,9 +1472,13 @@ export function ModernMarketplaceListing() {
         </div>
         <MarketplaceCampaignSlot vertical={vertical} placement="mobile" />
       </div>
-      <div className="mb-2 flex min-w-0 flex-nowrap items-center justify-between gap-1 border-b border-[#ead9ca] pb-2 sm:mb-3 sm:gap-4">
+      <div className="relative mb-2 flex min-w-0 flex-nowrap items-center justify-between gap-1 border-b border-[#ead9ca] pb-2 sm:mb-3 sm:gap-4">
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#fff0c7] text-[#941333] sm:h-9 sm:w-9"><Icon size={17} /></span><div className="min-w-0"><h1 className="truncate text-sm font-bold leading-tight text-[#3b252b] sm:text-xl">{config?.name || vertical}</h1><p className="truncate text-[10px] leading-4 text-[#806d70] sm:text-xs">{filtered.length} listings around Qatar</p></div></div>
-        <MarketplaceCampaignSlot vertical={vertical} placement="desktop" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden w-[min(42vw,620px)] -translate-x-1/2 -translate-y-1/2 lg:block">
+          <div className="pointer-events-auto">
+            <MarketplaceCampaignSlot vertical={vertical} placement="desktop" />
+          </div>
+        </div>
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <button type="button" onClick={() => setSort("best-value")} title="Best value deals" aria-label="Best value deals" className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1.5 text-[10px] font-semibold transition sm:px-2.5 sm:text-xs ${sort === "best-value" ? "border-amber-400 bg-amber-50 text-amber-800" : "border-amber-200 bg-white text-amber-700 hover:bg-amber-50"}`}><Sparkles size={14} className="animate-pulse" /><span>Best Value Deals</span></button>
           <label className="flex shrink-0 items-center gap-1 text-[0px] text-slate-600 sm:gap-2 sm:text-sm"><span className="hidden sm:inline">Sort by</span><select aria-label="Sort by" value={sort} onChange={(event) => setSort(event.target.value)} className="w-[78px] rounded-md border border-slate-300 bg-white px-1.5 py-1.5 text-xs text-slate-800 sm:w-auto sm:px-3 sm:py-2 sm:text-sm">{vertical === "restaurants" ? <><option value="latest">Latest</option>{ENABLE_RANDOM_SORT && <option value="random">Random</option>}<option value="best-value">Best Value</option><option value="price-asc">Low to High</option><option value="price-desc">High to Low</option></> : <><option value="latest">Latest</option><option value="best-value">Best Value</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></>}</select></label>
