@@ -2,8 +2,9 @@
 // Generic listing card component for any vertical
 
 import React from 'react';
-import { Star, MapPin, Calendar } from 'lucide-react';
+import { Star, MapPin, Calendar, Heart } from 'lucide-react';
 import { Listing } from '../../types/listing';
+import { useFavoritesContext } from '../../contexts/FavoritesContext';
 
 interface ListingCardProps {
   listing: Listing;
@@ -29,6 +30,7 @@ export default function ListingCard({
   };
 
   const isVehicle = vertical === 'vehicles';
+  const { isFavorite, toggleFavorite } = useFavoritesContext();
 
   // Get pricing info (handles both old and new format)
   const originalPrice = listing.pricing?.originalPrice || listing.originalPrice;
@@ -39,6 +41,28 @@ export default function ListingCard({
   const discount = vertical !== 'jobs' && originalPrice && discountedPrice && Number(discountedPrice) < Number(originalPrice)
     ? Math.round(((Number(originalPrice) - Number(discountedPrice)) / Number(originalPrice)) * 100)
     : null;
+  const favorite = {
+    id: listing.id,
+    itemId: String(listing.id),
+    source: 'listing' as const,
+    verticalId: vertical,
+    title: listing.title,
+    description: listing.description || '',
+    restaurantId: 0,
+    cuisine: listing.cuisine || '',
+    originalPrice: Number(originalPrice) || 0,
+    discountedPrice: Number(discountedPrice) || 0,
+    offerType: listing.offerType || '',
+    validFrom: listing.validFrom || listing.validity?.from || '',
+    validTo: listing.validTo || listing.validity?.to || '',
+    imageUrl: listing.imageUrl || '',
+    location: listing.location?.address || listing.location?.city || '',
+    category: listing.category || listing.subcategory,
+    pricing: listing.pricing,
+    attributes: listing.attributes,
+    availability: listing.status === undefined || listing.status === 'active',
+  };
+  const saved = isFavorite(listing.id, 'listing', vertical);
 
   return (
     <div
@@ -53,6 +77,17 @@ export default function ListingCard({
     >
       {/* Image Container */}
       <div className={`relative bg-gray-200 overflow-hidden ${['vehicles', 'jobs'].includes(vertical) ? 'md:w-72 h-40 md:h-full' : 'h-40 md:h-48'}`}>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            toggleFavorite(favorite);
+          }}
+          aria-label={saved ? 'Remove listing from favorites' : 'Add listing to favorites'}
+          className="absolute right-2 top-2 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/95 text-slate-600 shadow-sm transition hover:bg-white"
+        >
+          <Heart size={18} className={saved ? 'fill-red-500 text-red-500' : ''} />
+        </button>
         {listing.imageUrl && (
           <img
             src={listing.imageUrl}

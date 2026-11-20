@@ -544,7 +544,7 @@ function Home() {
             restaurants={restaurants}
             isLoading={loading}
             showOfferDetail={SHOW_OFFER_DETAIL}
-            favorites={favorites.map((f) => f.id)}
+            favorites={favorites.filter((favorite) => (favorite.source || "offer") === "offer").map((favorite) => Number(favorite.id)).filter(Number.isFinite)}
             onToggleFavorite={toggleFavorite}
           />
         </section>

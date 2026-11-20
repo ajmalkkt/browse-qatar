@@ -16,6 +16,7 @@ export interface Validity {
 export interface Location {
   city?: string;
   country?: string;
+  address?: string;
   coordinates?: { lat: number; lng: number };
 }
 

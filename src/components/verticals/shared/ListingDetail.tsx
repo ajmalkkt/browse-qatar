@@ -6,6 +6,7 @@ import { ChevronLeft, MapPin, Calendar, Tag, Share2, Heart, ExternalLink, Lock, 
 import { getProviderById } from '../../../services/providerService';
 import { incrementListingEnquiryClicks } from '../../../services/listingService';
 import ListingEnquiryPopup from '../../ListingEnquiryPopup';
+import { useFavoritesContext } from '../../../contexts/FavoritesContext';
 
 const MOCK_PROVIDERS: Record<string, any> = {
   dealer1: {
@@ -64,6 +65,7 @@ const ListingDetail: React.FC = () => {
   const { vertical, id } = useParams<{ vertical: string; id: string }>();
   const navigate = useNavigate();
   const { verticals, currentConfig } = useVertical();
+  const { isFavorite, toggleFavorite } = useFavoritesContext();
   
   const { listing, loading, error } = useListingById(vertical || '', id);
 
@@ -71,6 +73,33 @@ const ListingDetail: React.FC = () => {
   const [loadingProvider, setLoadingProvider] = useState(false);
   const [showProviderModal, setShowProviderModal] = useState(false);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
+  const favoriteSaved = listing ? isFavorite(listing.id, 'listing', vertical || listing.vertical) : false;
+
+  const toggleListingFavorite = () => {
+    if (!listing) return;
+    const price = Number(listing.pricing?.discountedPrice ?? listing.discountedPrice ?? listing.pricing?.originalPrice ?? listing.originalPrice) || 0;
+    toggleFavorite({
+      id: listing.id,
+      itemId: String(listing.id),
+      source: 'listing',
+      verticalId: vertical || listing.vertical,
+      title: listing.title,
+      description: listing.description || '',
+      restaurantId: 0,
+      cuisine: listing.cuisine || '',
+      originalPrice: Number(listing.pricing?.originalPrice ?? listing.originalPrice) || price,
+      discountedPrice: price,
+      offerType: listing.offerType || '',
+      validFrom: listing.validFrom || listing.validity?.from || '',
+      validTo: listing.validTo || listing.validity?.to || '',
+      imageUrl: listing.imageUrl || '',
+      location: listing.location?.address || listing.location?.city || '',
+      category: listing.category || listing.subcategory,
+      pricing: listing.pricing,
+      attributes: listing.attributes,
+      availability: listing.status === undefined || listing.status === 'active',
+    });
+  };
 
   const handleEnquireNow = async () => {
     setEnquiryOpen(true);
@@ -500,8 +529,8 @@ const ListingDetail: React.FC = () => {
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2 text-gray-400 hover:text-red-500 transition rounded-full hover:bg-gray-100">
-              <Heart size={20} />
+            <button onClick={toggleListingFavorite} aria-label={favoriteSaved ? 'Remove listing from favorites' : 'Add listing to favorites'} className={`p-2 transition rounded-full hover:bg-gray-100 ${favoriteSaved ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}>
+              <Heart size={20} className={favoriteSaved ? 'fill-red-500' : ''} />
             </button>
             <button className="p-2 text-gray-400 hover:text-blue-500 transition rounded-full hover:bg-gray-100">
               <Share2 size={20} />

@@ -702,14 +702,42 @@ function ListingCard({ listing, vertical }: { listing: ListingRecord; vertical: 
   const href = isRestaurant ? `/offer/${listing.id}` : `/marketplace/${vertical}/${listing.id}`;
   const { favorites, toggleFavorite } = useFavoritesContext();
   const [showSharePopup, setShowSharePopup] = useState(false);
-  const isFavorite = favorites.some((favorite) => String(favorite.id) === String(listing.id));
+  const favoriteSource = isRestaurant ? "offer" : "listing";
+  const favoriteVertical = isRestaurant ? "restaurants" : vertical;
+  const isFavorite = favorites.some((favorite) =>
+    String(favorite.itemId ?? favorite.id) === String(listing.id) &&
+    (favorite.source || "offer") === favoriteSource &&
+    (favorite.verticalId || (favoriteSource === "offer" ? "restaurants" : "classifieds")) === favoriteVertical
+  );
+  const favoriteItem = {
+    id: listing.id,
+    itemId: String(listing.id),
+    source: favoriteSource,
+    verticalId: favoriteVertical,
+    title: listing.title || (isRestaurant ? "Restaurant offer" : "Marketplace listing"),
+    description: listing.description || "",
+    restaurantId: Number(listing.restaurantId) || 0,
+    cuisine: listing.cuisine || "",
+    originalPrice: Number(listing.originalPrice ?? listing.pricing?.originalPrice) || 0,
+    discountedPrice: Number(listing.discountedPrice ?? listing.pricing?.discountedPrice) || 0,
+    offerType: listing.offerType || "Offer",
+    validFrom: listing.validFrom || listing.validity?.from || "",
+    validTo: listing.validTo || listing.validity?.to || "",
+    imageUrl: imageOf(listing),
+    location: locationOf(listing),
+    country: listing.country || listing.location?.country,
+    category: listing.category || verticalConfig[vertical]?.name,
+    pricing: listing.pricing,
+    attributes: listing.attributes,
+    availability: listing.active !== false && listing.status !== "inactive",
+  } as const;
 
   return <Link to={href} state={{ listing }} className="group min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:border-slate-400 hover:shadow-md">
     {isRestaurant ? <>
       <div className="relative overflow-hidden">
         <img src={imageOf(listing)} alt={listing.title || "Restaurant offer"} loading="lazy" className="h-40 w-full object-cover transition duration-300 group-hover:scale-[1.03] sm:h-44" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} />
         <span className="absolute right-2 top-2 rounded-full bg-[#0878d1] px-2.5 py-1 text-xs font-bold text-white">{SHOW_DISCOUNTED_PRICE || Number(listing.originalPrice) === Number(listing.discountedPrice) ? `QAR ${Number(amount || 0).toLocaleString()}` : `${Math.round((1 - Number(listing.discountedPrice) / Number(listing.originalPrice)) * 100)}% OFF`}</span>
-        <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); toggleFavorite({ id: Number(listing.id), title: listing.title || "Restaurant offer", description: listing.description || "", restaurantId: Number(listing.restaurantId), cuisine: listing.cuisine || "", originalPrice: Number(listing.originalPrice) || 0, discountedPrice: Number(listing.discountedPrice) || 0, offerType: listing.offerType || "Offer", validFrom: listing.validFrom || "", validTo: listing.validTo || "", imageUrl: imageOf(listing), location: locationOf(listing), country: listing.country, category: listing.category }); }} aria-label={isFavorite ? "Remove offer from favorites" : "Add offer to favorites"} className="absolute left-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-slate-500 transition hover:bg-white">
+        <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); toggleFavorite(favoriteItem); }} aria-label={isFavorite ? "Remove offer from favorites" : "Add offer to favorites"} className="absolute left-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-slate-500 transition hover:bg-white">
           <Heart size={18} className={isFavorite ? "fill-red-500 text-red-500" : ""} />
         </button>
         <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setShowSharePopup((open) => !open); }} aria-label="Share restaurant offer" className="absolute bottom-2 right-2 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm transition hover:bg-white"><Share2 size={18} /></button>
@@ -735,7 +763,9 @@ function ListingCard({ listing, vertical }: { listing: ListingRecord; vertical: 
       <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
         <img src={imageOf(listing)} alt={listing.title || "Marketplace listing"} loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} />
         <span className="absolute left-2 top-2 rounded bg-white/95 px-2 py-1 text-[10px] font-bold uppercase text-slate-700">{listing.category || verticalConfig[vertical]?.name}</span>
-        <span className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/95 text-slate-600" aria-hidden="true"><Heart size={16} /></span>
+        <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); toggleFavorite(favoriteItem); }} aria-label={isFavorite ? "Remove listing from favorites" : "Add listing to favorites"} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/95 text-slate-600 transition hover:bg-white">
+          <Heart size={16} className={isFavorite ? "fill-red-500 text-red-500" : ""} />
+        </button>
       </div>
       <div className="p-3 sm:p-4">
         {amount !== null && <p className="text-lg font-bold text-slate-950">{`${listing.pricing?.currency || "QAR"} `}{Number(amount).toLocaleString()}</p>}
@@ -1340,12 +1370,12 @@ export function ModernMarketplaceDetail() {
     <MarketplaceHeader vertical={vertical} />
     <CategoryStrip active={vertical} />
     <CategoryJump />
-    <main className="mx-auto max-w-[1320px] px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+    <main className="mx-auto w-full min-w-0 max-w-[1320px] overflow-x-clip px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
       <button type="button" onClick={() => navigate(`/marketplace/${vertical}`)} className="mb-3 inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-[#6b5157] transition hover:bg-[#fff1c9] hover:text-[#941333]"><ArrowLeft size={18} /> Back to {category?.name || "listings"}</button>
-      {loading ? <div className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(300px,0.7fr)]"><div className="aspect-[16/10] animate-pulse rounded-2xl bg-slate-200" /><div className="h-80 animate-pulse rounded-2xl bg-slate-100" /></div> : listing ? vertical === "restaurants" ? <div className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(300px,0.7fr)]">
+      {loading ? <div className="grid min-w-0 gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(300px,0.7fr)]"><div className="aspect-[16/10] animate-pulse rounded-2xl bg-slate-200" /><div className="h-80 animate-pulse rounded-2xl bg-slate-100" /></div> : listing ? vertical === "restaurants" ? <div className="grid min-w-0 gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(300px,0.7fr)]">
         <section className="overflow-hidden rounded-xl border border-[#ead9ca] bg-[#fffdfa] shadow-sm"><div className="aspect-[4/3] bg-[#fff7e6]"><img src={imageOf(listing)} alt={listing.title || "Listing"} className="h-full w-full object-cover" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} /></div><div className="flex items-center justify-between border-t border-[#ead9ca] px-4 py-3 text-sm text-[#6b5157]"><span className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff0c7] text-[#941333]"><CategoryIcon size={17} /></span>{category?.name || vertical}</span><button type="button" className="inline-flex items-center gap-2 rounded-md px-2 py-1 hover:bg-[#fff1c9]"><Share2 size={16} /> Share</button></div></section>
         <aside className="h-fit rounded-xl border border-[#ead9ca] bg-[#fffdfa] p-5 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-[#941333]">{listing.category || category?.name}</p><h1 className="mt-2 text-2xl font-bold leading-tight text-[#30252a]">{listing.title || "Listing details"}</h1>{amount !== null && <p className="mt-4 text-3xl font-bold text-[#851432]">{currency} {formattedAmount}</p>}<p className="mt-3 flex items-center gap-2 text-sm text-[#806d70]"><MapPin size={16} />{locationOf(listing)}</p><div className="mt-5 border-t border-[#ead9ca] pt-4"><h2 className="font-bold text-[#30252a]">Description</h2><p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{listing.description || "Contact the seller for more information about this listing."}</p></div><button type="button" onClick={() => setEnquiryOpen(true)} className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#941333] px-4 py-3 font-bold text-white transition hover:bg-[#6f1028]"><Tag size={17} /> Contact seller</button><p className="mt-3 text-center text-xs text-[#806d70]">Browse Qatar marketplace</p></aside>
-      </div> : <div className="space-y-5">
+      </div> : <div className="min-w-0 space-y-5">
         <section className="relative isolate flex h-24 items-center overflow-hidden rounded-2xl border border-[#ead9ca] bg-[#341a24] shadow-sm sm:h-32">
           <img src={category?.featuredImage || categoryImages[vertical] || imageOf(listing)} alt="" className="absolute inset-0 -z-20 size-full object-cover opacity-70" />
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#35121f]/95 via-[#581c31]/75 to-transparent" />
@@ -1373,11 +1403,11 @@ export function ModernMarketplaceDetail() {
           </div>
         </div>
 
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.75fr)] lg:gap-6">
-          <div className="space-y-5">
+        <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,0.75fr)] lg:gap-6">
+          <div className="min-w-0 space-y-5">
             <section className="overflow-hidden rounded-2xl border border-[#ead9ca] bg-white shadow-sm">
-              <div className="relative aspect-[4/3] bg-[#f2e9e5] sm:aspect-[16/10]">
-                {images.length > 0 ? <img src={images[selectedImage] || images[0]} alt={`${listing.title || "Listing"} photo ${selectedImage + 1}`} className="size-full object-contain" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} /> : <div className="grid size-full place-items-center text-[#806d70]"><CategoryIcon size={48} /><span className="mt-2 text-sm">No photos added yet</span></div>}
+              <div className="relative mx-auto flex aspect-[4/3] w-full min-w-0 items-center justify-center bg-[#f2e9e5] sm:aspect-[16/10]">
+                {images.length > 0 ? <img src={images[selectedImage] || images[0]} alt={`${listing.title || "Listing"} photo ${selectedImage + 1}`} className="size-full object-contain object-center" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} /> : <div className="grid size-full place-items-center text-[#806d70]"><CategoryIcon size={48} /><span className="mt-2 text-sm">No photos added yet</span></div>}
                 {listing.promoted || listing.isPromoted || listing.featured ? <span className="absolute left-3 top-3 rounded-md bg-[#941333] px-2.5 py-1 text-xs font-bold text-white shadow">Promoted</span> : null}
                 {images.length > 1 && <>
                   <button type="button" onClick={() => setSelectedImage((index) => (index - 1 + images.length) % images.length)} aria-label="Previous photo" className="absolute left-3 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#851432] shadow hover:bg-white"><ArrowLeft size={18} /></button>
@@ -1391,13 +1421,13 @@ export function ModernMarketplaceDetail() {
               <div className="flex items-center justify-between border-t border-[#ead9ca] px-4 py-3 text-xs text-[#6b5157]"><span className="flex items-center gap-2"><Camera size={15} className="text-[#941333]" />{images.length} photos</span><span>Listing ID #{listing.id}</span></div>
             </section>
 
-            {groupedAttributes.size > 0 && <div className="space-y-4">
+            {groupedAttributes.size > 0 && <div className="min-w-0 space-y-4">
               {Array.from(groupedAttributes).map(([group, values]) => <section key={group} className="overflow-hidden rounded-2xl border border-[#ead9ca] bg-white shadow-sm">
                 <h2 className="border-b border-[#f1e4d6] bg-gradient-to-r from-[#fff7e6] to-white px-4 py-3 text-base font-bold text-[#50343b] sm:px-5">{group === "Vehicle" ? "Basic details" : group}</h2>
                 <dl className="divide-y divide-[#f1e4d6] px-4 sm:px-5">
-                  {values.map((attribute) => <div key={attribute.key} className="flex flex-col gap-1 py-3 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-5">
+                  {values.map((attribute) => <div key={attribute.key} className="flex min-w-0 flex-col gap-1 py-3 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-5">
                     <dt className="font-medium text-[#806d70]">{attribute.label}</dt>
-                    <dd className="max-w-[65%] text-left font-semibold text-[#30252a] sm:text-right">
+                    <dd className="min-w-0 max-w-full break-words text-left font-semibold text-[#30252a] [overflow-wrap:anywhere] sm:max-w-[65%] sm:text-right">
                       {["convenience", "entertainment", "exteriorFeatures"].includes(attribute.key) ? <span className="flex flex-wrap gap-1.5 sm:justify-end">{displayAttribute(attribute.value).split(/[,|\n]/).map((feature) => feature.trim()).filter(Boolean).map((feature) => <span key={feature} className="rounded-full bg-[#fff1c9] px-2.5 py-1 text-xs text-[#6b333e]">{feature}</span>)}</span> : displayAttribute(attribute.value)}
                     </dd>
                   </div>)}
@@ -1406,24 +1436,24 @@ export function ModernMarketplaceDetail() {
             </div>}
           </div>
 
-          <aside className="space-y-4 lg:sticky lg:top-24">
-            <section className="rounded-2xl border border-[#ead9ca] bg-white p-5 shadow-[0_8px_24px_rgba(111,16,40,0.08)] sm:p-6">
+          <aside className="w-full min-w-0 space-y-4 lg:sticky lg:top-24">
+            <section className="w-full min-w-0 overflow-hidden rounded-2xl border border-[#ead9ca] bg-white p-5 shadow-[0_8px_24px_rgba(111,16,40,0.08)] sm:p-6">
               <p className="text-xs font-bold uppercase tracking-wider text-[#941333]">{listing.category || listing.subcategory || category?.name}</p>
               <h2 className="mt-2 text-xl font-bold leading-snug text-[#30252a]">{listing.title || "Listing details"}</h2>
-              <p className="mt-2 flex items-center gap-2 text-sm text-[#806d70]"><MapPin size={16} className="shrink-0 text-[#941333]" />{locationOf(listing)}</p>
+              <p className="mt-2 flex min-w-0 items-center gap-2 text-sm text-[#806d70]"><MapPin size={16} className="shrink-0 text-[#941333]" /><span className="min-w-0 break-words [overflow-wrap:anywhere]">{locationOf(listing)}</span></p>
               <div className="mt-4 rounded-xl bg-gradient-to-r from-[#fff7e6] to-[#fff0c7] p-4">
                 <p className="text-xs font-medium text-[#806d70]">Price</p>
-                <p className="mt-1 text-3xl font-black text-[#851432]">{amount !== null ? `${currency} ${formattedAmount}` : "Contact for price"}</p>
+                <p className="mt-1 break-words text-2xl font-black leading-tight text-[#851432] [overflow-wrap:anywhere] sm:text-3xl">{amount !== null ? `${currency} ${formattedAmount}` : "Contact for price"}</p>
                 {listing.pricing?.unit && <p className="mt-1 text-xs text-[#806d70]">Per {listing.pricing.unit}</p>}
               </div>
-              <div className="mt-4 grid gap-2">
-                {phone ? <a href={`tel:${phone}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#941333] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#6f1028]"><Phone size={17} />Call seller</a> : <button type="button" onClick={() => setEnquiryOpen(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#941333] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#6f1028]"><Phone size={17} />Request a call</button>}
-                {whatsappDigits ? <a href={`https://wa.me/${whatsappDigits}`} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#19a567] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#138552]"><MessageCircle size={18} />WhatsApp seller</a> : <button type="button" onClick={() => setEnquiryOpen(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#b8e4ce] bg-[#effaf4] px-4 py-3 text-sm font-bold text-[#137246] transition hover:bg-[#e2f5ea]"><MessageCircle size={18} />Contact seller</button>}
+              <div className="mt-4 grid min-w-0 gap-2">
+                {phone ? <a href={`tel:${phone}`} className="inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl bg-[#941333] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#6f1028]"><Phone size={17} />Call seller</a> : <button type="button" onClick={() => setEnquiryOpen(true)} className="inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl bg-[#941333] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#6f1028]"><Phone size={17} />Request a call</button>}
+                {whatsappDigits ? <a href={`https://wa.me/${whatsappDigits}`} target="_blank" rel="noreferrer" className="inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl bg-[#19a567] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#138552]"><MessageCircle size={18} />WhatsApp seller</a> : <button type="button" onClick={() => setEnquiryOpen(true)} className="inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-[#b8e4ce] bg-[#effaf4] px-4 py-3 text-sm font-bold text-[#137246] transition hover:bg-[#e2f5ea]"><MessageCircle size={18} />Contact seller</button>}
               </div>
               {phone && <p className="mt-3 text-center text-xs text-[#806d70]">Seller contact: {phone}</p>}
               <div className="mt-5 border-t border-[#f1e4d6] pt-4">
                 <h3 className="text-sm font-bold text-[#30252a]">Description</h3>
-                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#66565a]">{listing.description || "Contact the seller for more information about this listing."}</p>
+                <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-[#66565a] [overflow-wrap:anywhere]">{listing.description || "Contact the seller for more information about this listing."}</p>
               </div>
               <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-[#806d70]"><ShieldCheck size={14} className="text-[#941333]" /> Browse Qatar local listing</p>
             </section>
