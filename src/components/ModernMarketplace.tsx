@@ -168,7 +168,7 @@ const verticalRefineConfig: Record<string, { subcategories: string[]; fields: Re
   vehicles: {
     subcategories: ["Cars", "Motorcycles & Bikes", "Commercial Vehicles", "Spare Parts & Accessories", "Boats & Marine"],
     fields: [
-      { label: "Vehicle Type", key: "bodyType", aliases: ["bodyType", "vehicleType"], type: "select", options: ["Sedan", "SUV", "Coupe", "Hatchback", "Pickup", "Van"], group: "Cars" },
+      { label: "Vehicle Type", key: "bodyType", aliases: ["bodyType", "vehicleType"], type: "select", options: ["Sedan", "SUV", "Coupe", "Hatchback", "Pickup", "Van"], group: "Body Type" },
       { label: "Make", key: "make", aliases: ["make", "vehicleMake"], type: "text", group: "Makes" },
       { label: "Model", key: "model", aliases: ["model", "vehicleModel"], type: "text", group: "Model" },
       { label: "Year", key: "year", aliases: ["year", "modelYear"], type: "range", group: "Vehicle" },
