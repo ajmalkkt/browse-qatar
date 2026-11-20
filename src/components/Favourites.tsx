@@ -219,6 +219,7 @@ export default function Favourites() {
       <Helmet>
         <title>My Favorites | Browse Qatar</title>
         <meta name="description" content="View and manage your saved Browse Qatar listings and restaurant offers." />
+        <meta name="robots" content="noindex,follow" />
         <link rel="canonical" href="https://browseqatar.com/favourites" />
       </Helmet>
       {isV2Theme ? (

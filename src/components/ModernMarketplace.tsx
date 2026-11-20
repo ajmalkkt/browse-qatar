@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,10 +15,12 @@ import {
   Instagram,
   CircleUserRound,
   LayoutGrid,
+  Leaf,
   Camera,
   Check,
   FileText,
   CircleHelp,
+  HeartHandshake,
   Home,
   LogOut,
   MapPin,
@@ -51,6 +54,27 @@ import { useFavoritesContext } from "../contexts/FavoritesContext";
 import ListingEnquiryPopup from "./ListingEnquiryPopup";
 
 type ListingRecord = Record<string, any>;
+
+const marketplaceSeo: Record<string, { label: string; description: string }> = {
+  restaurants: { label: "Restaurant Offers", description: "Explore restaurant deals, dining offers, and promotions in Qatar. Browse current offers and contact each restaurant for availability and terms." },
+  vehicles: { label: "Vehicles", description: "Browse vehicle listings in Qatar, including cars and other vehicles. Compare listing details, prices, location, and contact the advertiser directly." },
+  accommodations: { label: "Accommodation", description: "Explore accommodation listings in Qatar, including homes, apartments, and rooms. Review listing details and contact the advertiser to confirm availability." },
+  services: { label: "Local Services", description: "Find local service listings in Qatar. Browse service descriptions, locations, and provider details, then contact providers directly." },
+  classifieds: { label: "Classifieds", description: "Browse local classifieds in Qatar, including furniture, electronics, appliances, and more. Review item details and contact the advertiser." },
+  jobs: { label: "Jobs", description: "Explore job listings in Qatar across different roles and work arrangements. Review each vacancy and contact the advertiser using the details provided." },
+};
+
+const jsonLd = (value: unknown) => JSON.stringify(value).replace(/</g, "\\u003c");
+
+const marketplaceBreadcrumbs = (vertical: string, verticalLabel: string, itemTitle?: string) => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://browseqatar.com/" },
+    { "@type": "ListItem", position: 2, name: verticalLabel, item: `https://browseqatar.com/marketplace/${encodeURIComponent(vertical)}` },
+    ...(itemTitle ? [{ "@type": "ListItem", position: 3, name: itemTitle }] : []),
+  ],
+});
 
 const mockListings: Record<string, ListingRecord[]> = {
   vehicles: [
@@ -98,9 +122,113 @@ const categoryImages: Record<string, string> = {
 
 const categories = Object.values(verticalConfig).filter((item) => item.enabled);
 
+function RestaurantCampaignSlot({ placement = "desktop" }: { placement?: "mobile" | "desktop" }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
+  return <>
+      {placement === "mobile" ? <div className="flex justify-center lg:hidden">
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          aria-haspopup="dialog"
+          className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2 py-1.5 text-[10px] font-bold text-green-800 transition hover:border-green-400 hover:bg-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
+        >
+          <Leaf size={13} aria-hidden="true" />
+          <span className="whitespace-nowrap uppercase">Eco Initiative</span>
+        </button>
+      </div> : <div className="hidden min-w-0 flex-1 justify-center lg:flex">
+        <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        aria-haspopup="dialog"
+        className="hidden h-[76px] min-w-0 w-full max-w-[620px] items-center gap-4 overflow-hidden rounded-xl border border-green-200 bg-gradient-to-r from-[#f0fdf4] via-[#f7fff7] to-[#dcfce7] px-5 text-left shadow-sm transition hover:border-green-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 lg:flex"
+      >
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-green-100 text-green-700">
+          <Leaf size={22} aria-hidden="true" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-2">
+            <span className="truncate text-base font-bold text-green-800">No Waste... More Tasty!!!</span>
+            <span className="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-800"> Eco Initiative</span>
+          </span>
+          <span className="mt-1 block truncate text-xs text-green-800/80">Save food, celebrate every meal, and help reduce food waste.</span>
+        </span>
+        <span className="shrink-0 text-xs font-semibold text-green-800">Our story <span aria-hidden="true">→</span></span>
+        </button>
+      </div>}
+    {isOpen && <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) setIsOpen(false);
+      }}
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="eco-campaign-title"
+        className="relative my-auto flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border-4 border-double border-green-800/20 bg-[#fdfbf7] shadow-2xl"
+      >
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          aria-label="Close eco initiative details"
+          className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        >
+          <X size={20} />
+        </button>
+        <header className="relative shrink-0 bg-green-800 px-5 py-5 text-center text-white sm:px-7">
+          <Leaf className="mx-auto mb-2 opacity-90" size={26} aria-hidden="true" />
+          <h2 id="eco-campaign-title" className="text-xl font-bold tracking-wide sm:text-2xl">No Waste... More Tasty!!!</h2>
+          <p className="mt-1 text-xs tracking-widest text-green-100 sm:text-sm">A Browse Qatar Eco Initiative</p>
+        </header>
+        <div className="overflow-y-auto px-5 py-5 text-center sm:px-8 sm:py-7">
+          <HeartHandshake className="mx-auto mb-4 text-green-700/40" size={38} aria-hidden="true" />
+          <p className="mb-4 text-base italic leading-relaxed text-slate-700 sm:text-lg">
+            Every grain has a story, and every plate has a purpose. Great taste should never end in waste.
+          </p>
+          <p className="mb-4 text-sm leading-6 text-slate-700">
+            When you choose to save food, you help honor the farmers who grew it, the people who prepared it, and the planet that sustains us.
+          </p>
+          <p className="text-sm leading-6 text-slate-700">
+            Join us in ordering mindfully, enjoying every meal, and sharing responsibly. Browse restaurant offers and look for Super Saver deals when available.
+          </p>
+        </div>
+        <div className="h-1.5 shrink-0 bg-green-800" />
+      </section>
+    </div>}
+    </>
+}
+
 export function ModernMarketplaceFooter({ variant = "modern" }: { variant?: "modern" | "v2" }) {
   const isV2 = variant === "v2";
-  return <footer className={`border-t text-slate-700 ${isV2 ? "border-[#ead9ca] bg-[#fff7e6]" : "border-slate-200 bg-[#f3f8fc]"}`}>
+  const [appLaunchNoticeOpen, setAppLaunchNoticeOpen] = useState(false);
+
+  useEffect(() => {
+    if (!appLaunchNoticeOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAppLaunchNoticeOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [appLaunchNoticeOpen]);
+
+  const appButtonClass = `inline-flex items-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition ${
+    isV2
+      ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]"
+      : "border-slate-200 text-slate-600 hover:border-slate-400 hover:text-slate-900"
+  }`;
+
+  return <>
+    <footer className={`border-t text-slate-700 ${isV2 ? "border-[#ead9ca] bg-[#fff7e6]" : "border-slate-200 bg-[#f3f8fc]"}`}>
     <div className="mx-auto grid max-w-[1320px] gap-8 px-4 py-9 sm:px-6 sm:py-11 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:px-8">
       <div>
         <div className="flex items-center gap-3 sm:block">
@@ -113,9 +241,9 @@ export function ModernMarketplaceFooter({ variant = "modern" }: { variant?: "mod
         <p className="mt-0 min-w-0 flex-1 text-xs leading-5 text-slate-500 sm:mt-3 sm:max-w-sm sm:flex-none sm:text-sm sm:leading-6">Discover local deals, trusted services, and listings across Qatar.</p>
         </div>
         <div className="mt-4 flex items-center gap-2">
-          <a href="https://www.facebook.com/browseqatar" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Facebook" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-700"}`}><Facebook size={17} /></a>
-          <a href="https://www.instagram.com/browseqatar/" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Instagram" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-pink-300 hover:text-pink-600"}`}><Instagram size={17} /></a>
-          <a href="https://twitter.com/browseqatar" target="_blank" rel="noreferrer" aria-label="Browse Qatar on X" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-900"}`}><Twitter size={16} /></a>
+          <a href="https://www.facebook.com/browseqatarofficial" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Facebook" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-700"}`}><Facebook size={17} /></a>
+          <a href="https://www.instagram.com/browseqatarofficial/" target="_blank" rel="noreferrer" aria-label="Browse Qatar on Instagram" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-pink-300 hover:text-pink-600"}`}><Instagram size={17} /></a>
+          <a href="https://twitter.com/browseqatarofficial" target="_blank" rel="noreferrer" aria-label="Browse Qatar on X" className={`grid h-9 w-9 place-items-center rounded-full border transition ${isV2 ? "border-[#e8d2bf] text-[#7e1831] hover:bg-[#fff0c7]" : "border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-900"}`}><Twitter size={16} /></a>
         </div>
       </div>
 
@@ -140,8 +268,8 @@ export function ModernMarketplaceFooter({ variant = "modern" }: { variant?: "mod
         <h2 className="text-sm font-bold text-slate-900">Get the app</h2>
         <p className="mt-3 text-sm text-slate-500">Browse Qatar wherever you go.</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <a href="https://play.google.com/store" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-400 hover:text-slate-900"><img src="/android.png" alt="" className="h-5 w-5 object-contain" />Google Play</a>
-          <a href="https://www.apple.com/app-store/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-400 hover:text-slate-900"><img src="/apple.png" alt="" className="h-5 w-5 object-contain" />App Store</a>
+          <button type="button" onClick={() => setAppLaunchNoticeOpen(true)} className={appButtonClass}><img src="/android.png" alt="" className="h-5 w-5 object-contain" />Google Play</button>
+          <button type="button" onClick={() => setAppLaunchNoticeOpen(true)} className={appButtonClass}><img src="/apple.png" alt="" className="h-5 w-5 object-contain" />App Store</button>
         </div>
       </div>
     </div>
@@ -151,7 +279,51 @@ export function ModernMarketplaceFooter({ variant = "modern" }: { variant?: "mod
         <p>Made for exploring Qatar.</p>
       </div>
     </div>
-  </footer>;
+    </footer>
+    {appLaunchNoticeOpen && <div
+    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 p-4"
+    onMouseDown={(event) => {
+      if (event.target === event.currentTarget) setAppLaunchNoticeOpen(false);
+    }}
+    >
+    <section
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="app-launch-notice-title"
+      className={`relative w-full max-w-md rounded-2xl border p-6 text-center shadow-2xl sm:p-8 ${
+        isV2 ? "border-[#ead9ca] bg-[#fffdfa]" : "border-slate-200 bg-white"
+      }`}
+    >
+      <button
+        type="button"
+        onClick={() => setAppLaunchNoticeOpen(false)}
+        aria-label="Close app launch notice"
+        className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+      >
+        <X size={20} />
+      </button>
+      <div className={`mx-auto grid h-14 w-14 place-items-center rounded-2xl ${
+        isV2 ? "bg-[#fff0c7] text-[#941333]" : "bg-blue-50 text-blue-700"
+      }`}>
+        <Sparkles size={26} />
+      </div>
+      <h2 id="app-launch-notice-title" className={`mt-4 text-xl font-bold ${
+        isV2 ? "text-[#851432]" : "text-slate-900"
+      }`}>Browse Qatar app launching soon</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">
+        We&apos;re putting the finishing touches on the Browse Qatar app. It will be available on Google Play and the App Store soon.
+      </p>
+      <button
+        type="button"
+        autoFocus
+        onClick={() => setAppLaunchNoticeOpen(false)}
+        className={`mt-6 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition ${
+          isV2 ? "bg-[#941333] hover:bg-[#7e102b]" : "bg-[#0878d1] hover:bg-[#0667b4]"
+        }`}
+      >Got it</button>
+    </section>
+    </div>}
+  </>;
 }
 
 type RefineField = {
@@ -412,7 +584,7 @@ export function MarketplaceAccountMenu() {
       {!auth.user && <div className="border-b border-[#f1e4d6] p-3"><button type="button" onClick={handleLogin} className="w-full rounded-md bg-[#941333] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#6f1028]">{ENABLE_SIGNUP ? "Login / Sign up" : "Login"}</button></div>}
       <div className="p-2">
         <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><Camera size={18} className="text-[#941333]" />Start selling</button>
-        <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><FileText size={18} className="text-[#941333]" />My Ads / Manage Offers</button>
+        <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><FileText size={18} className="text-[#941333]" />My Listings & Offers</button>
         <Link to="/favourites" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><Heart size={18} className="text-[#941333]" />Wishlist</Link>
         <Link to="/faq" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><CircleHelp size={18} className="text-[#941333]" />Help</Link>
       </div>
@@ -607,7 +779,7 @@ export function MarketplaceHeader({ search, onSearch, vertical }: { search?: str
             {!auth.user && <div className="border-b border-[#f1e4d6] p-3"><button type="button" onClick={handleLogin} className="w-full rounded-md bg-[#941333] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#6f1028]">{ENABLE_SIGNUP ? "Login / Sign up" : "Login"}</button></div>}
             <div className="p-2">
               <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"><Camera size={18} className="text-slate-500" />Start selling</button>
-              <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"><FileText size={18} className="text-slate-500" />My Ads / Manage Offers</button>
+              <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"><FileText size={18} className="text-slate-500" />My Listings & Offers</button>
               <Link to="/favourites" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"><Heart size={18} className="text-slate-500" />Wishlist</Link>
               <Link to="/faq" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"><CircleHelp size={18} className="text-slate-500" />Help</Link>
             </div>
@@ -880,6 +1052,18 @@ export function ModernMarketplaceHome() {
   const { listings, loading } = useMarketplaceListings();
   const filtered = useMemo(() => listings.filter((item) => !search || `${item.title} ${item.description} ${locationOf(item)}`.toLowerCase().includes(search.toLowerCase())), [listings, search]);
   return <div className="min-h-screen bg-[#fffdfa] text-[#30252a]">
+    <Helmet>
+      <title>Browse Qatar | Marketplace for Listings, Offers, Services and Jobs</title>
+      <meta name="description" content="Discover local listings and restaurant offers across Qatar: vehicles, accommodation, services, classifieds, jobs, and dining deals." />
+      <link rel="canonical" href="https://browseqatar.com/" />
+      <link rel="alternate" type="text/markdown" href="https://browseqatar.com/content/marketplace.md" />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content="Browse Qatar | Qatar Marketplace" />
+      <meta property="og:description" content="Explore local listings, restaurant offers, vehicles, accommodation, services, classifieds and jobs across Qatar." />
+      <meta property="og:url" content="https://browseqatar.com/" />
+      <meta property="og:image" content="https://browseqatar.com/bqLogo.jpg" />
+      <meta name="twitter:card" content="summary" />
+    </Helmet>
     <MarketplaceHeader search={search} onSearch={setSearch} />
     <CategoryStrip />
     <main className="mx-auto max-w-[1320px] px-4 pb-16 pt-5 sm:px-6 lg:px-8">
@@ -935,6 +1119,12 @@ export function ModernMarketplaceSearchResults() {
   }, [listings, search]);
 
   return <div className="min-h-screen bg-[#fffdfa] text-[#30252a]">
+    <Helmet>
+      <title>{search ? `Search: ${search.slice(0, 60)} | Browse Qatar` : "Search the Qatar Marketplace | Browse Qatar"}</title>
+      <meta name="description" content="Search Browse Qatar for local listings and offers across vehicles, accommodation, services, classifieds, jobs, and restaurants." />
+      <meta name="robots" content="noindex,follow" />
+      <link rel="canonical" href="https://browseqatar.com/marketplace/search" />
+    </Helmet>
     <MarketplaceHeader search={search} onSearch={setSearch} />
     <CategoryStrip />
     <main className="mx-auto min-h-[45vh] max-w-[1320px] px-4 py-5 sm:px-6 lg:px-8">
@@ -1083,6 +1273,10 @@ export function ModernMarketplaceListing() {
   const [draftRefineFilters, setDraftRefineFilters] = useState<Record<string, string>>({});
   const { listings, loading, restaurantDirectory } = useMarketplaceListings(vertical);
   const config = verticalConfig[vertical];
+  const seo = marketplaceSeo[vertical] || {
+    label: config?.name || "Local Listings",
+    description: `Browse ${config?.name || "local"} listings and offers in Qatar on Browse Qatar. Review listing details and contact the advertiser directly.`,
+  };
   const categoryFilter = searchParams.get("category");
   const cuisineFilter = searchParams.get("cuisine");
   const restaurantFilter = searchParams.get("restaurant");
@@ -1237,14 +1431,52 @@ export function ModernMarketplaceListing() {
     next.delete("restaurant");
     setSearchParams(next, { replace: true });
   };
+  const categoryCanonical = `https://browseqatar.com/marketplace/${encodeURIComponent(vertical)}`;
+  const categorySchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${seo.label} in Qatar | Browse Qatar`,
+    description: seo.description,
+    url: categoryCanonical,
+    isPartOf: { "@type": "WebSite", name: "Browse Qatar", url: "https://browseqatar.com/" },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: filtered.slice(0, 20).map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: item.title || `${seo.label} listing`,
+        url: `https://browseqatar.com/marketplace/${encodeURIComponent(vertical)}/${encodeURIComponent(String(item.id))}`,
+      })),
+    },
+  };
   return <div className="min-h-screen bg-[#fffdfa] text-[#30252a]">
+    <Helmet>
+      <title>{`${seo.label} in Qatar | Browse Qatar`}</title>
+      <meta name="description" content={seo.description} />
+      <link rel="canonical" href={categoryCanonical} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={`${seo.label} in Qatar | Browse Qatar`} />
+      <meta property="og:description" content={seo.description} />
+      <meta property="og:url" content={categoryCanonical} />
+      <meta property="og:image" content="https://browseqatar.com/bqLogo.jpg" />
+      <script type="application/ld+json">{jsonLd(categorySchema)}</script>
+      <script type="application/ld+json">{jsonLd(marketplaceBreadcrumbs(vertical, seo.label))}</script>
+    </Helmet>
     <MarketplaceHeader search={search} onSearch={setSearch} vertical={vertical} />
     <CategoryStrip active={vertical} />
     <CategoryJump />
     <main className="mx-auto max-w-[1320px] px-4 py-3 sm:px-6 sm:py-5 lg:px-8">
-      <div className="mb-3 flex items-center gap-2 text-xs text-[#806d70] sm:mb-5"><Link to="/" className="hover:text-[#941333]">Home</Link><span>/</span><span className="text-[#5d464c]">{config?.name || vertical}</span></div>
-      <div className="mb-2 flex flex-nowrap items-center justify-between gap-1 border-b border-[#ead9ca] pb-2 sm:mb-3 sm:gap-4">
+      <div className="mb-3 flex min-w-0 items-center justify-between gap-2 text-xs text-[#806d70] sm:mb-5">
+        <div className="flex min-w-0 items-center gap-2 overflow-hidden">
+          <Link to="/" className="shrink-0 hover:text-[#941333]">Home</Link>
+          <span className="shrink-0">/</span>
+          <span className="truncate text-[#5d464c]">{config?.name || vertical}</span>
+        </div>
+        {vertical === "restaurants" && <RestaurantCampaignSlot placement="mobile" />}
+      </div>
+      <div className="mb-2 flex min-w-0 flex-nowrap items-center justify-between gap-1 border-b border-[#ead9ca] pb-2 sm:mb-3 sm:gap-4">
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#fff0c7] text-[#941333] sm:h-9 sm:w-9"><Icon size={17} /></span><div className="min-w-0"><h1 className="truncate text-sm font-bold leading-tight text-[#3b252b] sm:text-xl">{config?.name || vertical}</h1><p className="truncate text-[10px] leading-4 text-[#806d70] sm:text-xs">{filtered.length} listings around Qatar</p></div></div>
+        {vertical === "restaurants" && <RestaurantCampaignSlot placement="desktop" />}
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <button type="button" onClick={() => setSort("best-value")} title="Best value deals" aria-label="Best value deals" className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1.5 text-[10px] font-semibold transition sm:px-2.5 sm:text-xs ${sort === "best-value" ? "border-amber-400 bg-amber-50 text-amber-800" : "border-amber-200 bg-white text-amber-700 hover:bg-amber-50"}`}><Sparkles size={14} className="animate-pulse" /><span>Best Value Deals</span></button>
           <label className="flex shrink-0 items-center gap-1 text-[0px] text-slate-600 sm:gap-2 sm:text-sm"><span className="hidden sm:inline">Sort by</span><select aria-label="Sort by" value={sort} onChange={(event) => setSort(event.target.value)} className="w-[78px] rounded-md border border-slate-300 bg-white px-1.5 py-1.5 text-xs text-slate-800 sm:w-auto sm:px-3 sm:py-2 sm:text-sm">{vertical === "restaurants" ? <><option value="latest">Latest</option>{ENABLE_RANDOM_SORT && <option value="random">Random</option>}<option value="best-value">Best Value</option><option value="price-asc">Low to High</option><option value="price-desc">High to Low</option></> : <><option value="latest">Latest</option><option value="best-value">Best Value</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></>}</select></label>
@@ -1365,8 +1597,28 @@ export function ModernMarketplaceDetail() {
   const whatsappDigits = whatsapp?.replace(/\D/g, "");
   const formattedAmount = amount === null ? "" : numericValue(amount)?.toLocaleString() || String(amount);
   const currency = listing?.pricing?.currency || listing?.currency || "QAR";
+  const seo = marketplaceSeo[vertical] || {
+    label: category?.name || "Local Listings",
+    description: `Browse ${category?.name || "local"} listings in Qatar on Browse Qatar.`,
+  };
+  const detailTitle = listing?.title || `${seo.label} listing`;
+  const detailDescription = listing
+    ? `${String(listing.description || `View details for ${detailTitle}.`).replace(/\s+/g, " ").trim().slice(0, 130)}${locationOf(listing) ? ` Location: ${locationOf(listing)}.` : ""}`.slice(0, 160)
+    : seo.description;
+  const detailCanonical = `https://browseqatar.com/marketplace/${encodeURIComponent(vertical)}/${encodeURIComponent(id)}`;
 
   return <div className="min-h-screen bg-[#fffdfa] text-[#30252a]">
+    <Helmet>
+      <title>{`${detailTitle} | ${seo.label} in Qatar | Browse Qatar`}</title>
+      <meta name="description" content={detailDescription} />
+      <link rel="canonical" href={detailCanonical} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={`${detailTitle} | Browse Qatar`} />
+      <meta property="og:description" content={detailDescription} />
+      <meta property="og:url" content={detailCanonical} />
+      {images[0] && <meta property="og:image" content={images[0]} />}
+      <script type="application/ld+json">{jsonLd(marketplaceBreadcrumbs(vertical, seo.label, detailTitle))}</script>
+    </Helmet>
     <MarketplaceHeader vertical={vertical} />
     <CategoryStrip active={vertical} />
     <CategoryJump />

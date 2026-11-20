@@ -543,7 +543,7 @@ const ListingDetail: React.FC = () => {
       <footer className="bg-muted py-6 px-4 mt-2 pb-8 border-t border-gray-200">
         <div className="container mx-auto text-center text-muted-foreground">
           <div className="flex flex-col md:flex-row items-center justify-center gap-3">
-            <p className="m-0">© {new Date().getFullYear()} BrowseQatar Offers Platform. All rights reserved.</p>
+            <p className="m-0">© {new Date().getFullYear()} Browse Qatar Marketplace. All rights reserved.</p>
             <span className="hidden md:inline text-muted-foreground mr-2">|</span>
             <a href="/terms" className="text-sm text-gray-500 hover:text-blue-600 transition-colors md:mr-3 underline">
               Terms & Conditions

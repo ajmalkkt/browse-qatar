@@ -79,14 +79,14 @@ export default function TopHeader({
                   navigate("/");
                   setMenuOpen(false);
                 }}
-                aria-label="DineDeals Home"
+                aria-label="Browse Qatar Home"
               >
                 <img
                   src="/bqLogo.jpg"
-                  alt="DineDeals"
+                  alt="Browse Qatar"
                   className="w-13 h-11 object-contain shadow-sm"
                 />
-                <span className="sr-only">DineDeals</span>
+                <span className="sr-only">Browse Qatar</span>
                 {currentVertical === 'restaurants' && location.pathname !== '/' && (
                   <span className="ml-3 inline-flex items-center gap-1 px-1 py-1 md:px-3 md:py-1 rounded-full brand-gradient-bg text-white font-semibold text-xs md:text-sm">
                     <img src="/images/chef.jpg" alt="chef" className="w-4 h-4 md:w-5 md:h-5 object-cover rounded waving-chef" />

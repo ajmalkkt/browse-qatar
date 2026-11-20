@@ -395,7 +395,7 @@ function Home() {
         <footer className="bg-muted py-6 px-4 mt-2 pb-8 border-t border-gray-200">
           <div className="container mx-auto text-center text-muted-foreground">
             <div className="flex flex-col md:flex-row items-center justify-center gap-3">
-              <p className="m-0">© {new Date().getFullYear()} BrowseQatar Offers Platform. All rights reserved.</p>
+              <p className="m-0">© {new Date().getFullYear()} Browse Qatar Marketplace. All rights reserved.</p>
               <span className="hidden md:inline text-muted-foreground mr-2">|</span>
               <a href="/terms" className="text-sm text-gray-500 hover:text-blue-600 transition-colors md:mr-3 underline">
                 Terms &amp; Conditions
@@ -417,24 +417,23 @@ function Home() {
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>
-          {searchQuery
-            ? `Search: ${searchQuery} | DineDeals`
-            : currentConfig?.name
-              ? `${currentConfig.name} | DineDeals`
-              : "DineDeals | Best Food Offers & Restaurant Deals in Qatar"}
-        </title>
+        <title>Browse Qatar | Local Marketplace, Listings and Restaurant Offers</title>
         <meta
           name="description"
-          content={`Discover the best restaurant offers, budget meals, and dining deals in ${selectedCountry}. Search by cuisine, location, or restaurant.`}
+          content="Discover restaurant offers, vehicles, accommodation, services, classifieds, and jobs across Qatar. Browse local listings and contact advertisers directly."
         />
-        <link rel="alternate" type="text/markdown" href="/content/offers" />
-        {/* SEO Keywords for Restaurants */}
-        <meta name="keywords" content="Qatar food offers, Doha restaurant deals, budget meals Qatar, buy 1 get 1 food Qatar, best dining offers Doha" />
+        <link rel="canonical" href="https://browseqatar.com/" />
+        <link rel="alternate" type="text/markdown" href="https://browseqatar.com/content/marketplace.md" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Browse Qatar | Qatar Local Marketplace" />
+        <meta property="og:description" content="Explore local listings and offers across restaurants, vehicles, accommodation, services, classifieds, and jobs." />
+        <meta property="og:url" content="https://browseqatar.com/" />
+        <meta property="og:image" content="https://browseqatar.com/bqLogo.jpg" />
+        <meta name="twitter:card" content="summary" />
       </Helmet>
 
       {/* Screen reader only H1 for SEO */}
-      <h1 className="sr-only">Best Food Offers and Dining Deals in Qatar Today</h1>
+      <h1 className="sr-only">Browse Qatar marketplace: local listings, restaurant offers, services, and jobs</h1>
 
       {/* 
          ✅ STICKY TOP HEADER ONLY 
@@ -479,13 +478,11 @@ function Home() {
           onCuisineSelect={handleCuisineSelect}
         />
       </div>
-      {/* 🔍 SEO Marquee Strip */}
+      {/* Marketplace category strip */}
       <div className="overflow-hidden bg-green-50 border-green-200">
         <div className="whitespace-nowrap animate-marquee py-1 text-sm font-medium text-green-900">
           <span className="mx-6">
-            Best food offers in Qatar today • Family dinner buffet offers •
-            Top food offers in Qatar • Budget-friendly options (QAR 1–10) • Best restaurants in Qatar •
-            Affordable restaurants in Doha • Discover the best dining deals in Qatar on BrowseQatar
+            Browse local listings across Qatar • Vehicles • Accommodation • Services • Classifieds • Jobs • Restaurant offers
           </span>
         </div>
       </div>
@@ -549,7 +546,7 @@ function Home() {
           />
         </section>
 
-        {/* --- SEO Content Section for AdSense Appeal --- */}
+        {/* --- Marketplace guide --- */}
         <section className="my-2 max-w-4xl mx-auto px-4">
           <button
             onClick={() => setShowSeoContent(!showSeoContent)}
@@ -557,41 +554,34 @@ function Home() {
           >
             <div className="flex items-center gap-2 text-gray-500 font-medium text-sm">
               <Info size={16} className="text-blue-400" />
-              <span>Guide to Dining Deals in Qatar</span>
+              <span>Guide to the Browse Qatar Marketplace</span>
             </div>
             {showSeoContent ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
           </button>
 
           <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showSeoContent ? 'max-h-[1000px] opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
             <div className="p-6 bg-white rounded-2xl border border-gray-50 shadow-sm leading-relaxed text-slate-500 text-xs font-sans">
-              <h2 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">Your Ultimate Guide to Dining Deals and Food Offers in Qatar</h2>
+              <h2 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">Discover local listings and offers across Qatar</h2>
 
               <div className="space-y-3">
                 <p>
-                  Looking for the <strong>best food offers in Qatar today</strong>? You&apos;ve come to the right place.
-                  <strong> BrowseQatar</strong> is dedicated to bringing you the most up-to-date information on
-                  <strong> dining deals in Qatar</strong>, helping you enjoy premium culinary experiences without breaking the bank.
+                  Browse Qatar brings together local discovery across <strong>restaurant offers, vehicles, accommodation, services, classifieds, and jobs</strong>. Choose a category, review the details available on a listing, and contact the advertiser or provider directly.
                 </p>
 
                 <p>
-                  Whether you are searching for <strong>family dinner buffet offers</strong> for a special weekend treat or
-                  <strong> cheap food offers in Qatar</strong> for your daily lunch, our platform categorizes thousands of deals
-                  from top-rated <strong>restaurants in Doha</strong> and across the country. We specialize in finding
-                  <strong> budget-friendly restaurants in Doha</strong> that offer high-quality meals starting from as low as QAR 1 to QAR 50.
+                  Search and category filters can help narrow the listings shown. Available inventory changes over time, and details such as price, terms, and availability are supplied by the relevant advertiser, service provider, employer, or restaurant.
                 </p>
 
-                <h3 className="text-[11px] font-black text-slate-700 pt-1 uppercase">Why Choose BrowseQatar?</h3>
+                <h3 className="text-[11px] font-black text-slate-700 pt-1 uppercase">Browse categories</h3>
                 <ul className="list-disc pl-4 space-y-1">
-                  <li><strong>Real-time Updates:</strong> We constantly monitor the market to bring you the latest <strong>food offers in Qatar</strong>.</li>
-                  <li><strong>Sustainability First:</strong> Our mission is &quot;No Waste... More Tasty!!!&quot; helping restaurants reduce food wastage while giving you better prices.</li>
-                  <li><strong>Wide Variety:</strong> From <strong>Arabic food deals</strong> to <strong>Chinese buffet offers</strong> and <strong>Italian dining specials</strong>.</li>
-                  <li><strong>Detailed Info:</strong> We provide locations, contact numbers, and validity periods for every offer.</li>
+                  <li><strong>Vehicles:</strong> Review advertised vehicles and the details provided by the seller.</li>
+                  <li><strong>Accommodation:</strong> Browse homes, apartments, rooms, and other accommodation listings.</li>
+                  <li><strong>Services and classifieds:</strong> Explore local service providers and advertised goods.</li>
+                  <li><strong>Jobs and restaurant offers:</strong> Review vacancy information or dining promotions shared by advertisers.</li>
                 </ul>
 
                 <p>
-                  By using our platform, you gain access to the <strong>top food offers in Qatar</strong> across various cuisines
-                  including Indian, Lebanese, Turkish, Pure Vegetarian dishes and Western fusion. Don&apos;t miss out on <strong>best restaurants in Qatar </strong>
-                  that frequently run seasonal promotions for Ramadan, Eid, and National Day.
+                  Browse Qatar is a discovery and advertising platform, not the transaction party. Promoted placements, where labeled, are advertising and are not an endorsement. Confirm important details and terms directly before arranging a purchase, service, job application, accommodation, or restaurant visit.
                 </p>
               </div>
             </div>
@@ -616,7 +606,7 @@ function Home() {
       <footer className="bg-muted py-6 px-4 mt-2 pb-20"> {/* pb-20 adds space for float button */}
         <div className="container mx-auto text-center text-muted-foreground">
           <div className="flex items-center justify-center gap-3">
-            <p className="m-0">© {new Date().getFullYear()} BrowseQatar Offers Platform. All rights reserved.</p>
+            <p className="m-0">© {new Date().getFullYear()} Browse Qatar Marketplace. All rights reserved.</p>
             <span className="text-muted-foreground mr-2">|</span>
             <a href="/terms" className="text-sm text-gray-500 hover:text-blue-600 transition-colors mr-3 underline">
               Terms & Conditions

@@ -3,6 +3,7 @@ Allow: /
 Disallow: /admin
 Disallow: /manage-offers
 Disallow: /make-offer
+Disallow: /admin-guide
 Disallow: /*?utm_*
 
 Sitemap: https://browseqatar.com/sitemap.xml

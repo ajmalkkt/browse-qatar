@@ -1,66 +1,44 @@
-# Features of Browse Qatar
+# Browse Qatar Marketplace Features
 
-## 1. Discover the Best Food Offers in Qatar
+Browse Qatar helps people discover local listings and offers across Qatar. Browse by category, use the search and filters available on the site, review the information published on a listing, and contact the advertiser or provider directly.
 
-Browse hundreds of restaurant deals across Qatar, including:
+## Marketplace categories
 
-- Daily offers
-- Limited-time discounts
-- Special dining experiences
+### Restaurant offers
 
-## 2. Affordable Dining for Every Budget
+Explore dining offers and promotions shared by restaurants. Check each offer for its current terms and contact the restaurant to confirm availability.
 
-Find meals ranging from:
+### Vehicles
 
-- Budget-friendly (QAR 5–20)
-- Mid-range offers
-- Premium dining deals
+Browse vehicle advertisements and review details such as make, model, year, mileage, price, photographs, and location when provided by the advertiser.
 
-## 3. Smart Food Discovery
+### Accommodation
 
-Easily explore restaurants by:
+Explore accommodation advertisements, including homes, apartments, and rooms. Confirm availability, fees, terms, and property details directly with the advertiser.
 
-- Location (Doha and beyond)
-- Cuisine type
-- Price range
-- Popularity
+### Local services
 
-## 4. Real-Time Offer Updates
+Find advertised local services and provider details. Discuss scope, pricing, schedule, and qualifications directly with the service provider.
 
-We ensure:
+### Classifieds
 
-- Offers are regularly updated
-- Accurate deal information
-- No outdated listings
+Browse items advertised locally, including furniture, electronics, appliances, and other goods. Inspect the item and agree on collection, delivery, and payment directly with the advertiser.
 
-## 5. Family & Group Dining Deals
+### Jobs
 
-Perfect for:
+Review advertised vacancies and application instructions. Employers and advertisers provide job details; applicants should confirm role information directly.
 
-- Family dinners
-- Weekend outings
-- Buffet experiences
-- Group celebrations
+## Search, filters, and favorites
 
-## 6. Wide Restaurant Coverage
+Search across the marketplace and use category-specific filters where available. Save supported listings to favorites for easier access. Favorites may remain in browser storage when signed out; signing in enables account synchronization where available.
 
-From:
+## Listing and advertising information
 
-- Local favorites
-- Cafés and fast food
-- Premium restaurants
-- Hotel dining
+Some placements may be labeled promoted or sponsored. This label indicates advertising placement, not independent verification or endorsement. Advertiser-submitted details and availability can change, so confirm important terms directly.
 
-## 7. Sustainability Focus
+## Explore
 
-Browse Qatar actively supports:
-
-- Reduction of food wastage
-- Better utilization of restaurant capacity
-- Responsible consumption
-
-## 8. Simple & User-Friendly Experience
-
-- Easy browsing
-- Quick discovery
-- Transparent pricing
+- [Browse the marketplace](https://browseqatar.com/)
+- [Help and FAQs](https://browseqatar.com/faq)
+- [About Browse Qatar](https://browseqatar.com/about)
+- [Terms of Use](https://browseqatar.com/terms)

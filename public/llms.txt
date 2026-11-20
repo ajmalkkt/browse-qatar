@@ -1,0 +1,27 @@
+# Browse Qatar
+
+> Browse Qatar is a Qatar local discovery and advertising marketplace for restaurant offers, vehicles, accommodation, services, classifieds, and jobs.
+
+Browse Qatar helps visitors browse category listings, review advertiser-provided information, and contact the relevant seller, service provider, employer, or restaurant directly. It is not generally the transaction party and does not guarantee every listing's accuracy or availability. Promoted or sponsored placements are advertising, not endorsements.
+
+## Main pages
+
+- [Marketplace home](https://browseqatar.com/): Browse categories and current marketplace content.
+- [Vehicles](https://browseqatar.com/marketplace/vehicles): Vehicle listings in Qatar.
+- [Accommodation](https://browseqatar.com/marketplace/accommodations): Accommodation listings in Qatar.
+- [Services](https://browseqatar.com/marketplace/services): Local service listings in Qatar.
+- [Classifieds](https://browseqatar.com/marketplace/classifieds): Advertised goods and local classifieds.
+- [Jobs](https://browseqatar.com/marketplace/jobs): Job advertisements in Qatar.
+- [Restaurant offers](https://browseqatar.com/marketplace/restaurants): Dining offers and promotions.
+
+## Reference content
+
+- [Marketplace overview for AI systems](https://browseqatar.com/content/marketplace.md)
+- [About Browse Qatar](https://browseqatar.com/content/about.md)
+- [Marketplace features](https://browseqatar.com/content/features.md)
+- [Help and FAQs](https://browseqatar.com/content/faq.md)
+- [Restaurant offers](https://browseqatar.com/content/offers.md)
+- [Restaurants](https://browseqatar.com/content/restaurants.md)
+- [Terms of Use](https://browseqatar.com/terms)
+
+Category inventory, listing details, prices, and availability can change. Refer to the relevant live page and confirm important details with the advertiser or provider.

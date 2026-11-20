@@ -16,11 +16,13 @@ const CuisinesPage = () => {
     return (
         <div className="min-h-screen bg-gray-50 pb-12">
             <Helmet>
-                <title>Explore Global Cuisines in Qatar | Browse Qatar</title>
-                <meta name="description" content="Discover the variety of cuisines available in Qatar. From traditional Arabic and Qatari dishes to Italian, Chinese, and Indian flavors. Find the best dining deals by cuisine." />
+                <title>Explore Restaurant Cuisines in Qatar | Browse Qatar</title>
+                <meta name="description" content="Explore cuisines represented by restaurants and dining offers in Qatar. Browse available restaurant promotions and confirm offer details directly." />
                 <link rel="canonical" href="https://browseqatar.com/cuisines" />
-                <meta property="og:title" content="Discover Cuisines in Qatar - Arabic, Indian, Italian & More" />
-                <meta property="og:description" content="Explore a world of flavors. Browse top dining offers in Qatar categorized by cuisine." />
+                <link rel="alternate" type="text/markdown" href="https://browseqatar.com/content/restaurants.md" />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Explore Restaurant Cuisines in Qatar | Browse Qatar" />
+                <meta property="og:description" content="Browse cuisines and restaurant offers available across Qatar." />
                 <meta property="og:url" content="https://browseqatar.com/cuisines" />
                 <meta property="og:image" content="https://browseqatar.com/bqLogo.jpg" />
             </Helmet>

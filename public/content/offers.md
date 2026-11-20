@@ -1,47 +1,24 @@
-# Food Offers in Qatar – Browse Qatar
+# Restaurant Offers in Qatar — Browse Qatar
 
-Browse Qatar provides a centralized platform to discover the best food offers in Qatar today.
+Browse Qatar includes a restaurant-offer category alongside local marketplace listings for vehicles, accommodation, services, classifieds, and jobs. Restaurant offers are published by participating restaurants or advertisers and may vary in availability and terms.
 
-## Types of Offers Available
+## Exploring restaurant offers
 
-- Discounted meals (10%–50%)
-- Combo offers
-- Buffet deals
-- Family dinner packages
-- Limited-time restaurant deals
+Browse current restaurant offers and promotions in Qatar. Review the offer details, validity dates, conditions, and contact information provided on each page. Contact the restaurant directly to confirm that an offer is available before visiting or placing an order.
 
-## Budget-Friendly Deals
+## How to use an offer
 
-We highlight low-cost dining options including:
+1. Browse restaurant offers and open an offer that interests you.
+2. Read its details and any eligibility or redemption conditions.
+3. Contact the restaurant or follow the instructions provided with the offer.
+4. Confirm current availability and terms directly with the restaurant.
 
-- Meals starting from QAR 5
-- Affordable daily offers
-- Value deals for students and professionals
+Browse Qatar is a discovery platform and does not sell restaurant meals or guarantee that third-party offer details remain current.
 
-## Categories of Food
+## Explore other categories
 
-Explore offers across:
-
-- Arabic cuisine
-- Indian cuisine
-- Fast food
-- Cafés and desserts
-- Healthy meals
-
-## How It Works
-
-1. Browse available offers
-2. Choose your preferred deal
-3. Visit or order from the restaurant
-4. Enjoy great food at lower prices
-
-## Why Choose Browse Qatar?
-
-- Verified restaurant offers
-- Regular updates
-- Wide variety of options
-- Transparent and simple experience
-
-## Explore Dining Deals in Doha
-
-From affordable restaurants in Doha to premium dining experiences, Browse Qatar helps you find the perfect deal for every occasion.
+- [Vehicles](https://browseqatar.com/marketplace/vehicles)
+- [Accommodation](https://browseqatar.com/marketplace/accommodations)
+- [Services](https://browseqatar.com/marketplace/services)
+- [Classifieds](https://browseqatar.com/marketplace/classifieds)
+- [Jobs](https://browseqatar.com/marketplace/jobs)

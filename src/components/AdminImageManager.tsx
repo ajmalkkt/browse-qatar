@@ -792,8 +792,8 @@ export default function ManageOffers() {
           {renderSidebarItem("dashboard", <LayoutDashboard size={20} />, "Dashboard")}
           {renderSidebarItem("restaurants", <Store size={20} />, "Restaurants")}
           {renderSidebarItem("offers", <Tag size={20} />, "Restaurant offers")}
-          {renderSidebarItem("providers", <Building2 size={20} />, "Ads Providers")}
-          {renderSidebarItem("listings", <List size={20} />, "Manage Your Ads")}
+          {renderSidebarItem("providers", <Building2 size={20} />, "Listing Owners")}
+          {renderSidebarItem("listings", <List size={20} />, "Manage Your Listings")}
           {/* New Messages Item */}
           {renderSidebarItem("messages", <MessageSquare size={20} />, "Messages")}
         </nav>
@@ -889,7 +889,7 @@ export default function ManageOffers() {
               {/* Stat Cards — row 2: Providers, Listings */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
                 {[
-                  { icon: <Building2 size={22} />, color: "text-indigo-600", bg: "bg-indigo-100", label: "Ad Providers", val: user?.role === "admin" ? providers.length : providers.filter((p: any) => p.ownerLogin === user?.email || p.email === user?.email).length },
+                  { icon: <Building2 size={22} />, color: "text-indigo-600", bg: "bg-indigo-100", label: "Listing Owners", val: user?.role === "admin" ? providers.length : providers.filter((p: any) => p.ownerLogin === user?.email || p.email === user?.email).length },
                   { icon: <List size={22} />, color: "text-teal-600", bg: "bg-teal-100", label: "Total Ad Listings", val: user?.role === "admin" ? listings.length : listings.filter((l: any) => l.ownerLogin === user?.email).length },
                 ].map((stat, idx) => (
                   <div key={idx} className="bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
@@ -915,14 +915,14 @@ export default function ManageOffers() {
                   <button onClick={() => setActiveTab('offers')} className="w-full md:w-auto bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">Go to Restaurant Offers</button>
                 </div>
                 <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Your Ad Provider/Business</h3>
-                  <p className="text-indigo-100 mb-3 text-xs">Register your company or provider for grouping Ads.</p>
-                  <button onClick={() => setActiveTab('providers')} className="w-full md:w-auto bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition">Go to Ad Providers</button>
+                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Listing Owners</h3>
+                  <p className="text-indigo-100 mb-3 text-xs">Register your company or provider for grouping your listings.</p>
+                  <button onClick={() => setActiveTab('providers')} className="w-full md:w-auto bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition">Go to Listing Owners</button>
                 </div>
                 <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 text-white shadow-lg">
-                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Your Ads</h3>
-                  <p className="text-teal-100 mb-3 text-xs">Post Ads for vehicles, accommodation, services.</p>
-                  <button onClick={() => setActiveTab('listings')} className="w-full md:w-auto bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Your Ads</button>
+                  <h3 className="text-base md:text-lg font-bold mb-1">Manage Your Listings</h3>
+                  <p className="text-teal-100 mb-3 text-xs">Post listings for vehicles, accommodation, services.</p>
+                  <button onClick={() => setActiveTab('listings')} className="w-full md:w-auto bg-white text-teal-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-50 transition">Go to Your Listings</button>
                 </div>
               </div>
 
@@ -1314,7 +1314,7 @@ export default function ManageOffers() {
                 <div className="flex items-end gap-2 w-full md:w-auto">
                   <div className="bg-blue-100 p-2 rounded-lg text-blue-600"><List size={20} /></div>
                   <div className="flex-1">
-                    <label className="text-xs text-gray-500 font-semibold block mb-1">SELECT AD PROVIDER</label>
+                    <label className="text-xs text-gray-500 font-semibold block mb-1">SELECT PROVIDER</label>
                     <select
                       value={selectedRestaurant}
                       onChange={handleSelectRestaurant}
@@ -1360,7 +1360,7 @@ export default function ManageOffers() {
                 <div className="text-center py-20 text-gray-400">
                   <List size={48} className="mx-auto mb-4 opacity-20" />
                   <p>Please select a provider to manage listings. 
-                    If you do not have registered the provider/business yet, go to Ads Providers menu to do so first.</p>
+                    If you do not have registered the provider/business yet, go to Listing Owners menu to do so first.</p>
                 </div>
               ) : (
                 <>

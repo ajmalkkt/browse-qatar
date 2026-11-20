@@ -1,45 +1,18 @@
-# Restaurants in Qatar – Discover Dining with Browse Qatar
+# Restaurant Offers in Qatar — Browse Qatar
 
-Browse Qatar connects you with some of the best restaurants in Qatar, from local favorites to premium dining destinations.
+Browse Qatar helps visitors discover restaurant offers and dining promotions shared by restaurants across Qatar. The restaurant-offer category is part of a broader marketplace that also features vehicles, accommodation, services, classifieds, and jobs.
 
-## Types of Restaurants
+## Browse restaurant listings and offers
 
-- Affordable restaurants in Doha
-- Premium dining experiences
-- Family-friendly restaurants
-- Cafés and casual dining
-- Fast food and takeaway
+Review each restaurant offer for its description, validity, conditions, location, and contact information. Offers and availability are provided by the relevant restaurant or advertiser and may change. Contact the restaurant directly to confirm details before making plans.
 
-## Popular Dining Experiences
+## For restaurants
 
-- Buffet dinners
-- Group dining offers
-- Weekend specials
-- Seasonal promotions
+Eligible restaurants can use Browse Qatar to advertise offers and help customers discover dining options. Restaurants are responsible for providing accurate details, current terms, and valid contact information.
 
-## Why Restaurants Partner with Browse Qatar
+Browse Qatar is not a restaurant, does not prepare or sell meals, and does not guarantee a third-party offer or dining experience.
 
-We help restaurants:
-
-- Reduce food wastage
-- Increase customer reach
-- Promote dining offers effectively
-- Improve visibility in the market
-
-## Discover New Places
-
-Browse Qatar makes it easy to:
-
-- Explore new cuisines
-- Try different restaurants
-- Find hidden gems across Qatar
-
-## A Platform for Everyone
-
-Whether you are:
-
-- A food lover
-- A family planner
-- A tourist exploring Qatar
-
-Browse Qatar helps you find the perfect place to dine.
+- [Explore restaurant offers](https://browseqatar.com/marketplace/restaurants)
+- [View all restaurants](https://browseqatar.com/all-restaurants)
+- [Browse cuisines](https://browseqatar.com/cuisines)
+- [Read marketplace FAQs](https://browseqatar.com/faq)

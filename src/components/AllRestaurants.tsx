@@ -64,12 +64,13 @@ export default function AllRestaurants() {
     return (
         <div className={`min-h-screen flex flex-col ${isV2Theme ? "bg-[#fffdfa] text-[#30252a]" : "bg-gray-50"}`}>
             <Helmet>
-                <title>All Restaurants in Qatar | Browse Best Dining Places & Cuisines – BrowseQatar</title>
-                <meta name="description" content="Explore a comprehensive list of restaurants in Qatar. Search by cuisine, location, and rating to find the perfect dining spot for your next meal." />
+                <title>Restaurants and Dining Offers in Qatar | Browse Qatar</title>
+                <meta name="description" content="Explore restaurant information and dining offers in Qatar. Browse cuisines and locations, then contact restaurants directly to confirm details." />
                 <link rel="canonical" href="https://browseqatar.com/all-restaurants" />
-                <link rel="alternate" type="text/markdown" href="/content/restaurants" />
-                <meta property="og:title" content="Find Restaurants in Qatar - Browse Best Dining Places" />
-                <meta property="og:description" content="Discover restaurants across Qatar. Search by cuisine, view ratings, and find the best locations to dine in Doha and beyond." />
+                <link rel="alternate" type="text/markdown" href="https://browseqatar.com/content/restaurants.md" />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Restaurants and Dining Offers in Qatar | Browse Qatar" />
+                <meta property="og:description" content="Explore restaurant information, cuisines, and dining offers across Qatar." />
                 <meta property="og:url" content="https://browseqatar.com/all-restaurants" />
                 <meta property="og:image" content="https://browseqatar.com/bqLogo.jpg" />
                 <meta name="twitter:card" content="summary_large_image" />

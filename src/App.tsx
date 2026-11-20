@@ -55,6 +55,7 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/features" element={<Features />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/help" element={<Navigate to="/faq" replace />} />
               {/*<Route path="/login" element={<LoginPage />} /> */}
               <Route path="/make-offer" element={<AdminRoute><MakeOffer /></AdminRoute>} />
               <Route path="/admin-guide" element={<ProtectedRoute><AdminUserGuide /></ProtectedRoute>} />

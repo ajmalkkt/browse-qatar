@@ -1,61 +1,41 @@
-# Browse Qatar – Dine Offers Platform
+# About Browse Qatar
 
-## No Waste... More Tasty!!!
+Browse Qatar is a local discovery and advertising marketplace for people and businesses in Qatar. It brings several types of local listings and offers together so visitors can browse by category, review information, and contact the relevant advertiser or provider.
 
-Browse Qatar (BQ’s Dine Offers) is a smart food discovery platform designed to help users find the best food offers in Qatar while promoting a meaningful mission — reducing food wastage.
+## What you can discover
 
-We connect food lovers with restaurants, cafés, and hotels across Qatar, making it easy to explore dining deals in Doha and beyond.
+- **Restaurant offers:** dining deals and promotions shared by restaurants.
+- **Vehicles:** cars and other vehicle advertisements.
+- **Accommodation:** homes, apartments, rooms, and other accommodation listings.
+- **Services:** local service advertisements and provider details.
+- **Classifieds:** items such as furniture, electronics, appliances, and more.
+- **Jobs:** advertised vacancies and role information.
 
-## Our Mission
+Browse categories from [the marketplace home page](https://browseqatar.com/) or open a category directly:
 
-Our primary goal is to:
+- [Restaurant offers](https://browseqatar.com/marketplace/restaurants)
+- [Vehicles](https://browseqatar.com/marketplace/vehicles)
+- [Accommodation](https://browseqatar.com/marketplace/accommodations)
+- [Services](https://browseqatar.com/marketplace/services)
+- [Classifieds](https://browseqatar.com/marketplace/classifieds)
+- [Jobs](https://browseqatar.com/marketplace/jobs)
 
-- Reduce food wastage
-- Help customers save money
-- Support restaurants by improving visibility of offers
+## How Browse Qatar works
 
-We believe great food should never go to waste.
+Visitors can explore public listings and offers, use available category filters, save supported favorites, and follow the contact instructions on an individual listing. Account features may be required to publish or manage advertisements or synchronize favorites.
 
-## What We Do
+Browse Qatar is a discovery platform. Advertisers and providers supply listing details and remain responsible for their accuracy and availability. Users should confirm important information, terms, and the identity of the other party directly before making a decision or transaction.
 
-Browse Qatar brings together:
+Promoted or sponsored placements, where labeled, are advertising placements and are not a guarantee or endorsement by Browse Qatar.
 
-- Best food offers in Qatar today
-- Affordable dining deals across Doha
-- Family buffet and group dining offers
-- Budget-friendly meals (QAR 5–20)
-- Premium restaurant deals
+## For advertisers and local businesses
 
-All in one simple and transparent platform.
+Eligible businesses and advertisers can use Browse Qatar to present offers or listings to people exploring local options. Posting availability and requirements can vary by category. Advertisers should provide accurate, current, and lawful content and respond to enquiries using the contact details they publish.
 
-## Who Is It For?
+## Help and policies
 
-Browse Qatar is built for:
+- [Help and frequently asked questions](https://browseqatar.com/faq)
+- [Marketplace features](https://browseqatar.com/features)
+- [Terms of Use](https://browseqatar.com/terms)
 
-- Students looking for budget meals
-- Families planning dining experiences
-- Professionals ordering daily food
-- Food lovers exploring new restaurants
-- Tourists discovering Qatar cuisine
-
-## Why Browse Qatar?
-
-Finding food deals can be time-consuming. We simplify it by:
-
-- Aggregating offers from multiple restaurants
-- Updating deals regularly
-- Providing budget-friendly options
-- Offering a centralized discovery platform
-
-## Dining Experience for Every Budget
-
-From casual cafés to premium restaurants, Browse Qatar helps you:
-
-- Discover affordable restaurants in Doha
-- Explore top-rated dining spots
-- Enjoy quality food without overspending
-- Find Pure Vegetarian restaurants and vegetarian-friendly dining deals
-
-## Our Vision
-
-To become the go-to platform for discovering and enjoying the best dining deals in Qatar — while making food consumption more sustainable.
+Browse Qatar currently serves local discovery across Qatar. Category inventory and availability vary over time.

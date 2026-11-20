@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import {
   ArrowRight,
   BriefcaseBusiness,
@@ -75,6 +76,19 @@ export default function BrowseQatarHomeV2() {
   };
 
   return <main className="min-h-screen bg-[#fffdfa] text-[#24171b]">
+    <Helmet>
+      <title>Browse Qatar | Qatar Marketplace for Local Listings and Offers</title>
+      <meta name="description" content="Find restaurant offers, vehicles, accommodation, services, classifieds and jobs across Qatar. Browse local listings and contact advertisers directly." />
+      <link rel="canonical" href="https://browseqatar.com/" />
+      <link rel="alternate" type="text/markdown" href="https://browseqatar.com/content/marketplace.md" />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="Browse Qatar" />
+      <meta property="og:title" content="Browse Qatar | Qatar Marketplace" />
+      <meta property="og:description" content="Explore local listings and offers across restaurants, vehicles, accommodation, services, classifieds and jobs." />
+      <meta property="og:url" content="https://browseqatar.com/" />
+      <meta property="og:image" content="https://browseqatar.com/bqLogo.jpg" />
+      <meta name="twitter:card" content="summary" />
+    </Helmet>
     <header className="sticky top-0 z-40 w-full bg-[#fffdfa]/95 px-4 pt-2 backdrop-blur-md sm:px-6 sm:pt-3 lg:px-10 lg:pt-4">
       <div className="flex flex-nowrap items-center gap-1 sm:gap-3 lg:gap-5">
         <details className="group relative shrink-0">

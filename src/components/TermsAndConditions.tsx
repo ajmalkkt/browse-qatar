@@ -11,9 +11,14 @@ const TermsAndConditions = () => {
     return (
         <div className={`min-h-screen font-sans ${isV2Theme ? "bg-[#fffdfa] text-[#30252a]" : "bg-white text-gray-800"}`}>
             <Helmet>
-                <title>Terms of Use | Browse Qatar - Dining Offers Platform</title>
-                <meta name="description" content="Read the terms and conditions for using Browse Qatar. Learn about our platform nature, eco-friendly mission, and data privacy policies." />
+                <title>Terms of Use | Browse Qatar Marketplace</title>
+                <meta name="description" content="Review Browse Qatar's marketplace terms for listings, restaurant offers, advertisers, promoted placements, user conduct, and direct transactions." />
                 <link rel="canonical" href="https://browseqatar.com/terms" />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Terms of Use | Browse Qatar Marketplace" />
+                <meta property="og:description" content="Terms for using Browse Qatar to discover listings, restaurant offers, services, accommodation, classifieds, and jobs." />
+                <meta property="og:url" content="https://browseqatar.com/terms" />
+                <meta property="og:image" content="https://browseqatar.com/bqLogo.jpg" />
             </Helmet>
             {/* Header */}
             <header className={`sticky top-0 z-10 ${isV2Theme ? "bg-[#fffdfa] border-b border-[#ead9ca]" : "bg-white border-b border-gray-100"}`}>
@@ -38,8 +43,7 @@ const TermsAndConditions = () => {
                 <div className="mb-12 text-center">
                     <h2 className={`text-3xl font-bold mb-4 ${isV2Theme ? "text-[#851432]" : "text-gray-900"}`}>Welcome to BrowseQatar</h2>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        We are committed to creating a transparent, safe, and eco-friendly platform.
-                        Please read our terms carefully to understand our mutual agreement.
+                        These terms apply when you browse, save, post, or respond to marketplace listings and restaurant offers on Browse Qatar.
                     </p>
                 </div>
 
@@ -53,7 +57,24 @@ const TermsAndConditions = () => {
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">1. Platform Nature</h3>
                                 <p className="text-gray-600 leading-relaxed">
-                                    BrowseQatar acts exclusively as an <strong>Offer Aggregator Platform</strong>. We do not sell products, manage inventory, or handle payment transactions for goods. Our sole purpose is to connect users with offers from partner restaurants. Any transaction or service agreement is strictly between the user and the respective restaurant.
+                                    Browse Qatar is a discovery and advertising marketplace for restaurant offers, vehicles, accommodation, services, classifieds, and job listings. Unless a specific service expressly states otherwise, Browse Qatar is not the seller, buyer, landlord, tenant, employer, applicant, service provider, or restaurant, and does not own or control third-party listings, inventory, or offers. Transactions and arrangements are made directly between the users and the relevant advertiser or provider.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className={`${isV2Theme ? "bg-[#fff7e6] border-[#ead9ca]" : "bg-amber-50/50 border-amber-100"} rounded-2xl p-8 border`}>
+                        <div className="flex items-start gap-4">
+                            <div className={`${isV2Theme ? "bg-[#fff0c7] text-[#941333]" : "bg-amber-100 text-amber-700"} p-3 rounded-xl`}>
+                                <FileText size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">2. Listings, Offers & Advertisements</h3>
+                                <p className="text-gray-600 leading-relaxed">
+                                    Advertisers and providers are responsible for the accuracy, legality, and currency of the information they submit, including prices, descriptions, images, contact information, eligibility, and availability. Information may change; confirm material details directly before paying, visiting, applying, or entering an agreement.
+                                </p>
+                                <p className="mt-3 text-gray-600 leading-relaxed">
+                                    Paid or promoted placements may be labeled as promoted or sponsored. Such placement is advertising and does not mean Browse Qatar guarantees, independently verifies, or endorses the advertiser, item, offer, vacancy, or service.
                                 </p>
                             </div>
                         </div>
@@ -66,7 +87,7 @@ const TermsAndConditions = () => {
                                 <Leaf size={24} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">2. Our Green Initiative</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">3. Our Green Initiative</h3>
                                 <p className="text-gray-600 leading-relaxed">
                                     We are dedicated to sustainable practices. A core part of our mission is to <strong>Help Save Food</strong> and reduce waste. We prioritize partners who share our eco-friendly values. Users and partners are encouraged to use our platform to promote sustainable consumption and reduce environmental impact.
                                 </p>
@@ -81,7 +102,7 @@ const TermsAndConditions = () => {
                                 <Shield size={24} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">3. Content & Safety Policy</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">4. Content & Safety Policy</h3>
                                 <p className="text-gray-600 leading-relaxed mb-4">
                                     We maintain a <strong>Zero Tolerance Policy</strong> for offensive or harmful content. Uploading or sharing content that depicts, encourages, or relates to:
                                 </p>
@@ -104,7 +125,7 @@ const TermsAndConditions = () => {
                                 <Lock size={24} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">4. Data Privacy & Communication</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">5. Data Privacy & Communication</h3>
                                 <p className="text-gray-600 leading-relaxed">
                                     We respect your privacy. All personal information (such as Name, Email, and Phone Number) collected is used <strong>solely for communication related to your partnership or activities with BrowseQatar</strong>.
                                 </p>
@@ -123,9 +144,9 @@ const TermsAndConditions = () => {
                                 <FileText size={24} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">5. Limitation of Liability</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">6. Limitation of Liability</h3>
                                 <p className="text-gray-600 leading-relaxed">
-                                    BrowseQatar acts as an information service. While we strive for accuracy, we adhere to a standard "As Is" liability policy. We are not responsible for the quality, safety, or legality of the offers provided by third-party restaurants, nor for any disputes arising from transactions between users and partners.
+                                    Browse Qatar provides marketplace information on an "as available" basis. To the extent permitted by applicable law, Browse Qatar is not responsible for third-party listing accuracy, the quality or safety of goods and services, job outcomes, accommodation conditions, restaurant offers, or disputes arising from arrangements between users and advertisers or providers. Nothing in these terms limits any rights that cannot be excluded under applicable law.
                                 </p>
                             </div>
                         </div>
@@ -134,7 +155,7 @@ const TermsAndConditions = () => {
 
                 <div className="mt-12 text-center border-t border-gray-100 pt-8">
                     <p className="text-sm text-gray-400">
-                        Last Updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        Last Updated: November 20, 2026
                     </p>
                 </div>
             </main>
