@@ -27,12 +27,18 @@ import NotFound from "./components/NotFound";
 import Features from "./components/Feature";
 import FAQ from "./components/FAQ";
 import RestaurantDetails from "./components/RestaurantDetails";
+import FestivalFloatingPromotion from "./components/FestivalFloatingPromotion";
 
 function App() {
   const location = useLocation();
   // V2 takes precedence when both modern design flags are enabled.
   const isModernViewV2Enabled = import.meta.env.VITE_MODERN_VIEW_V2 === "true";
   const isModernViewEnabled = isModernViewV2Enabled || location.pathname === "/modern-v2" || import.meta.env.VITE_MODERN_VIEW === "true";
+  const isModernMarketplaceRoute = isModernViewEnabled && (
+    location.pathname === "/" ||
+    location.pathname === "/modern-v2" ||
+    location.pathname.startsWith("/marketplace/")
+  );
 
   return (
     <VerticalProvider>
@@ -40,6 +46,7 @@ function App() {
         <div className={`min-h-screen ${isModernViewEnabled ? "bg-[#f5f6f7]" : "bg-gradient-to-br from-blue-50 via-white to-blue-100"} ${isModernViewEnabled ? "" : "flex items-center justify-center"}`}>
           <div className={isModernViewEnabled ? "w-full" : "max-w-screen-lg w-full mx-auto px-4 sm:px-6 lg:px-8 bg-white rounded-xl shadow-xl border border-gray-200"}>
             <LoginModal /> {/* Add this here, outside Routes */}
+            {isModernMarketplaceRoute && <FestivalFloatingPromotion />}
             <Routes>
               <Route path="/" element={isModernViewV2Enabled ? <BrowseQatarHomeV2 /> : isModernViewEnabled ? <ModernMarketplaceHome /> : <Home />} />
               <Route path="/modern-v2" element={<BrowseQatarHomeV2 />} />

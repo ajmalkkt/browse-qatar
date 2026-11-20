@@ -46,6 +46,7 @@ import type { Vertical as ApiVertical } from "../services/verticalService";
 import { getProviderById } from "../services/providerService";
 import { verticalConfig } from "../config/verticalConfig";
 import { marketplaceSpotlight } from "../config/marketplaceSpotlight";
+import { marketplaceCampaignSlot } from "../config/marketplaceCampaignSlot";
 import { cuisineLists, ENABLE_RANDOM_SORT, ENABLE_SIGNUP, SHOW_DISCOUNTED_PRICE } from "../config/appConfig";
 import SharePopup from "./SharePopup";
 import useAuth from "../auth/useAuth";
@@ -122,50 +123,53 @@ const categoryImages: Record<string, string> = {
 
 const categories = Object.values(verticalConfig).filter((item) => item.enabled);
 
-function RestaurantCampaignSlot({ placement = "desktop" }: { placement?: "mobile" | "desktop" }) {
+function MarketplaceCampaignSlot({ vertical, placement = "desktop" }: { vertical: string; placement?: "mobile" | "desktop" }) {
   const [isOpen, setIsOpen] = useState(false);
+  const campaign = marketplaceCampaignSlot;
+  const popup = campaign.popup;
+  const shouldShow = campaign.enabled && campaign.categoryIds.includes(vertical);
+  const usesPopup = campaign.action.type === "popup";
 
   useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsOpen(false);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+      if (!isOpen || !usesPopup) return;
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "Escape") setIsOpen(false);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, usesPopup]);
+
+  if (!shouldShow) return null;
+
+  const triggerContent = placement === "mobile" ? <>
+      <Leaf size={13} aria-hidden="true" />
+      <span className="whitespace-nowrap">{campaign.mobileLabel}</span>
+  </> : <>
+      {campaign.desktopImage ? <img src={campaign.desktopImage.src} alt={campaign.desktopImage.alt} className="h-full w-24 shrink-0 rounded-md object-cover" /> : <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-green-100 text-green-700"><Leaf size={22} aria-hidden="true" /></span>}
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2">
+          <span className="truncate text-base font-bold text-green-800">{campaign.title}</span>
+          <span className="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-800">{campaign.label}</span>
+        </span>
+        <span className="mt-1 block truncate text-xs text-green-800/80">{campaign.description}</span>
+      </span>
+      <span className="shrink-0 text-xs font-semibold text-green-800">{usesPopup ? "Our story" : "Learn more"} <span aria-hidden="true">→</span></span>
+  </>;
+
+  const triggerClassName = placement === "mobile"
+      ? "inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2 py-1.5 text-[10px] font-bold text-green-800 transition hover:border-green-400 hover:bg-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
+      : "flex h-[76px] min-w-0 w-full max-w-[620px] items-center gap-4 overflow-hidden rounded-xl border border-green-200 bg-gradient-to-r from-[#f0fdf4] via-[#f7fff7] to-[#dcfce7] px-5 text-left shadow-sm transition hover:border-green-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2";
+  const trigger = campaign.action.type === "popup"
+      ? <button type="button" onClick={() => setIsOpen(true)} aria-haspopup="dialog" className={triggerClassName}>{triggerContent}</button>
+      : <a href={campaign.action.url} target={campaign.action.openInNewTab ? "_blank" : undefined} rel={campaign.action.openInNewTab ? "noreferrer" : undefined} className={triggerClassName}>{triggerContent}</a>;
 
   return <>
       {placement === "mobile" ? <div className="flex justify-center lg:hidden">
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          aria-haspopup="dialog"
-          className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2 py-1.5 text-[10px] font-bold text-green-800 transition hover:border-green-400 hover:bg-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
-        >
-          <Leaf size={13} aria-hidden="true" />
-          <span className="whitespace-nowrap uppercase">Eco Initiative</span>
-        </button>
-      </div> : <div className="hidden min-w-0 flex-1 justify-center lg:flex">
-        <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        aria-haspopup="dialog"
-        className="hidden h-[76px] min-w-0 w-full max-w-[620px] items-center gap-4 overflow-hidden rounded-xl border border-green-200 bg-gradient-to-r from-[#f0fdf4] via-[#f7fff7] to-[#dcfce7] px-5 text-left shadow-sm transition hover:border-green-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 lg:flex"
-      >
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-green-100 text-green-700">
-          <Leaf size={22} aria-hidden="true" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-2">
-            <span className="truncate text-base font-bold text-green-800">No Waste... More Tasty!!!</span>
-            <span className="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-800"> Eco Initiative</span>
-          </span>
-          <span className="mt-1 block truncate text-xs text-green-800/80">Save food, celebrate every meal, and help reduce food waste.</span>
-        </span>
-        <span className="shrink-0 text-xs font-semibold text-green-800">Our story <span aria-hidden="true">→</span></span>
-        </button>
-      </div>}
-    {isOpen && <div
+        {trigger}
+        </div> : <div className="hidden min-w-0 flex-1 justify-center lg:flex">
+          {trigger}
+        </div>}
+      {isOpen && popup && <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) setIsOpen(false);
@@ -187,20 +191,14 @@ function RestaurantCampaignSlot({ placement = "desktop" }: { placement?: "mobile
         </button>
         <header className="relative shrink-0 bg-green-800 px-5 py-5 text-center text-white sm:px-7">
           <Leaf className="mx-auto mb-2 opacity-90" size={26} aria-hidden="true" />
-          <h2 id="eco-campaign-title" className="text-xl font-bold tracking-wide sm:text-2xl">No Waste... More Tasty!!!</h2>
-          <p className="mt-1 text-xs tracking-widest text-green-100 sm:text-sm">A Browse Qatar Eco Initiative</p>
+          <h2 id="eco-campaign-title" className="text-xl font-bold tracking-wide sm:text-2xl">{popup.title}</h2>
+          <p className="mt-1 text-xs tracking-widest text-green-100 sm:text-sm">{popup.eyebrow}</p>
         </header>
         <div className="overflow-y-auto px-5 py-5 text-center sm:px-8 sm:py-7">
           <HeartHandshake className="mx-auto mb-4 text-green-700/40" size={38} aria-hidden="true" />
-          <p className="mb-4 text-base italic leading-relaxed text-slate-700 sm:text-lg">
-            Every grain has a story, and every plate has a purpose. Great taste should never end in waste.
-          </p>
-          <p className="mb-4 text-sm leading-6 text-slate-700">
-            When you choose to save food, you help honor the farmers who grew it, the people who prepared it, and the planet that sustains us.
-          </p>
-          <p className="text-sm leading-6 text-slate-700">
-            Join us in ordering mindfully, enjoying every meal, and sharing responsibly. Browse restaurant offers and look for Super Saver deals when available.
-          </p>
+          {popup.paragraphs.map((paragraph, index) => <p key={`${index}-${paragraph}`} className={`${index < popup.paragraphs.length - 1 ? "mb-4" : ""} text-sm leading-6 text-slate-700 ${index === 0 ? "text-base italic sm:text-lg" : ""}`}>
+            {paragraph}
+          </p>)}
         </div>
         <div className="h-1.5 shrink-0 bg-green-800" />
       </section>
@@ -1472,11 +1470,11 @@ export function ModernMarketplaceListing() {
           <span className="shrink-0">/</span>
           <span className="truncate text-[#5d464c]">{config?.name || vertical}</span>
         </div>
-        {vertical === "restaurants" && <RestaurantCampaignSlot placement="mobile" />}
+        <MarketplaceCampaignSlot vertical={vertical} placement="mobile" />
       </div>
       <div className="mb-2 flex min-w-0 flex-nowrap items-center justify-between gap-1 border-b border-[#ead9ca] pb-2 sm:mb-3 sm:gap-4">
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#fff0c7] text-[#941333] sm:h-9 sm:w-9"><Icon size={17} /></span><div className="min-w-0"><h1 className="truncate text-sm font-bold leading-tight text-[#3b252b] sm:text-xl">{config?.name || vertical}</h1><p className="truncate text-[10px] leading-4 text-[#806d70] sm:text-xs">{filtered.length} listings around Qatar</p></div></div>
-        {vertical === "restaurants" && <RestaurantCampaignSlot placement="desktop" />}
+        <MarketplaceCampaignSlot vertical={vertical} placement="desktop" />
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <button type="button" onClick={() => setSort("best-value")} title="Best value deals" aria-label="Best value deals" className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1.5 text-[10px] font-semibold transition sm:px-2.5 sm:text-xs ${sort === "best-value" ? "border-amber-400 bg-amber-50 text-amber-800" : "border-amber-200 bg-white text-amber-700 hover:bg-amber-50"}`}><Sparkles size={14} className="animate-pulse" /><span>Best Value Deals</span></button>
           <label className="flex shrink-0 items-center gap-1 text-[0px] text-slate-600 sm:gap-2 sm:text-sm"><span className="hidden sm:inline">Sort by</span><select aria-label="Sort by" value={sort} onChange={(event) => setSort(event.target.value)} className="w-[78px] rounded-md border border-slate-300 bg-white px-1.5 py-1.5 text-xs text-slate-800 sm:w-auto sm:px-3 sm:py-2 sm:text-sm">{vertical === "restaurants" ? <><option value="latest">Latest</option>{ENABLE_RANDOM_SORT && <option value="random">Random</option>}<option value="best-value">Best Value</option><option value="price-asc">Low to High</option><option value="price-desc">High to Low</option></> : <><option value="latest">Latest</option><option value="best-value">Best Value</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></>}</select></label>
