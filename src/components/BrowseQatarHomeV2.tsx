@@ -90,7 +90,7 @@ export default function BrowseQatarHomeV2() {
       <meta name="twitter:card" content="summary" />
     </Helmet>
     <header className="sticky top-0 z-40 w-full bg-[#fffdfa]/95 px-4 pt-2 backdrop-blur-md sm:px-6 sm:pt-3 lg:px-10 lg:pt-4">
-      <div className="flex flex-nowrap items-center gap-1 sm:gap-3 lg:gap-5">
+      <div className="flex flex-nowrap items-center gap-1 border-b border-[#ead9ca] pb-2 sm:gap-3 sm:pb-3 lg:gap-5">
         <details className="group relative shrink-0">
           <summary aria-label="Toggle navigation menu" className="grid size-9 cursor-pointer list-none place-items-center rounded-xl bg-[#fff1c9] text-[#941333] transition hover:bg-[#fbe7b2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#941333] sm:size-11 [&::-webkit-details-marker]:hidden">
             <Menu className="size-5 sm:size-6" aria-hidden="true" />
