@@ -35,4 +35,5 @@ core
 .env
 .env_local
 MIGRATION_PLAN.md
+*stats.html
 
