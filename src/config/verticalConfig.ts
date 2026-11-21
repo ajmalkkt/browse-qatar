@@ -70,7 +70,7 @@ export const verticalConfig: Record<string, VerticalConfig> = {
       { name: 'model', label: 'Model', type: 'text', group: 'Vehicle' },
       { name: 'trim', label: 'Trim', type: 'text', group: 'Vehicle' },
       { name: 'year', label: 'Year', type: 'number', group: 'Vehicle' },
-      { name: 'bodyType', label: 'Vehicle type', type: 'select', options: ['Sedan', 'SUV', 'Coupe', 'Hatchback', 'Pickup', 'Van'], group: 'Vehicle' },
+      { name: 'bodyType', label: 'Vehicle type', type: 'select', options: ['Sedan', 'SUV', 'Coupe', 'Hatchback', 'Pickup', 'Van', 'Truck', 'Bus', 'Minivan', 'Motorcycle', 'Scooter', 'ATV', 'UTV', 'Bicycle', 'Boat', 'Yacht', 'Jet Ski', 'Trailer', 'RV / Motorhome', 'Commercial Vehicle', 'Other'], group: 'Vehicle' },
       { name: 'mileage', label: 'Mileage (km)', type: 'number', group: 'Performance' },
       { name: 'engineSize', label: 'Engine size', type: 'text', group: 'Performance' },
       { name: 'wheelDrive', label: 'Wheel drive', type: 'select', options: ['2WD', '4WD', 'AWD'], group: 'Performance' },

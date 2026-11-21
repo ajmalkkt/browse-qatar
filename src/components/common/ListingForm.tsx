@@ -87,7 +87,7 @@ export default function ListingForm({
     <form onSubmit={handleListingUpload} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
       <div className="space-y-1">
         <label className="text-xs font-semibold text-gray-500">
-          Ads Sector {isEdit && <span className="text-gray-400 font-normal">(locked in edit)</span>}
+          Category {isEdit && <span className="text-gray-400 font-normal">(locked in edit)</span>}
         </label>
         <select 
           name="verticalId" 
@@ -116,11 +116,6 @@ export default function ListingForm({
         />
       </div>
       
-      <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Category</label>
-        <input value={activeVertical?.name || listingForm.category || ""} readOnly className="w-full rounded-lg border border-gray-200 bg-gray-50 p-2.5 text-sm text-gray-600" />
-      </div>
-
       {activeVertical && <>
         <div className="space-y-1">
           <label className="text-xs font-semibold text-gray-500">Subcategory *</label>
@@ -130,11 +125,18 @@ export default function ListingForm({
           </select>
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-gray-500">Provider Type</label>
-          <select name="providerType" value={listingForm.providerType || ""} onChange={handleListingFormChange} className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">-- Select Provider Type --</option>
-            {(activeVertical.providerTypes || []).map((providerType) => <option key={providerType} value={providerType}>{providerType}</option>)}
-          </select>
+          <label className="text-xs font-semibold text-gray-500">Owner / Seller Type</label>
+          <input
+            name="providerType"
+            list="owner-seller-types"
+            value={listingForm.providerType || ""}
+            onChange={handleListingFormChange}
+            placeholder="Select or type a type"
+            className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <datalist id="owner-seller-types">
+            {(activeVertical.providerTypes || []).map((providerType) => <option key={providerType} value={providerType} />)}
+          </datalist>
         </div>
       </>}
 
@@ -153,16 +155,16 @@ export default function ListingForm({
         />
       </div>
 
-      {(listingForm.verticalId === "accommodations" || listingForm.verticalId === "vehicles" || listingForm.verticalId === "jobs") && (
+      {(listingForm.verticalId === "accommodations" || listingForm.verticalId === "jobs") && (
         <div className="space-y-1">
           <label className="text-xs font-semibold text-gray-500">
-            {listingForm.verticalId === "jobs" ? "Open Position" : "Unit (e.g., night, trip)"}
+            {listingForm.verticalId === "jobs" ? "Open Position" : "Unit (e.g., night, month, area)"}
           </label>
           <input 
             name="unit" 
             value={listingForm.unit || ""} 
             onChange={handleListingFormChange} 
-            placeholder={listingForm.verticalId === "jobs" ? "e.g., 3" : "e.g., night, trip"}
+            placeholder={listingForm.verticalId === "jobs" ? "e.g., 3" : "e.g., night, month, area"}
             className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
           />
         </div>
@@ -333,6 +335,21 @@ export default function ListingForm({
                     {attr.label} {attr.required && "*"}
                   </label>
                   {attr.type === "select" ? (
+                    attr.name === "bodyType" ? (
+                      <>
+                        <input
+                          list="vehicle-type-options"
+                          value={value}
+                          onChange={handleChange}
+                          required={attr.required}
+                          placeholder="Select or type a vehicle type"
+                          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+                        />
+                        <datalist id="vehicle-type-options">
+                          {attr.options?.map((opt: string) => <option key={opt} value={opt} />)}
+                        </datalist>
+                      </>
+                    ) : (
                     <select
                       value={value}
                       onChange={handleChange}
@@ -346,6 +363,7 @@ export default function ListingForm({
                         </option>
                         ))}
                     </select>
+                    )
                   ) : attr.type === "textarea" ? (
                     <textarea
                         value={value}

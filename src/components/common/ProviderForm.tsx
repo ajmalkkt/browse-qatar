@@ -63,7 +63,7 @@ export default function ProviderForm({
       {/* Vertical */}
       <div className="space-y-1">
         <label className="text-xs font-semibold text-gray-500 tracking-wide">
-          Ads Category *
+          Category *
         </label>
         <select
           name="verticalId"
@@ -84,22 +84,22 @@ export default function ProviderForm({
       {/* Provider Type */}
       <div className="space-y-1">
         <label className="text-xs font-semibold text-gray-500 tracking-wide">
-          Business / Provider Type *
+          Owner / Seller Type *
         </label>
-        <select
+        <input
           name="type"
+          list="provider-owner-seller-types"
           value={providerForm.type}
           onChange={handleProviderFormChange}
           required
+          placeholder="Select or type a type"
           className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
-        >
-          <option value="">-- Select Type --</option>
-          {typeOptions.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
+        />
+        <datalist id="provider-owner-seller-types">
+          {typeOptions.map((type) => (
+            <option key={type} value={type} />
           ))}
-        </select>
+        </datalist>
       </div>
 
       {/* Name */}

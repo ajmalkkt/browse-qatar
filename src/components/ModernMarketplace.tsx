@@ -274,7 +274,13 @@ export function ModernMarketplaceFooter({ variant = "modern" }: { variant?: "mod
     <div className={`border-t ${isV2 ? "border-[#ead9ca] bg-[#fff0c7]" : "border-slate-200 bg-[#eaf2f8]"}`}>
       <div className={`mx-auto flex max-w-[1320px] flex-col gap-2 px-4 py-4 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 ${isV2 ? "text-[#76565b]" : "text-slate-500"}`}>
         <p>© {new Date().getFullYear()} Browse Qatar. All rights reserved.</p>
-        <p>Made for exploring Qatar.</p>
+        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <p>Made for exploring Qatar.</p>
+          <div className="flex items-center gap-2">
+            <img src="/meraki.webp" alt="Meraki AI" className="h-4 w-4 object-contain" />
+            <span>Powered by <span className="font-medium text-slate-700">MerakiAi</span></span>
+          </div>
+        </div>
       </div>
     </div>
     </footer>
@@ -338,13 +344,13 @@ const verticalRefineConfig: Record<string, { subcategories: string[]; fields: Re
   vehicles: {
     subcategories: ["Cars", "Motorcycles & Bikes", "Commercial Vehicles", "Spare Parts & Accessories", "Boats & Marine"],
     fields: [
-      { label: "Vehicle Type", key: "bodyType", aliases: ["bodyType", "vehicleType"], type: "select", options: ["Sedan", "SUV", "Coupe", "Hatchback", "Pickup", "Van"], group: "Body Type" },
+      { label: "Vehicle Type", key: "bodyType", aliases: ["bodyType", "vehicleType"], type: "select", options: ["Sedan", "SUV", "Coupe", "Hatchback", "Pickup", "Van", "Truck", "Bus", "Minivan", "Motorcycle", "Scooter", "ATV", "UTV", "Bicycle", "Boat", "Yacht", "Jet Ski", "Trailer", "RV / Motorhome", "Commercial Vehicle", "Other"], group: "Body Type" },
       { label: "Make", key: "make", aliases: ["make", "vehicleMake"], type: "text", group: "Makes" },
       { label: "Model", key: "model", aliases: ["model", "vehicleModel"], type: "text", group: "Model" },
       { label: "Year", key: "year", aliases: ["year", "modelYear"], type: "range", group: "Vehicle" },
       { label: "KM", key: "km", aliases: ["km", "mileage", "kilometers", "odometer"], type: "range", unit: "km", group: "Vehicle" },
       { label: "Transmission", key: "transmission", aliases: ["transmission"], type: "select", options: ["Automatic", "Manual", "CVT", "Semi-Automatic"], group: "Performance" },
-      { label: "Fuel", key: "fuel", aliases: ["fuel", "fuelType"], type: "select", options: ["Petrol", "Diesel", "Electric", "Hybrid"], group: "Performance" },
+      { label: "Fuel type", key: "fuelType", aliases: ["fuelType", "fuel"], type: "select", options: ["Petrol", "Diesel", "Electric", "Hybrid"], group: "Performance" },
       { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR", group: "Price" },
     ],
   },
@@ -448,7 +454,13 @@ function numericValue(value: unknown): number | undefined {
 }
 
 function amountOf(listing: ListingRecord) {
-  return listing.discountedPrice ?? listing.pricing?.discountedPrice ?? listing.price ?? listing.salary ?? null;
+  return listing.discountedPrice
+    ?? listing.pricing?.discountedPrice
+    ?? listing.originalPrice
+    ?? listing.pricing?.originalPrice
+    ?? listing.price
+    ?? listing.salary
+    ?? null;
 }
 
 function locationOf(listing: ListingRecord) {
@@ -476,7 +488,12 @@ function imagesOf(listing: ListingRecord) {
 function listingAttributesOf(listing: ListingRecord) {
   const attributes = listing.attributes && typeof listing.attributes === "object" && !Array.isArray(listing.attributes) ? listing.attributes : {};
   const additionalAttributes = listing.additionalAttributes && typeof listing.additionalAttributes === "object" && !Array.isArray(listing.additionalAttributes) ? listing.additionalAttributes : {};
-  return { ...attributes, ...additionalAttributes };
+  const merged = { ...attributes, ...additionalAttributes } as Record<string, unknown>;
+  if ((merged.fuelType === undefined || merged.fuelType === null || merged.fuelType === "") && merged.fuel) {
+    merged.fuelType = merged.fuel;
+  }
+  delete merged.fuel;
+  return merged;
 }
 
 function displayAttribute(value: unknown): string {
@@ -776,17 +793,17 @@ export function MarketplaceHeader({ search, onSearch, vertical }: { search?: str
             </div>
             {!auth.user && <div className="border-b border-[#f1e4d6] p-3"><button type="button" onClick={handleLogin} className="w-full rounded-md bg-[#941333] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#6f1028]">{ENABLE_SIGNUP ? "Login / Sign up" : "Login"}</button></div>}
             <div className="p-2">
-              <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"><Camera size={18} className="text-slate-500" />Start selling</button>
-              <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"><FileText size={18} className="text-slate-500" />My Listings & Offers</button>
-              <Link to="/favourites" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"><Heart size={18} className="text-slate-500" />Wishlist</Link>
-              <Link to="/faq" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"><CircleHelp size={18} className="text-slate-500" />Help</Link>
+              <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><Camera size={18} className="text-[#941333]" />Start selling</button>
+              <button type="button" onClick={handleManageOffers} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><FileText size={18} className="text-[#941333]" />My Listings & Offers</button>
+              <Link to="/favourites" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><Heart size={18} className="text-[#941333]" />Wishlist</Link>
+              <Link to="/faq" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]"><CircleHelp size={18} className="text-[#941333]" />Help</Link>
             </div>
-            <div className="border-t border-slate-100 p-2">
+            <div className="border-t border-[#ead9ca] p-2">
               <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">Browse categories</p>
               <div className="grid grid-cols-2 gap-1">{categories.map((item) => <Link key={item.id} to={`/marketplace/${item.id}`} onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-2 text-xs text-slate-600 hover:bg-[#fff1c9] hover:text-[#941333]">{item.id === "classifieds" ? "Classifieds" : item.name.replace(/ Buy & Sell| Deal/, "")}</Link>)}</div>
             </div>
-            <div className="border-t border-slate-100 p-2">
-              <Link to="/about" onClick={() => setMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">About Us</Link>
+            <div className="border-t border-[#ead9ca] p-2">
+              <Link to="/about" onClick={() => setMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]">About Us</Link>
               <Link to="/" onClick={() => setMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-[#fff1c9]">Back to Home</Link>
               {auth.user && <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-700"><LogOut size={18} />Log out</button>}
             </div>
@@ -1111,7 +1128,7 @@ export function ModernMarketplaceSearchResults() {
     if (!term) return [];
     return listings.filter((item) => {
       const verticalName = verticalConfig[item.vertical]?.name || item.vertical || "";
-      const searchable = `${item.title || ""} ${item.description || ""} ${locationOf(item)} ${item.category || ""} ${item.subcategory || ""} ${verticalName} ${item.restaurant?.name || ""} ${JSON.stringify(item.attributes || {})}`.toLowerCase();
+      const searchable = `${item.title || ""} ${item.description || ""} ${locationOf(item)} ${item.category || ""} ${item.restaurant?.name || ""} ${JSON.stringify(item.attributes || {})}`.toLowerCase();
       return searchable.includes(term);
     });
   }, [listings, search]);
@@ -1127,7 +1144,7 @@ export function ModernMarketplaceSearchResults() {
     <CategoryStrip />
     <main className="mx-auto min-h-[45vh] max-w-[1320px] px-4 py-5 sm:px-6 lg:px-8">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
-        <div><p className="text-xs font-bold uppercase tracking-wide text-[#0878d1]">Marketplace search</p><h1 className="mt-1 text-xl font-bold sm:text-2xl">{search ? `Results for “${search}”` : "Search listings"}</h1></div>
+        <div><p className="text-xs font-bold uppercase tracking-wide text-[#0878d1]">Marketplace search</p><h1 className="mt-1 text-xl font-bold sm:text-2xl">{search ? `Results for ΓÇ£${search}ΓÇ¥` : "Search listings"}</h1></div>
         {!loading && search && <p className="text-sm text-slate-500">{filtered.length} listings</p>}
       </div>
       {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{Array.from({ length: 8 }, (_, index) => <div key={index} className="aspect-[4/5] animate-pulse rounded-lg bg-slate-200" />)}</div> : filtered.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{filtered.map((item) => <ListingCard key={`${item.vertical}-${item.id}`} listing={item} vertical={item.vertical || "vehicles"} />)}</div> : <div className="rounded-lg border border-slate-200 bg-white px-5 py-12 text-center"><Search className="mx-auto text-slate-300" size={32} /><h2 className="mt-3 font-bold">{search ? "No listings found" : "Enter a search to browse listings"}</h2><p className="mt-1 text-sm text-slate-500">Try another search or choose a category to explore.</p></div>}
@@ -1226,8 +1243,9 @@ function VerticalRefinePanel({ vertical, metadata, fields, cuisineFilter, catego
             Category <ChevronDown size={16} className="text-[#941333] transition group-open:rotate-180" />
           </summary>
           <div className="border-t border-[#f1e4d6] p-3">
-            <select value={refineFilters.subcategory || ""} onChange={(event) => { updateFilter("subcategory", event.target.value); closeAfterChoice(); }} className="w-full rounded-lg border border-[#e8c8c6] bg-white px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15">
-              <option value="">All categories</option>{subcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
+            <select value={refineFilters.subcategory || ""} onChange={(event) => { updateFilter("subcategory", event.target.value); closeAfterChoice(); }} className="w-full rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15">
+              <option value="">All categories</option>
+              {subcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
             </select>
           </div>
         </details>}
@@ -1636,7 +1654,7 @@ export function ModernMarketplaceDetail() {
           <div className="w-full overflow-hidden px-5 py-3 sm:px-8">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ffe0a2] sm:text-xs">Browse Qatar spotlight · Sponsored</p>
             <div className="mt-1 whitespace-nowrap text-lg font-black text-white sm:text-2xl">
-              <span className="inline-block animate-marquee">Discover trusted {vertical === "vehicles" ? "cars and vehicles" : (category?.name || "local listings").toLowerCase()} across Qatar&nbsp; · &nbsp;Find your next great deal&nbsp; · &nbsp;</span>
+              <span className="inline-block animate-marquee">Discover trusted {vertical === "vehicles" ? "cars and vehicles" : (category?.name || "local listings").toLowerCase()} across Qatar&nbsp; · &nbsp;Find your next great deal&nbsp; &nbsp;</span>
             </div>
           </div>
           <span className="absolute bottom-2 right-3 rounded-full border border-white/40 bg-black/20 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wide text-white/90 sm:right-5 sm:text-[10px]">Ad placement</span>
@@ -1650,8 +1668,8 @@ export function ModernMarketplaceDetail() {
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#941333]">{listing.category || listing.subcategory || category?.name}</p>
               <h1 className="mt-1 text-xl font-black leading-tight text-[#30252a] sm:text-3xl">{listing.title || "Listing details"}</h1>
               <div className="mt-2 flex flex-wrap gap-2">
-                {primaryFields.map((field) => <span key={field.key} className="inline-flex items-center gap-1 rounded-full border border-[#d7aeb0] bg-[#fff7e6] px-2.5 py-1 text-[11px] font-semibold text-[#6b333e] sm:text-xs"><Check size={12} className="text-[#941333]" />{field.label}: {displayAttribute(field.value)}</span>)}
-                <span className="inline-flex items-center gap-1 rounded-full border border-[#d7aeb0] bg-[#fff7e6] px-2.5 py-1 text-[11px] font-semibold text-[#6b333e] sm:text-xs"><MapPin size={12} className="text-[#941333]" />{locationOf(listing)}</span>
+                {primaryFields.map((field) => <span key={field.key} className="inline-flex items-center gap-1 rounded-full border border-[#d7aeb0] bg-[#fff7e6] px-2.5 py-1 text-[11px] font-medium text-[#6b333e] sm:text-xs"><Check size={12} className="text-[#941333]" />{field.label}: {displayAttribute(field.value)}</span>)}
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#d7aeb0] bg-[#fff7e6] px-2.5 py-1 text-[11px] font-medium text-[#6b333e] sm:text-xs"><MapPin size={12} className="text-[#941333]" />{locationOf(listing)}</span>
               </div>
             </div>
           </div>

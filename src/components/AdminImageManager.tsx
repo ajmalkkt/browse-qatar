@@ -1546,7 +1546,7 @@ export default function ManageOffers() {
               {showAddProviderForm && (
                 <div className="bg-white p-4 md:p-6 rounded-xl shadow border border-blue-100 animate-in slide-in-from-top-2">
                   <h4 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-                    {editingProvider ? `Edit Provider — ${editingProvider.name}` : "Register New Provider"}
+                    {editingProvider ? `Edit Owner/Provider — ${editingProvider.name}` : "Register Owner/Provider"}
                   </h4>
                   <ProviderForm
                     providerForm={providerForm}
