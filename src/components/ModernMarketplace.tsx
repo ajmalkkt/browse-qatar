@@ -350,36 +350,66 @@ const verticalRefineConfig: Record<string, { subcategories: string[]; fields: Re
       { label: "Year", key: "year", aliases: ["year", "modelYear"], type: "range", group: "Vehicle" },
       { label: "KM", key: "km", aliases: ["km", "mileage", "kilometers", "odometer"], type: "range", unit: "km", group: "Vehicle" },
       { label: "Transmission", key: "transmission", aliases: ["transmission"], type: "select", options: ["Automatic", "Manual", "CVT", "Semi-Automatic"], group: "Performance" },
-      { label: "Fuel type", key: "fuelType", aliases: ["fuelType", "fuel"], type: "select", options: ["Petrol", "Diesel", "Electric", "Hybrid"], group: "Performance" },
+      { label: "Fuel type", key: "fuelType", aliases: ["fuelType", "fuel"], type: "select", options: ["Petrol", "Diesel", "Electric", "Hybrid", "Plug-in Hybrid", "CNG", "LPG"], group: "Performance" },
+      { label: "Drive type", key: "wheelDrive", aliases: ["wheelDrive", "driveType", "drivetrain"], type: "select", options: ["RWD", "FWD", "2WD", "4WD", "AWD"], group: "Performance" },
+      { label: "Condition", key: "condition", aliases: ["condition", "vehicleCondition"], type: "select", options: ["New", "Used", "Refurbished", "Preloved"], group: "Vehicle" },
+      { label: "Service history", key: "serviceHistory", aliases: ["serviceHistory", "service_history"], type: "select", options: ["Full Service History", "Partial Service History", "No Service History", "Unknown"], group: "Vehicle" },
       { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR", group: "Price" },
     ],
   },
   accommodations: {
     subcategories: ["Rent (Apartment/Villa)", "Sale (Apartment/Villa)", "Commercial", "Shared/Partition", "Land & Plots"],
     fields: [
-      { label: "Property Type", key: "propertyType", aliases: ["propertyType", "type"], type: "select", options: ["Apartment", "Villa", "Commercial", "Land"] },
-      { label: "Bedrooms", key: "bedrooms", aliases: ["bedrooms", "bedroom"], type: "range" },
-      { label: "Bathrooms", key: "bathrooms", aliases: ["bathrooms", "bathroom"], type: "range" },
-      { label: "Furnishing", key: "furnishing", aliases: ["furnishing", "furnished"], type: "select", options: ["Furnished", "Semi-furnished", "Unfurnished"] },
-      { label: "Size (sq ft)", key: "size", aliases: ["size", "sizeSqFt", "areaSqFt", "squareFeet"], type: "range", unit: "sq ft" },
-      { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR" },
+      { label: "Transaction type", key: "transactionType", aliases: ["transactionType"], type: "select", options: ["For Rent", "For Sale"], group: "Property" },
+      { label: "Sector", key: "sector", aliases: ["sector"], type: "select", options: ["Residential", "Commercial", "International"], group: "Property" },
+      { label: "Property type", key: "propertyType", aliases: ["propertyType", "type"], type: "select", options: ["Apartment", "Villa", "Standalone Villa", "Compound Villa", "Studio", "Penthouse", "Duplex", "Hotel Apartment", "Villa Apartment", "Townhouse", "Office", "Warehouse", "Shop"], group: "Property" },
+      { label: "Area / Neighbourhood", key: "area", aliases: ["area", "neighbourhood", "location.area", "location.city"], type: "text", group: "Location" },
+      { label: "Bedrooms", key: "bedrooms", aliases: ["bedrooms", "bedroom"], type: "range", group: "Property" },
+      { label: "Bathrooms", key: "bathrooms", aliases: ["bathrooms", "bathroom"], type: "range", group: "Property" },
+      { label: "Furnishing", key: "furnishing", aliases: ["furnishing", "furnished", "furnishingStatus"], type: "select", options: ["Furnished", "Fully Furnished", "Semi-Furnished", "Unfurnished"], group: "Property" },
+      { label: "Parking", key: "parking", aliases: ["parking"], type: "select", options: ["Underground", "Dedicated Covered", "Dedicated Uncovered", "On-street"], group: "Features" },
+      { label: "Size (sq ft)", key: "sizeSqFt", aliases: ["sizeSqFt", "size", "areaSqFt", "squareFeet"], type: "range", unit: "sq ft", group: "Property" },
+      { label: "Amenities", key: "amenities", aliases: ["amenities", "features"], type: "text", group: "Features" },
+      { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR", group: "Price" },
     ],
   },
   jobs: {
     subcategories: ["Jobs Offered", "Jobs Wanted"],
     secondaryField: { label: "Industry", key: "industry", aliases: ["industry"], type: "select", options: ["Accounting/Finance", "Customer Service", "IT/Telecom", "Sales/Marketing", "Drivers/Transport", "Domestic/Cleaning", "Hospitality/F&B", "Engineering/Construction"] },
     fields: [
-      { label: "Type (FT/PT/Contract)", key: "jobType", aliases: ["jobType", "type", "employmentType"], type: "select", options: ["Full-time", "Part-time", "Contract", "Freelance"] },
-      { label: "Experience", key: "experience", aliases: ["experience", "yearsExperience", "experienceYears"], type: "text" },
-      { label: "Salary", key: "salary", aliases: ["salary", "pricing.discountedPrice", "discountedPrice"], type: "range", unit: "QAR" },
+      { label: "Function", key: "function", aliases: ["function", "jobFunction"], type: "select", options: ["Accounting & Auditing", "Administration", "Advertising", "Quality Assurance & HSE", "Customer Service", "IT", "Skilled Trades & Technicians", "Healthcare & Medical", "Human Resources", "Sales & Marketing", "Engineering & Construction", "Hospitality & F&B", "Other"], group: "Role" },
+      { label: "Career level", key: "careerLevel", aliases: ["careerLevel", "level"], type: "select", options: ["Entry Level", "Mid Level", "Senior Level", "Manager", "Executive"], group: "Role" },
+      { label: "Work type / mode", key: "workType", aliases: ["workType", "jobType", "employmentType", "type"], type: "select", options: ["Full-time", "Part-time", "Contract", "Freelance", "On site", "Remote", "Hybrid"], group: "Role" },
+      { label: "Experience", key: "experience", aliases: ["experience", "yearsExperience", "experienceYears"], type: "text", group: "Role" },
+      { label: "Salary", key: "salary", aliases: ["salary", "pricing.discountedPrice", "discountedPrice", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR", group: "Salary" },
+      { label: "Negotiable salary", key: "salaryNegotiable", aliases: ["salaryNegotiable"], type: "select", options: ["Yes", "No"], group: "Salary" },
+      { label: "Visa status", key: "visaStatus", aliases: ["visaStatus"], type: "text", group: "Requirements" },
+      { label: "Languages", key: "languages", aliases: ["languages"], type: "text", group: "Requirements" },
+      { label: "Gender", key: "gender", aliases: ["gender"], type: "select", options: ["Any", "Male", "Female"], group: "Requirements" },
+      { label: "Location / Area", key: "area", aliases: ["area", "location.city", "location.area", "location"], type: "text", group: "Location" },
+      { label: "Hiring entity", key: "hiringEntity", aliases: ["hiringEntity", "company", "employer"], type: "text", group: "Employer" },
     ],
   },
   services: {
     subcategories: ["Home Maintenance", "Cleaning & Laundry", "Moving & Transport", "IT & Digital", "Events & Catering", "Beauty & Fitness", "Legal & Business"],
     fields: [
-      { label: "Service Type", key: "serviceType", aliases: ["serviceType", "category", "serviceCategory"], type: "text" },
-      { label: "Location", key: "serviceLocation", aliases: ["location.city", "location.area", "city", "location", "address"], type: "text" },
-      { label: "Provider", key: "provider", aliases: ["provider", "providerType", "provider.type"], type: "select", options: ["Individual", "Agency"] },
+      { label: "Category", key: "serviceCategory", aliases: ["serviceCategory", "category", "serviceType"], type: "select", options: ["Home Maintenance", "Education", "Business Services", "Tech & IT", "Automotive", "Cleaning", "Events", "Moving & Delivery", "Fashion & Tailoring", "Domestic Help", "Travel", "AC Repair", "Construction", "Health & Wellness", "Pest Control", "Beauty & Spa", "Pet Services", "Furniture & Decor", "Catering & Venues", "Facility Management"], group: "Service" },
+      { label: "Location / Area", key: "area", aliases: ["area", "location.city", "location.area", "city", "location", "address"], type: "text", group: "Location" },
+      { label: "Experience", key: "experience", aliases: ["experience"], type: "text", group: "Professional" },
+      { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR", group: "Price" },
+      { label: "Price on request", key: "priceOnRequest", aliases: ["priceOnRequest"], type: "select", options: ["Yes", "No"], group: "Price" },
+      { label: "Provider", key: "provider", aliases: ["provider", "providerType", "provider.type"], type: "select", options: ["Individual", "Agency", "Individual Provider", "Company"], group: "Provider" },
+    ],
+  },
+  classifieds: {
+    subcategories: ["Furniture", "Home Appliances", "Electronics", "Mobile Phones", "TVs", "Computers", "Books", "Clothing", "Sports", "Other"],
+    fields: [
+      { label: "Category", key: "classifiedCategory", aliases: ["classifiedCategory", "category", "subcategory"], type: "select", options: ["Mobile Phones & Tablets", "Electronics", "Furniture & Decor", "Fashion & Beauty", "Kids & Toys", "Sports & Hobbies", "Machinery", "Equipment & Materials", "Home Appliances", "Books", "Other"], group: "Listing" },
+      { label: "Sub-category", key: "subcategory", aliases: ["subcategory", "category"], type: "text", group: "Listing" },
+      { label: "Condition", key: "condition", aliases: ["condition"], type: "select", options: ["New", "Used", "Preloved", "Like New", "Good", "Fair"], group: "Listing" },
+      { label: "Brand", key: "brand", aliases: ["brand", "make"], type: "text", group: "Listing" },
+      { label: "Location / Area", key: "area", aliases: ["area", "location.city", "location.area", "location"], type: "text", group: "Location" },
+      { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR", group: "Price" },
     ],
   },
 };
@@ -1321,7 +1351,7 @@ export function ModernMarketplaceListing() {
       const values = Array.isArray(value) ? value : [value];
       return values.filter((option): option is string | number => typeof option === "string" || typeof option === "number").map(String);
     }))).sort((a, b) => a.localeCompare(b));
-    const listingDrivenVehicleFilters = ["make", "model", "trim", "engineSize", "wheelDrive", "fuelType", "cylinders", "transmission", "color", "insideColor", "doors", "seats", "seatType"];
+    const listingDrivenVehicleFilters = ["make", "model", "engineSize", "wheelDrive", "fuelType", "cylinders", "transmission", "color", "insideColor", "doors", "seats", "seatType"];
     if (vertical === "vehicles" && listingDrivenVehicleFilters.includes(field.key) && listingOptions.length) {
       return { ...field, type: "multiselect" as const, options: listingOptions };
     }
@@ -1594,7 +1624,7 @@ export function ModernMarketplaceDetail() {
   const groupedAttributes = Object.entries(attributes).reduce((groups, [key, value]) => {
     if (value === undefined || value === null || value === "") return groups;
     const definition = attributeLabels.get(key);
-    const defaultGroup = ["make", "model", "trim", "year"].includes(key) ? "Vehicle"
+    const defaultGroup = ["make", "model", "year"].includes(key) ? "Vehicle"
       : ["mileage", "engineSize", "wheelDrive", "fuelType", "cylinders", "transmission"].includes(key) ? "Performance"
         : ["color", "insideColor", "doors", "seats", "seatType"].includes(key) ? "Style"
           : ["convenience", "entertainment", "exteriorFeatures"].includes(key) ? "Features" : "Other details";

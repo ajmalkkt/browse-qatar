@@ -68,14 +68,15 @@ export const verticalConfig: Record<string, VerticalConfig> = {
     additionalAttributes: [
       { name: 'make', label: 'Make', type: 'text', group: 'Vehicle' },
       { name: 'model', label: 'Model', type: 'text', group: 'Vehicle' },
-      { name: 'trim', label: 'Trim', type: 'text', group: 'Vehicle' },
       { name: 'year', label: 'Year', type: 'number', group: 'Vehicle' },
       { name: 'bodyType', label: 'Vehicle type', type: 'select', options: ['Sedan', 'SUV', 'Coupe', 'Hatchback', 'Pickup', 'Van', 'Truck', 'Bus', 'Minivan', 'Motorcycle', 'Scooter', 'ATV', 'UTV', 'Bicycle', 'Boat', 'Yacht', 'Jet Ski', 'Trailer', 'RV / Motorhome', 'Commercial Vehicle', 'Other'], group: 'Vehicle' },
       { name: 'mileage', label: 'Mileage (km)', type: 'number', group: 'Performance' },
       { name: 'engineSize', label: 'Engine size', type: 'text', group: 'Performance' },
-      { name: 'wheelDrive', label: 'Wheel drive', type: 'select', options: ['2WD', '4WD', 'AWD'], group: 'Performance' },
-      { name: 'fuelType', label: 'Fuel type', type: 'select', options: ['Petrol', 'Diesel', 'Electric', 'Hybrid'], group: 'Performance' },
-      { name: 'cylinders', label: 'Cylinders', type: 'number', group: 'Performance' },
+      { name: 'wheelDrive', label: 'Drive type', type: 'select', options: ['RWD', 'FWD', '2WD', '4WD', 'AWD'], group: 'Performance' },
+      { name: 'fuelType', label: 'Fuel type', type: 'select', options: ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid', 'CNG', 'LPG'], group: 'Performance' },
+      { name: 'cylinders', label: 'Engine / Cylinders', type: 'number', group: 'Performance' },
+      { name: 'condition', label: 'Condition', type: 'select', options: ['New', 'Used', 'Refurbished', 'Preloved'], group: 'Vehicle' },
+      { name: 'serviceHistory', label: 'Service history', type: 'select', options: ['Full Service History', 'Partial Service History', 'No Service History', 'Unknown'], group: 'Vehicle' },
       { name: 'transmission', label: 'Transmission', type: 'select', options: ['Automatic', 'Manual', 'CVT', 'Semi-Automatic'], group: 'Performance' },
       { name: 'color', label: 'Exterior color', type: 'text', group: 'Style' },
       { name: 'insideColor', label: 'Interior color', type: 'text', group: 'Style' },
@@ -120,6 +121,22 @@ export const verticalConfig: Record<string, VerticalConfig> = {
       amenities: { type: 'multiselect', options: ['AC', 'WiFi', 'Parking', 'Pool', 'Gym', 'Garden'] }
     },
     
+    additionalAttributes: [
+      { name: 'transactionType', label: 'Transaction type', type: 'select', options: ['For Rent', 'For Sale'], group: 'Property' },
+      { name: 'sector', label: 'Sector', type: 'select', options: ['Residential', 'Commercial', 'International'], group: 'Property' },
+      { name: 'propertyType', label: 'Property type', type: 'select', options: ['Apartment', 'Villa', 'Standalone Villa', 'Compound Villa', 'Studio', 'Penthouse', 'Duplex', 'Hotel Apartment', 'Villa Apartment', 'Townhouse', 'Office', 'Warehouse', 'Shop'], group: 'Property' },
+      { name: 'area', label: 'Location / Area / Neighbourhood', type: 'text', group: 'Location' },
+      { name: 'bedrooms', label: 'Bedrooms', type: 'number', group: 'Property' },
+      { name: 'bathrooms', label: 'Bathrooms', type: 'number', group: 'Property' },
+      { name: 'sizeSqFt', label: 'Size (sq ft)', type: 'number', group: 'Property' },
+      { name: 'furnishing', label: 'Furnishing status', type: 'select', options: ['Furnished', 'Fully Furnished', 'Semi-Furnished', 'Unfurnished'], group: 'Property' },
+      { name: 'parking', label: 'Parking', type: 'select', options: ['Underground', 'Dedicated Covered', 'Dedicated Uncovered', 'On-street'], group: 'Features' },
+      { name: 'amenities', label: 'Features & amenities', type: 'textarea', group: 'Features' },
+      { name: 'utilitiesIncluded', label: 'Utilities / bills included', type: 'text', group: 'Financial Terms' },
+      { name: 'commission', label: 'Commission', type: 'text', group: 'Financial Terms' },
+      { name: 'deposit', label: 'Deposit', type: 'text', group: 'Financial Terms' },
+      { name: 'rentalTerm', label: 'Rental term', type: 'text', group: 'Financial Terms' }
+    ],
     sortOptions: ['popular', 'priceLow', 'priceHigh', 'newest'],
     featuredImage: 'https://images.unsplash.com/photo-1765124540398-d717b5b06f23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBob3VzZSUyMGFjY29tbW9kYXRpb24lMjBwcm9wZXJ0eXxlbnwxfHx8fDE3NzcxOTQ3NDF8MA&ixlib=rb-4.1.0&q=80&w=1080',
     description: 'Find perfect accommodation for your stay',
@@ -153,6 +170,12 @@ export const verticalConfig: Record<string, VerticalConfig> = {
       priceRange: { type: 'range', min: 10, max: 10000 }
     },
     
+    additionalAttributes: [
+      { name: 'serviceCategory', label: 'Category', type: 'select', options: ['Home Maintenance', 'Education', 'Business Services', 'Tech & IT', 'Automotive', 'Cleaning', 'Events', 'Moving & Delivery', 'Fashion & Tailoring', 'Domestic Help', 'Travel', 'AC Repair', 'Construction', 'Health & Wellness', 'Pest Control', 'Beauty & Spa', 'Pet Services', 'Furniture & Decor', 'Catering & Venues', 'Facility Management'], group: 'Service' },
+      { name: 'area', label: 'Location / Area', type: 'text', group: 'Location' },
+      { name: 'experience', label: 'Experience', type: 'text', group: 'Professional' },
+      { name: 'priceOnRequest', label: 'Price on request', type: 'select', options: ['Yes', 'No'], group: 'Pricing' }
+    ],
     sortOptions: ['popular', 'rating', 'newest', 'experience', 'priceLow', 'priceHigh'],
     featuredImage: 'https://images.unsplash.com/photo-1762087021974-b0729f37a8fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBzZXJ2aWNlcyUyMHdvcmtlcnN8ZW58MXx8fHwxNzc3MTk0NzQyfDA&ixlib=rb-4.1.0&q=80&w=1080',
     description: 'Find professional services near you',
@@ -185,6 +208,13 @@ export const verticalConfig: Record<string, VerticalConfig> = {
       priceRange: { type: 'range', min: 1, max: 100000 }
     },
     
+    additionalAttributes: [
+      { name: 'classifiedCategory', label: 'Category', type: 'select', options: ['Mobile Phones & Tablets', 'Electronics', 'Furniture & Decor', 'Fashion & Beauty', 'Kids & Toys', 'Sports & Hobbies', 'Machinery', 'Equipment & Materials', 'Home Appliances', 'Books', 'Other'], group: 'Listing' },
+      { name: 'subcategory', label: 'Sub-category', type: 'text', group: 'Listing' },
+      { name: 'condition', label: 'Condition', type: 'select', options: ['New', 'Used', 'Preloved', 'Like New', 'Good', 'Fair'], group: 'Listing' },
+      { name: 'brand', label: 'Brand', type: 'text', group: 'Listing' },
+      { name: 'area', label: 'Location / Area', type: 'text', group: 'Location' }
+    ],
     sortOptions: ['newest', 'priceLow', 'priceHigh'],
     featuredImage: 'https://images.unsplash.com/photo-1567016546367-c27a0d56712e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmdXJuaXR1cmUlMjBpbnRlcmlvciUyMGhvbWUlMjBkZWNvcnxlbnwxfHx8fDE3NzcxOTQ3NDJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
     description: 'Buy and sell used furniture, home appliances and electronics in your neighborhood',
@@ -218,6 +248,19 @@ export const verticalConfig: Record<string, VerticalConfig> = {
       salaryMax: { type: 'number', min: 0, max: 1000000 }
     },
     
+    additionalAttributes: [
+      { name: 'function', label: 'Function', type: 'select', options: ['Accounting & Auditing', 'Administration', 'Advertising', 'Quality Assurance & HSE', 'Customer Service', 'IT', 'Skilled Trades & Technicians', 'Healthcare & Medical', 'Human Resources', 'Sales & Marketing', 'Engineering & Construction', 'Hospitality & F&B', 'Other'], group: 'Role' },
+      { name: 'careerLevel', label: 'Career level', type: 'select', options: ['Entry Level', 'Mid Level', 'Senior Level', 'Manager', 'Executive'], group: 'Role' },
+      { name: 'salaryRangeMin', label: 'Minimum salary (QAR)', type: 'number', group: 'Salary' },
+      { name: 'salaryRangeMax', label: 'Maximum salary (QAR)', type: 'number', group: 'Salary' },
+      { name: 'salaryNegotiable', label: 'Negotiable salary', type: 'select', options: ['Yes', 'No'], group: 'Salary' },
+      { name: 'visaStatus', label: 'Visa status', type: 'text', group: 'Requirements' },
+      { name: 'languages', label: 'Languages', type: 'text', group: 'Requirements' },
+      { name: 'gender', label: 'Gender', type: 'select', options: ['Any', 'Male', 'Female'], group: 'Requirements' },
+      { name: 'workType', label: 'Work type / mode', type: 'select', options: ['Full-time', 'Part-time', 'Contract', 'Freelance', 'On site', 'Remote', 'Hybrid'], group: 'Role' },
+      { name: 'hiringEntity', label: 'Hiring entity', type: 'text', group: 'Employer' },
+      { name: 'area', label: 'Location / Area', type: 'text', group: 'Location' }
+    ],
     sortOptions: ['newest', 'salaryHigh', 'salaryLow'],
     featuredImage: 'https://images.unsplash.com/photo-1758518730083-4c12527b6742?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxidXNpbmVzcyUyMHByb2Zlc3Npb25hbHMlMjBvZmZpY2UlMjBwcm9wZXJ0eXxlbnwxfHx8fDE3NzcxOTQ5Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080',
     description: 'Explore job opportunities in your field',
