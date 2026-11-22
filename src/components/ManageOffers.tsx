@@ -171,6 +171,11 @@ export default function ManageOffers() {
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split('T')[0];
   };
+  const getNextWeekDate = () => {
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    return nextWeek.toISOString().split('T')[0];
+  };
 
   const [form, setForm] = useState({
     id: "", name: "", address: "", phone: "", rating: "", cuisine: "",
@@ -179,15 +184,15 @@ export default function ManageOffers() {
 
   const [offerForm, setOfferForm] = useState({
     title: "", description: "", cuisine: "", originalPrice: "", discountedPrice: "",
-    offerType: "Discount", validFrom: getTodayDate(), validTo: getTomorrowDate(), location: "", country: "Qatar",
+    offerType: "Discount", validFrom: getTodayDate(), validTo: getNextWeekDate(), location: "", country: "Qatar",
     category: "", image: null, active: true,
   });
 
   const [listingForm, setListingForm] = useState<any>({
     verticalId: "", title: "", description: "", category: "", subcategory: "",
     originalPrice: "", discountedPrice: "", unit: "", currency: "QAR",
-    validFrom: getTodayDate(), validTo: getTomorrowDate(), city: "", country: "Qatar", address: "",
-    attributes: {}, active: false, image: null, gallery: []
+    validFrom: getTodayDate(), validTo: getNextWeekDate(), city: "", country: "Qatar", address: "",
+    contactPhone: "", attributes: {}, active: false, image: null, gallery: []
   });
 
   // ===== Helpers =====
@@ -566,8 +571,8 @@ export default function ManageOffers() {
       setListingForm({
         verticalId: "vehicles", title: "", description: "", category: "", subcategory: "",
         originalPrice: "", discountedPrice: "", unit: "", currency: "QAR",
-        validFrom: getTodayDate(), validTo: getTomorrowDate(),
-        city: "", country: "Qatar", address: "",
+        validFrom: getTodayDate(), validTo: getNextWeekDate(),
+        city: "", country: "Qatar", address: "", contactPhone: "",
         attributes: {}, image: null, gallery: []
       });
       setListingPreview(null);
@@ -598,8 +603,7 @@ export default function ManageOffers() {
     }));
     formData.set("location", JSON.stringify({ city: listingForm.city, country: listingForm.country, address: listingForm.address }));
     formData.set("validity", JSON.stringify({ from: listingForm.validFrom, to: listingForm.validTo }));
-    formData.set("attributes", JSON.stringify(listingForm.attributes));
-    formData.set("additionalAttributes", JSON.stringify(listingForm.attributes || {}));
+    formData.set("attributes", JSON.stringify(listingForm.attributes || {}));
 
     if (listingForm.image) formData.append("image", listingForm.image);
     if (listingForm.gallery && listingForm.gallery.length > 0) {
@@ -609,12 +613,12 @@ export default function ManageOffers() {
     setIsUploading(true);
     try {
       await uploadListing(formData, { headers: getAuthHeaders() });
-      alert("Listing uploaded successfully!");
+      alert("Listing uploaded successfully! We recommend refreshing the page after some time to see the new listing.");
       const allListings = await getAllListings();
       setListings(allListings);
       // also refresh inactive
       getInactiveListings().then(setInactiveListings).catch(console.error);
-      setListingForm({ verticalId: "", title: "", description: "", category: "", subcategory: "", originalPrice: "", discountedPrice: "", unit: "", currency: "QAR", validFrom: getTodayDate(), validTo: getTomorrowDate(), city: "", country: "Qatar", address: "", attributes: {}, image: null, gallery: [] });
+      setListingForm({ verticalId: "", title: "", description: "", category: "", subcategory: "", originalPrice: "", discountedPrice: "", unit: "", currency: "QAR", validFrom: getTodayDate(), validTo: getNextWeekDate(), city: "", country: "Qatar", address: "", contactPhone: "", attributes: {}, image: null, gallery: [] });
       setListingPreview(null);
       setListingGalleryPreviews([]);
       setShowAddListingForm(false);
@@ -659,7 +663,6 @@ export default function ManageOffers() {
     formData.set("validity", JSON.stringify(validityData));
     
     formData.set("attributes", JSON.stringify(listingForm.attributes || {}));
-    formData.set("additionalAttributes", JSON.stringify(listingForm.attributes || {}));
 
     if (listingForm.active !== undefined) {
       formData.set("active", String(listingForm.active));
@@ -672,7 +675,7 @@ export default function ManageOffers() {
     setIsUploading(true);
     try {
       await updateListing((editingListing as any).id, formData, { headers: getAuthHeaders() });
-      alert("Listing updated successfully!");
+      alert("Listing updated successfully! We recommend refreshing the page after some time to see the updated listing.");
       const allListings = await getAllListings();
       setListings(allListings);
       getInactiveListings().then(setInactiveListings).catch(console.error);

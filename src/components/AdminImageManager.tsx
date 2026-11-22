@@ -148,6 +148,12 @@ export default function ManageOffers() {
     return today.toISOString().split("T")[0];
   };
 
+  const getNextWeekDate = () => {
+    const today = new Date();
+    today.setDate(today.getDate() + 7);
+    return today.toISOString().split("T")[0];
+  };
+
   // -- Search State --
   const [tabSearchTerm, setTabSearchTerm] = useState("");
 
@@ -157,15 +163,15 @@ export default function ManageOffers() {
   });
   const [offerForm, setOfferForm] = useState({
     title: "", description: "", cuisine: "", originalPrice: "", discountedPrice: "",
-    offerType: "Discount", validFrom: getTodayDate(), validTo: getTomorrowDate(), location: "", country: "Qatar",
+    offerType: "Discount", validFrom: getTodayDate(), validTo: getNextWeekDate(), location: "", country: "Qatar",
     category: "", image: null, active: true,
   });
 
   const [listingForm, setListingForm] = useState<any>({
     verticalId: "", title: "", description: "", category: "", subcategory: "",
     originalPrice: "", discountedPrice: "", unit: "", currency: "QAR",
-    validFrom: getTodayDate(), validTo: getTomorrowDate(),
-    city: "", country: "Qatar", address: "",
+    validFrom: getTodayDate(), validTo: getNextWeekDate(),
+    city: "", country: "Qatar", address: "", contactPhone: "",
     attributes: {}, active: false, image: null, gallery: []
   });
 
@@ -435,8 +441,8 @@ export default function ManageOffers() {
       setListingForm({
         verticalId: "vehicles", title: "", description: "", category: "", subcategory: "",
         originalPrice: "", discountedPrice: "", unit: "", currency: "QAR",
-        validFrom: getTodayDate(), validTo: getTomorrowDate(),
-        city: "", country: "Qatar", address: "",
+        validFrom: getTodayDate(), validTo: getNextWeekDate(),
+        city: "", country: "Qatar", address: "", contactPhone: "",
         attributes: {}, image: null, gallery: []
       });
       setListingPreview(null);
@@ -451,9 +457,10 @@ export default function ManageOffers() {
 
     const formData = new FormData();
     if (!selectedRestaurant) return alert("Select a Provider/Restaurant first.");
+    if (!listingForm.contactPhone?.trim()) return alert("Please enter a phone number for this listing.");
     formData.set("providerId", selectedRestaurant);
 
-    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory', 'providerType'];
+    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory', 'providerType', 'contactPhone'];
     textFields.forEach(field => {
       if (listingForm[field]) formData.set(field, listingForm[field]);
     });
@@ -476,8 +483,7 @@ export default function ManageOffers() {
       validTo: listingForm.validTo
     }));
 
-    formData.set("attributes", JSON.stringify(listingForm.attributes));
-    formData.set("additionalAttributes", JSON.stringify(listingForm.attributes || {}));
+    formData.set("attributes", JSON.stringify(listingForm.attributes || {}));
 
     if (listingForm.image) {
       formData.append("image", listingForm.image);
@@ -494,7 +500,7 @@ export default function ManageOffers() {
     try {
       await uploadListing(formData, { headers: getAuthHeaders() });
       alert("Listing uploaded successfully!");
-      setListingForm({ verticalId: "", title: "", description: "", category: "", subcategory: "", originalPrice: "", discountedPrice: "", unit: "", currency: "QAR", validFrom: getTodayDate(), validTo: getTomorrowDate(), city: "", country: "Qatar", address: "", attributes: {}, image: null, gallery: [] });
+      setListingForm({ verticalId: "", title: "", description: "", category: "", subcategory: "", originalPrice: "", discountedPrice: "", unit: "", currency: "QAR", validFrom: getTodayDate(), validTo: getNextWeekDate(), city: "", country: "Qatar", address: "", contactPhone: "", attributes: {}, image: null, gallery: [] });
       setShowAddListingForm(false);
     } catch (err) { 
       console.error(err); 
@@ -521,10 +527,11 @@ export default function ManageOffers() {
   const handleListingUpdate = async (e) => {
     e.preventDefault();
     if (REQUIRE_API_KEY_FOR_ADS === true && !apiKey) return alert("Please enter your Key in the top bar.");
+    if (!listingForm.contactPhone?.trim()) return alert("Please enter a phone number for this listing.");
     if (!editingListing) return;
     const formData = new FormData();
     formData.set("providerId", String((editingListing as any).providerId));
-    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory', 'providerType'];
+    const textFields = ['verticalId', 'title', 'description', 'category', 'subcategory', 'providerType', 'contactPhone'];
     textFields.forEach(field => { if (listingForm[field]) formData.set(field, listingForm[field]); });
     formData.set("pricing", JSON.stringify({ originalPrice: listingForm.originalPrice, discountedPrice: listingForm.discountedPrice, unit: listingForm.unit, currency: listingForm.currency }));
     formData.set("location", JSON.stringify({ city: listingForm.city, country: listingForm.country, address: listingForm.address }));
@@ -536,7 +543,6 @@ export default function ManageOffers() {
     formData.set("validity", JSON.stringify(validityData));
     
     formData.set("attributes", JSON.stringify(listingForm.attributes || {}));
-    formData.set("additionalAttributes", JSON.stringify(listingForm.attributes || {}));
 
     if (listingForm.active !== undefined) {
       formData.set("active", String(listingForm.active));
@@ -1352,6 +1358,8 @@ export default function ManageOffers() {
                     isAdmin={user?.role === "admin"}
                     apiKey={apiKey}
                     setApiKey={setApiKey}
+                    providers={providers}
+                    providerId={selectedRestaurant}
                   />
                 </div>
               )}
@@ -1427,6 +1435,7 @@ export default function ManageOffers() {
                                       city: l.location?.city || "",
                                       country: l.location?.country || "Qatar",
                                       address: l.location?.address || "",
+                                      contactPhone: l.contactPhone || "",
                                       attributes: { ...(l.additionalAttributes || {}), ...(l.attributes || {}) },
                                       active: !!l.active,
                                       image: null,
@@ -1517,6 +1526,8 @@ export default function ManageOffers() {
                         setUpdateImage={setListingUpdateImage}
                         apiKey={apiKey}
                         setApiKey={setApiKey}
+                        providers={providers}
+                        providerId={(editingListing as any)?.providerId}
                       />
                     </div>
                   </div>

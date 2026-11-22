@@ -189,7 +189,8 @@ export default function ListingForm({
       )}
 
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Valid From</label>
+        <div className="h-6" aria-hidden="true" />
+        <label className="block text-xs font-semibold text-gray-500">Valid From</label>
         <input 
           name="validFrom" 
           type="date"
@@ -200,7 +201,13 @@ export default function ListingForm({
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-500">Valid To</label>
+        <p
+          title="Default expiry is one week. Change Valid To if you need the listing to run longer."
+          className="h-6 truncate rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium leading-4 text-amber-800"
+        >
+          Default expiry is one week. Change Valid To if you need the listing to run longer.
+        </p>
+        <label className="block text-xs font-semibold text-gray-500">Valid To</label>
         <input 
           name="validTo" 
           type="date"

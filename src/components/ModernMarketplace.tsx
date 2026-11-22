@@ -521,7 +521,7 @@ function imagesOf(listing: ListingRecord) {
 function listingAttributesOf(listing: ListingRecord) {
   const attributes = listing.attributes && typeof listing.attributes === "object" && !Array.isArray(listing.attributes) ? listing.attributes : {};
   const additionalAttributes = listing.additionalAttributes && typeof listing.additionalAttributes === "object" && !Array.isArray(listing.additionalAttributes) ? listing.additionalAttributes : {};
-  const merged = { ...attributes, ...additionalAttributes } as Record<string, unknown>;
+  const merged = { ...additionalAttributes, ...attributes } as Record<string, unknown>;
   if ((merged.fuelType === undefined || merged.fuelType === null || merged.fuelType === "") && merged.fuel) {
     merged.fuelType = merged.fuel;
   }
