@@ -59,6 +59,7 @@ export const verticalConfig: Record<string, VerticalConfig> = {
     filters: {
       make: { type: 'select', source: 'vehicleMakes' },
       model: { type: 'select', source: 'vehicleModels', dependsOn: 'make' },
+      bodyType: { type: 'select', options: ['Sedan', 'SUV', 'Coupe', 'Hatchback', 'Pickup', 'Van', 'Truck', 'Bus', 'Minivan', 'Motorcycle', 'Scooter', 'ATV', 'UTV', 'Bicycle', 'Boat', 'Yacht', 'Jet Ski', 'Trailer', 'RV / Motorhome', 'Commercial Vehicle', 'Other'] },
       yearMin: { type: 'number', min: 1990, max: new Date().getFullYear() },
       yearMax: { type: 'number', min: 1990, max: new Date().getFullYear() },
       priceRange: { type: 'range', min: 1000, max: 500000 },
@@ -69,7 +70,6 @@ export const verticalConfig: Record<string, VerticalConfig> = {
       { name: 'make', label: 'Make', type: 'text', group: 'Vehicle' },
       { name: 'model', label: 'Model', type: 'text', group: 'Vehicle' },
       { name: 'year', label: 'Year', type: 'number', group: 'Vehicle' },
-      { name: 'bodyType', label: 'Vehicle type', type: 'select', options: ['Sedan', 'SUV', 'Coupe', 'Hatchback', 'Pickup', 'Van', 'Truck', 'Bus', 'Minivan', 'Motorcycle', 'Scooter', 'ATV', 'UTV', 'Bicycle', 'Boat', 'Yacht', 'Jet Ski', 'Trailer', 'RV / Motorhome', 'Commercial Vehicle', 'Other'], group: 'Vehicle' },
       { name: 'mileage', label: 'Mileage (km)', type: 'number', group: 'Performance' },
       { name: 'engineSize', label: 'Engine size', type: 'text', group: 'Performance' },
       { name: 'wheelDrive', label: 'Drive type', type: 'select', options: ['RWD', 'FWD', '2WD', '4WD', 'AWD'], group: 'Performance' },
@@ -123,8 +123,6 @@ export const verticalConfig: Record<string, VerticalConfig> = {
     
     additionalAttributes: [
       { name: 'transactionType', label: 'Transaction type', type: 'select', options: ['For Rent', 'For Sale'], group: 'Property' },
-      { name: 'sector', label: 'Sector', type: 'select', options: ['Residential', 'Commercial', 'International'], group: 'Property' },
-      { name: 'propertyType', label: 'Property type', type: 'select', options: ['Apartment', 'Villa', 'Standalone Villa', 'Compound Villa', 'Studio', 'Penthouse', 'Duplex', 'Hotel Apartment', 'Villa Apartment', 'Townhouse', 'Office', 'Warehouse', 'Shop'], group: 'Property' },
       { name: 'area', label: 'Location / Area / Neighbourhood', type: 'text', group: 'Location' },
       { name: 'bedrooms', label: 'Bedrooms', type: 'number', group: 'Property' },
       { name: 'bathrooms', label: 'Bathrooms', type: 'number', group: 'Property' },
@@ -171,7 +169,6 @@ export const verticalConfig: Record<string, VerticalConfig> = {
     },
     
     additionalAttributes: [
-      { name: 'serviceCategory', label: 'Category', type: 'select', options: ['Home Maintenance', 'Education', 'Business Services', 'Tech & IT', 'Automotive', 'Cleaning', 'Events', 'Moving & Delivery', 'Fashion & Tailoring', 'Domestic Help', 'Travel', 'AC Repair', 'Construction', 'Health & Wellness', 'Pest Control', 'Beauty & Spa', 'Pet Services', 'Furniture & Decor', 'Catering & Venues', 'Facility Management'], group: 'Service' },
       { name: 'area', label: 'Location / Area', type: 'text', group: 'Location' },
       { name: 'experience', label: 'Experience', type: 'text', group: 'Professional' },
       { name: 'priceOnRequest', label: 'Price on request', type: 'select', options: ['Yes', 'No'], group: 'Pricing' }
@@ -203,14 +200,13 @@ export const verticalConfig: Record<string, VerticalConfig> = {
     },
     
     filters: {
-      category: { type: 'select', options: ['Furniture', 'Home Appliances', 'Electronics', 'Mobile Phones', 'TVs', 'Computers', 'Books', 'Clothing', 'Sports', 'Other'] },
+      category: { type: 'select', options: ['Mobile Phones & Tablets', 'Electronics', 'Furniture & Decor', 'Fashion & Beauty', 'Kids & Toys', 'Sports & Hobbies', 'Machinery', 'Equipment & Materials', 'Home Appliances', 'Books', 'Other'] },
       condition: { type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
       priceRange: { type: 'range', min: 1, max: 100000 }
     },
     
     additionalAttributes: [
-      { name: 'classifiedCategory', label: 'Category', type: 'select', options: ['Mobile Phones & Tablets', 'Electronics', 'Furniture & Decor', 'Fashion & Beauty', 'Kids & Toys', 'Sports & Hobbies', 'Machinery', 'Equipment & Materials', 'Home Appliances', 'Books', 'Other'], group: 'Listing' },
-      { name: 'subcategory', label: 'Sub-category', type: 'text', group: 'Listing' },
+      { name: 'warranty', label: 'Warranty', type: 'select', options: ['Yes', 'No'], group: 'Listing' },
       { name: 'condition', label: 'Condition', type: 'select', options: ['New', 'Used', 'Preloved', 'Like New', 'Good', 'Fair'], group: 'Listing' },
       { name: 'brand', label: 'Brand', type: 'text', group: 'Listing' },
       { name: 'area', label: 'Location / Area', type: 'text', group: 'Location' }
@@ -244,13 +240,13 @@ export const verticalConfig: Record<string, VerticalConfig> = {
     filters: {
       jobType: { type: 'multiselect', options: ['Full-time', 'Part-time', 'Contract', 'Freelance'] },
       level: { type: 'select', options: ['Entry', 'Mid', 'Senior', 'Executive'] },
+      function: { type: 'select', options: ['Accounting & Auditing', 'Administration', 'Advertising', 'Quality Assurance & HSE', 'Customer Service', 'IT', 'Skilled Trades & Technicians', 'Healthcare & Medical', 'Human Resources', 'Sales & Marketing', 'Engineering & Construction', 'Hospitality & F&B', 'Other'] },
+      careerLevel: { type: 'select', options: ['Entry Level', 'Mid Level', 'Senior Level', 'Manager', 'Executive'] },
       salaryMin: { type: 'number', min: 0, max: 1000000 },
       salaryMax: { type: 'number', min: 0, max: 1000000 }
     },
     
     additionalAttributes: [
-      { name: 'function', label: 'Function', type: 'select', options: ['Accounting & Auditing', 'Administration', 'Advertising', 'Quality Assurance & HSE', 'Customer Service', 'IT', 'Skilled Trades & Technicians', 'Healthcare & Medical', 'Human Resources', 'Sales & Marketing', 'Engineering & Construction', 'Hospitality & F&B', 'Other'], group: 'Role' },
-      { name: 'careerLevel', label: 'Career level', type: 'select', options: ['Entry Level', 'Mid Level', 'Senior Level', 'Manager', 'Executive'], group: 'Role' },
       { name: 'salaryRangeMin', label: 'Minimum salary (QAR)', type: 'number', group: 'Salary' },
       { name: 'salaryRangeMax', label: 'Maximum salary (QAR)', type: 'number', group: 'Salary' },
       { name: 'salaryNegotiable', label: 'Negotiable salary', type: 'select', options: ['Yes', 'No'], group: 'Salary' },

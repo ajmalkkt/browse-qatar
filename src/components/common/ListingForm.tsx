@@ -56,7 +56,30 @@ export default function ListingForm({
       [...configuredAttributes, ...(activeVertical?.additionalAttributes || [])].map((attribute) => [attribute.name, attribute])
     ).values()
   );
-  const groupedAttributeDefinitions = Array.from(attributeDefinitions.reduce((groups, attribute) => {
+  const topLevelAttributeNames: Record<string, string[]> = {
+    accommodations: ["transactionType", "propertyType"],
+    services: ["serviceCategory"],
+    vehicles: ["bodyType"],
+    jobs: ["function", "careerLevel"],
+    classifieds: ["classifiedCategory", "subcategory"],
+  };
+  const topLevelAttributeDefinitions = attributeDefinitions.filter(
+    (attribute) => !topLevelAttributeNames[listingForm.verticalId]?.includes(attribute.name)
+  );
+  const promotedAttributes: Record<string, Array<{ name: string; label: string }>> = {
+    vehicles: [{ name: "bodyType", label: "Vehicle type" }],
+    jobs: [
+      { name: "function", label: "Function" },
+      { name: "careerLevel", label: "Career level" },
+    ],
+  };
+  const getAttributeOptions = (name: string) => {
+    const metadataFilter = activeVertical?.filters?.find((filter) => filter.key === name);
+    const configuredFilter = verticalConfig[listingForm.verticalId]?.filters[name];
+    const definition = attributeDefinitions.find((attribute) => attribute.name === name);
+    return metadataFilter?.options || configuredFilter?.options || definition?.options || [];
+  };
+  const groupedAttributeDefinitions = Array.from(topLevelAttributeDefinitions.reduce((groups, attribute) => {
     const group = attribute.group || attribute.category || attribute.section || "Additional details";
     groups.set(group, [...(groups.get(group) || []), attribute]);
     return groups;
@@ -136,12 +159,97 @@ export default function ListingForm({
       
       {activeVertical && <>
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-gray-500">Subcategory *</label>
-          <select name="subcategory" value={listingForm.subcategory || ""} onChange={handleListingFormChange} required className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">-- Select Subcategory --</option>
+          <label className="text-xs font-semibold text-gray-500">{
+            listingForm.verticalId === "accommodations"
+              ? "Property type *"
+              : listingForm.verticalId === "services"
+                ? "Service type *"
+                : listingForm.verticalId === "classifieds"
+                  ? "Item / service category *"
+                : "Subcategory *"
+          }</label>
+          <select
+            name="subcategory"
+            value={listingForm.verticalId === "classifieds"
+              ? listingForm.attributes?.classifiedCategory || listingForm.subcategory || ""
+              : listingForm.subcategory || ""}
+            onChange={(event) => {
+              handleListingFormChange(event);
+              if (listingForm.verticalId === "accommodations") {
+                setListingForm((current) => ({
+                  ...current,
+                  subcategory: event.target.value,
+                  attributes: { ...(current.attributes || {}), propertyType: event.target.value },
+                }));
+              }
+              if (listingForm.verticalId === "services") {
+                setListingForm((current) => ({
+                  ...current,
+                  subcategory: event.target.value,
+                  attributes: { ...(current.attributes || {}), serviceCategory: event.target.value },
+                }));
+              }
+              if (listingForm.verticalId === "classifieds") {
+                setListingForm((current) => ({
+                  ...current,
+                  subcategory: event.target.value,
+                  attributes: { ...(current.attributes || {}), classifiedCategory: event.target.value },
+                }));
+              }
+            }}
+            required
+            className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">{
+              listingForm.verticalId === "accommodations"
+                ? "-- Select Property Type --"
+                : listingForm.verticalId === "services"
+                  ? "-- Select Service Type --"
+                  : listingForm.verticalId === "classifieds"
+                    ? "-- Select an item or service category --"
+                  : "-- Select Subcategory --"
+            }</option>
+            {listingForm.verticalId === "classifieds" &&
+              listingForm.subcategory &&
+              !(activeVertical.subcategories || []).includes(listingForm.attributes?.classifiedCategory || listingForm.subcategory) && (
+                <option value={listingForm.attributes?.classifiedCategory || listingForm.subcategory}>
+                  {listingForm.attributes?.classifiedCategory || listingForm.subcategory}
+                </option>
+              )}
             {(activeVertical.subcategories || []).map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
           </select>
         </div>
+        {(promotedAttributes[listingForm.verticalId] || []).map((attribute) => (
+          <div key={attribute.name} className="space-y-1">
+            <label className="text-xs font-semibold text-gray-500">{attribute.label}</label>
+            <select
+              value={listingForm.attributes?.[attribute.name] || ""}
+              onChange={(event) => updateAttribute(attribute.name, event.target.value)}
+              className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">-- Select {attribute.label} --</option>
+              {getAttributeOptions(attribute.name).map((option) => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
+        ))}
+        {listingForm.verticalId === "accommodations" && (
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-gray-500">Transaction type *</label>
+            <select
+              name="transactionType"
+              value={listingForm.attributes?.transactionType || ""}
+              onChange={(event) => updateAttribute("transactionType", event.target.value)}
+              required
+              className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">-- Select Transaction Type --</option>
+              <option value="For Rent">For Rent</option>
+              <option value="For Sale">For Sale</option>
+            </select>
+          </div>
+        )}
         <div className="space-y-1">
           <label className="text-xs font-semibold text-gray-500">Owner / Seller Type</label>
           <input
@@ -176,13 +284,13 @@ export default function ListingForm({
       {(listingForm.verticalId === "accommodations" || listingForm.verticalId === "jobs") && (
         <div className="space-y-1">
           <label className="text-xs font-semibold text-gray-500">
-            {listingForm.verticalId === "jobs" ? "Open Position" : "Unit (e.g., night, month, area)"}
+            {listingForm.verticalId === "jobs" ? "Open Position" : "Unit (e.g., night, month)"}
           </label>
           <input 
             name="unit" 
             value={listingForm.unit || ""} 
             onChange={handleListingFormChange} 
-            placeholder={listingForm.verticalId === "jobs" ? "e.g., 3" : "e.g., night, month, area"}
+            placeholder={listingForm.verticalId === "jobs" ? "e.g., 3" : "e.g., night, month"}
             className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" 
           />
         </div>

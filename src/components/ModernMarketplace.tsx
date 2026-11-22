@@ -361,11 +361,9 @@ const verticalRefineConfig: Record<string, { subcategories: string[]; fields: Re
     ],
   },
   accommodations: {
-    subcategories: ["Rent (Apartment/Villa)", "Sale (Apartment/Villa)", "Commercial", "Shared/Partition", "Land & Plots"],
+    subcategories: ["Apartment", "Villa", "Standalone Villa", "Compound Villa", "Studio", "Penthouse", "Duplex", "Hotel Apartment", "Villa Apartment", "Townhouse", "Office", "Warehouse", "Shop", "Land & Plots", "Shared / Partition"],
     fields: [
       { label: "Transaction type", key: "transactionType", aliases: ["transactionType"], type: "select", options: ["For Rent", "For Sale"], group: "Property" },
-      { label: "Sector", key: "sector", aliases: ["sector"], type: "select", options: ["Residential", "Commercial", "International"], group: "Property" },
-      { label: "Property type", key: "propertyType", aliases: ["propertyType", "type"], type: "select", options: ["Apartment", "Villa", "Standalone Villa", "Compound Villa", "Studio", "Penthouse", "Duplex", "Hotel Apartment", "Villa Apartment", "Townhouse", "Office", "Warehouse", "Shop"], group: "Property" },
       { label: "Area / Neighbourhood", key: "area", aliases: ["area", "neighbourhood", "location.area", "location.city"], type: "text", group: "Location" },
       { label: "Bedrooms", key: "bedrooms", aliases: ["bedrooms", "bedroom"], type: "range", group: "Property" },
       { label: "Bathrooms", key: "bathrooms", aliases: ["bathrooms", "bathroom"], type: "range", group: "Property" },
@@ -394,9 +392,9 @@ const verticalRefineConfig: Record<string, { subcategories: string[]; fields: Re
     ],
   },
   services: {
-    subcategories: ["Home Maintenance", "Cleaning & Laundry", "Moving & Transport", "IT & Digital", "Events & Catering", "Beauty & Fitness", "Legal & Business"],
+    subcategories: ["Home Maintenance", "Education", "Business Services", "Tech & IT", "Automotive", "Cleaning", "Events", "Moving & Delivery", "Fashion & Tailoring", "Domestic Help", "Travel", "AC Repair", "Construction", "Health & Wellness", "Pest Control", "Beauty & Spa", "Pet Services", "Furniture & Decor", "Catering & Venues", "Facility Management"],
     fields: [
-      { label: "Category", key: "serviceCategory", aliases: ["serviceCategory", "category", "serviceType"], type: "select", options: ["Home Maintenance", "Education", "Business Services", "Tech & IT", "Automotive", "Cleaning", "Events", "Moving & Delivery", "Fashion & Tailoring", "Domestic Help", "Travel", "AC Repair", "Construction", "Health & Wellness", "Pest Control", "Beauty & Spa", "Pet Services", "Furniture & Decor", "Catering & Venues", "Facility Management"], group: "Service" },
+      { label: "Service type", key: "serviceCategory", aliases: ["serviceCategory", "category", "serviceType"], type: "select", options: ["Home Maintenance", "Education", "Business Services", "Tech & IT", "Automotive", "Cleaning", "Events", "Moving & Delivery", "Fashion & Tailoring", "Domestic Help", "Travel", "AC Repair", "Construction", "Health & Wellness", "Pest Control", "Beauty & Spa", "Pet Services", "Furniture & Decor", "Catering & Venues", "Facility Management"], group: "Service" },
       { label: "Location / Area", key: "area", aliases: ["area", "location.city", "location.area", "city", "location", "address"], type: "text", group: "Location" },
       { label: "Experience", key: "experience", aliases: ["experience"], type: "text", group: "Professional" },
       { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR", group: "Price" },
@@ -405,10 +403,9 @@ const verticalRefineConfig: Record<string, { subcategories: string[]; fields: Re
     ],
   },
   classifieds: {
-    subcategories: ["Furniture", "Home Appliances", "Electronics", "Mobile Phones", "TVs", "Computers", "Books", "Clothing", "Sports", "Other"],
+    subcategories: ["Mobile Phones & Tablets", "Electronics", "Furniture & Decor", "Fashion & Beauty", "Kids & Toys", "Sports & Hobbies", "Machinery", "Equipment & Materials", "Home Appliances", "Books", "Other"],
     fields: [
-      { label: "Category", key: "classifiedCategory", aliases: ["classifiedCategory", "category", "subcategory"], type: "select", options: ["Mobile Phones & Tablets", "Electronics", "Furniture & Decor", "Fashion & Beauty", "Kids & Toys", "Sports & Hobbies", "Machinery", "Equipment & Materials", "Home Appliances", "Books", "Other"], group: "Listing" },
-      { label: "Sub-category", key: "subcategory", aliases: ["subcategory", "category"], type: "text", group: "Listing" },
+      { label: "Item / service category", key: "classifiedCategory", aliases: ["classifiedCategory", "category", "subcategory"], type: "select", options: ["Mobile Phones & Tablets", "Electronics", "Furniture & Decor", "Fashion & Beauty", "Kids & Toys", "Sports & Hobbies", "Machinery", "Equipment & Materials", "Home Appliances", "Books", "Other"], group: "Listing" },
       { label: "Condition", key: "condition", aliases: ["condition"], type: "select", options: ["New", "Used", "Preloved", "Like New", "Good", "Fair"], group: "Listing" },
       { label: "Brand", key: "brand", aliases: ["brand", "make"], type: "text", group: "Listing" },
       { label: "Location / Area", key: "area", aliases: ["area", "location.city", "location.area", "location"], type: "text", group: "Location" },
@@ -1273,7 +1270,7 @@ function VerticalRefinePanel({ vertical, metadata, fields, cuisineFilter, catego
       </> : refineConfig || refineFields.length > 0 ? <div className="mt-5 space-y-2">
         {subcategories.length > 0 && <details className="group rounded-xl border border-[#f1e4d6] bg-white/70">
           <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-3 text-sm font-semibold text-[#50343b] [&::-webkit-details-marker]:hidden">
-            Category <ChevronDown size={16} className="text-[#941333] transition group-open:rotate-180" />
+            {vertical === "classifieds" ? "Item / service category" : "Category"} <ChevronDown size={16} className="text-[#941333] transition group-open:rotate-180" />
           </summary>
           <div className="border-t border-[#f1e4d6] p-3">
             <select value={refineFilters.subcategory || ""} onChange={(event) => { updateFilter("subcategory", event.target.value); closeAfterChoice(); }} className="w-full rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15">
@@ -1289,7 +1286,7 @@ function VerticalRefinePanel({ vertical, metadata, fields, cuisineFilter, catego
           <div className="space-y-4 border-t border-[#f1e4d6] p-3">{fields.map(renderField)}</div>
         </details>)}
       </div> : <>
-        <label className="mt-4 block text-sm font-semibold text-[#6b5157]">Category</label>
+        <label className="mt-4 block text-sm font-semibold text-[#6b5157]">{vertical === "classifieds" ? "Item / service category" : "Category"}</label>
         <div className="mt-2 space-y-2">{vertical === "classifieds" ? <>
           <button type="button" onClick={() => { selectCategory(null); closeAfterChoice(); }} aria-pressed={!categoryFilter} className={`block w-full text-left text-sm ${!categoryFilter ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>All categories</button>
           {["Furniture", "Home Appliances", "Electronics", "Mobile Phones", "TVs", "Computers", "Books", "Clothing", "Sports", "Other"].map((item) => <button key={item} type="button" onClick={() => { selectCategory(categoryFilter === item ? null : item); closeAfterChoice(); }} aria-pressed={categoryFilter === item} className={`block w-full text-left text-sm ${categoryFilter === item ? "font-semibold text-[#0878d1]" : "text-slate-600 hover:text-slate-900"}`}>{item}</button>)}
