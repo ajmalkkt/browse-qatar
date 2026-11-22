@@ -352,6 +352,9 @@ const verticalRefineConfig: Record<string, { subcategories: string[]; fields: Re
       { label: "Transmission", key: "transmission", aliases: ["transmission"], type: "select", options: ["Automatic", "Manual", "CVT", "Semi-Automatic"], group: "Performance" },
       { label: "Fuel type", key: "fuelType", aliases: ["fuelType", "fuel"], type: "select", options: ["Petrol", "Diesel", "Electric", "Hybrid", "Plug-in Hybrid", "CNG", "LPG"], group: "Performance" },
       { label: "Drive type", key: "wheelDrive", aliases: ["wheelDrive", "driveType", "drivetrain"], type: "select", options: ["RWD", "FWD", "2WD", "4WD", "AWD"], group: "Performance" },
+      { label: "Doors", key: "doors", aliases: ["doors"], type: "select", options: ["2", "3", "4", "5"], group: "Style" },
+      { label: "Seats", key: "seats", aliases: ["seats", "seatCount"], type: "select", options: ["2", "4", "5", "6", "7", "8", "9", "10", "12", "14", "24", "32", "40", "50"], group: "Style" },
+      { label: "Seat type", key: "seatType", aliases: ["seatType", "seatingType"], type: "select", options: ["Standard", "Bucket", "Bench", "Captain", "Reclining", "Leather", "Fabric", "Cloth", "Vinyl", "Synthetic Leather", "Alcantara", "Sport", "Heated", "Ventilated", "Other"], group: "Style" },
       { label: "Condition", key: "condition", aliases: ["condition", "vehicleCondition"], type: "select", options: ["New", "Used", "Refurbished", "Preloved"], group: "Vehicle" },
       { label: "Service history", key: "serviceHistory", aliases: ["serviceHistory", "service_history"], type: "select", options: ["Full Service History", "Partial Service History", "No Service History", "Unknown"], group: "Vehicle" },
       { label: "Price", key: "price", aliases: ["pricing.discountedPrice", "discountedPrice", "price", "pricing.originalPrice", "originalPrice"], type: "range", unit: "QAR", group: "Price" },
@@ -810,7 +813,7 @@ export function MarketplaceHeader({ search, onSearch, vertical }: { search?: str
             <button type="submit" className="hidden h-full shrink-0 items-center gap-2 bg-[#941333] px-4 text-sm font-semibold text-white transition hover:bg-[#6f1028] sm:flex"><Search size={16} /> Search</button>
           </form>
           <div className="ml-auto flex shrink-0 items-center gap-0 text-[#8c1534] sm:gap-1.5 lg:gap-4">
-          <MarketplacePostAction className="inline-flex h-7 shrink-0 items-center gap-0.5 rounded-full border-2 border-[#941333] px-2.5 text-[10px] font-extrabold text-[#941333] shadow-sm transition hover:bg-[#fff0c7] min-[390px]:px-3 min-[390px]:text-[11px] sm:h-11 sm:gap-2 sm:px-4 sm:text-sm"><span className="text-sm leading-none sm:text-lg">+</span> SELL</MarketplacePostAction>
+          <MarketplacePostAction className="relative size-6 shrink-0 rounded-full bg-[#fff0c7] text-[#941333] transition hover:bg-[#fbe7b2] sm:inline-flex sm:h-11 sm:w-auto sm:items-center sm:justify-center sm:gap-2 sm:rounded-full sm:border-2 sm:border-[#941333] sm:bg-transparent sm:px-4 sm:text-sm sm:font-extrabold sm:shadow-sm sm:hover:bg-[#fff0c7]"><span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-black leading-none sm:static sm:translate-x-0 sm:translate-y-0">+</span><span className="hidden sm:inline">SELL</span></MarketplacePostAction>
           <Link to="/favourites" className="grid size-8 shrink-0 place-items-center rounded-full text-[#6b5157] transition hover:bg-[#fff1c9] sm:rounded-lg sm:size-10" aria-label="Favorites"><Heart size={18} className="sm:size-5" /></Link>
           <button type="button" onClick={() => setMenuOpen((open) => !open)} className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[#6b5157] transition hover:bg-[#fff1c9] sm:rounded-lg sm:h-10 sm:w-10" aria-label={auth.user ? "Open account menu" : "Open login menu"} aria-expanded={menuOpen}>
             <CircleUserRound size={20} className={auth.user ? "text-[#941333]" : ""} />
@@ -1248,7 +1251,7 @@ function VerticalRefinePanel({ vertical, metadata, fields, cuisineFilter, catego
     return <label key={field.key} className="block space-y-1.5">
       <span className="block text-xs font-semibold text-[#6b5157]">{field.label}</span>
       {field.type === "select" ? <select value={refineFilters[field.key] || ""} onChange={(event) => { updateFilter(field.key, event.target.value); closeAfterChoice(); }} className="w-full rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15">
-        <option value="">All</option>
+        <option value="">Any</option>
         {field.options?.map((option) => <option key={option} value={option}>{option}</option>)}
       </select> : <input type="text" value={refineFilters[field.key] || ""} onChange={(event) => updateFilter(field.key, event.target.value)} className="w-full rounded-lg border border-[#e8c8c6] bg-white/90 px-2.5 py-2 text-sm text-slate-800 outline-none focus:border-[#941333] focus:ring-2 focus:ring-[#941333]/15" />}
     </label>;
@@ -1346,12 +1349,21 @@ export function ModernMarketplaceListing() {
   }, [vertical, searchQuery]);
 
   const refineFields = useMemo(() => buildRefineFields(vertical, verticalMetadata).map((field) => {
-    const listingOptions = Array.from(new Set(listings.flatMap((item) => {
+    const uniqueListingOptions = new Map<string, string>();
+    listings.forEach((item) => {
       const value = getListingFieldValue(item, field.aliases);
       const values = Array.isArray(value) ? value : [value];
-      return values.filter((option): option is string | number => typeof option === "string" || typeof option === "number").map(String);
-    }))).sort((a, b) => a.localeCompare(b));
-    const listingDrivenVehicleFilters = ["make", "model", "engineSize", "wheelDrive", "fuelType", "cylinders", "transmission", "color", "insideColor", "doors", "seats", "seatType"];
+      values
+        .filter((option): option is string | number => typeof option === "string" || typeof option === "number")
+        .map((option) => String(option).trim())
+        .filter(Boolean)
+        .forEach((option) => {
+          const normalized = option.toLocaleLowerCase();
+          if (!uniqueListingOptions.has(normalized)) uniqueListingOptions.set(normalized, option);
+        });
+    });
+    const listingOptions = Array.from(uniqueListingOptions.values()).sort((a, b) => a.localeCompare(b));
+    const listingDrivenVehicleFilters = ["make", "model", "engineSize", "wheelDrive", "fuelType", "cylinders", "transmission", "color", "insideColor"];
     if (vertical === "vehicles" && listingDrivenVehicleFilters.includes(field.key) && listingOptions.length) {
       return { ...field, type: "multiselect" as const, options: listingOptions };
     }

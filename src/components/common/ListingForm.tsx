@@ -17,6 +17,8 @@ interface ListingFormProps {
   setUpdateImage?: (val: boolean) => void;
   apiKey: string;
   setApiKey: (val: string) => void;
+  providers?: any[];
+  providerId?: number | string;
 }
 
 export default function ListingForm({
@@ -32,7 +34,9 @@ export default function ListingForm({
   updateImage,
   setUpdateImage,
   apiKey,
-  setApiKey
+  setApiKey,
+  providers = [],
+  providerId
 }: ListingFormProps) {
 
   const [verticals, setVerticals] = useState<Vertical[]>([]);
@@ -63,6 +67,20 @@ export default function ListingForm({
       setListingForm((current) => ({ ...current, category: activeVertical.name }));
     }
   }, [activeVertical, isEdit, listingForm.category, setListingForm]);
+
+  useEffect(() => {
+    if (!providerId) return;
+    const provider = providers.find((item) => String(item.id) === String(providerId));
+    const providerPhone = typeof provider?.phone === "string" ? provider.phone.trim() : "";
+    if (!isEdit) {
+      setListingForm((current) => ({
+        ...current,
+        contactPhone: current.contactPhone?.trim() || providerPhone,
+      }));
+    } else if (!listingForm.contactPhone?.trim() && providerPhone) {
+      setListingForm((current) => ({ ...current, contactPhone: providerPhone }));
+    }
+  }, [providerId, providers, isEdit, setListingForm]);
 
   const handleVerticalChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const vertical = verticals.find((item) => item.id === event.target.value);
@@ -230,6 +248,19 @@ export default function ListingForm({
           onChange={handleListingFormChange} 
           placeholder="e.g. West Bay"
           className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+        />
+      </div>
+
+      <div className="space-y-1 md:col-span-1">
+        <label className="text-xs font-semibold text-gray-500">Phone Number *</label>
+        <input
+          name="contactPhone"
+          type="tel"
+          value={listingForm.contactPhone || ""}
+          onChange={handleListingFormChange}
+          placeholder="+974 1234 5678"
+          required
+          className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
         />
       </div>
 
