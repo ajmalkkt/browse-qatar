@@ -234,7 +234,7 @@ export function ModernMarketplaceFooter({ variant = "modern" }: { variant?: "mod
           <img src="/logo.jpg" alt="Browse Qatar" className="size-12 shrink-0 rounded-full object-cover" />
         </Link>
         <Link to="/" aria-label="Browse Qatar home" className="hidden items-center sm:inline-flex">
-          <img src="/bqLogo.png" alt="Browse Qatar" className="h-11 w-auto object-contain" onError={(event) => { event.currentTarget.src = "/bqLogo.jpg"; }} />
+          <img src="/bqLogo.jpg" alt="Browse Qatar" className="h-11 w-auto object-contain" onError={(event) => { event.currentTarget.src = "/browseQtr.jpg"; }} />
         </Link>
         <p className="mt-0 min-w-0 flex-1 text-xs leading-5 text-slate-500 sm:mt-3 sm:max-w-sm sm:flex-none sm:text-sm sm:leading-6">Discover local deals, trusted services, and listings across Qatar.</p>
         </div>
