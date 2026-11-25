@@ -15,12 +15,14 @@ import {
   ChevronRight,
   Heart,
   Home,
+  LayoutGrid,
   MapPin,
   Menu,
   Moon,
   Newspaper,
   Search,
   ShieldCheck,
+  Sparkles,
   Sun,
   Tag,
   TrendingUp,
@@ -29,6 +31,8 @@ import {
 } from "lucide-react";
 import { verticalConfig } from "../config/verticalConfig";
 import { getAllActiveListings } from "../services/listingService";
+import { getQatarEventList, getQatarNewsList, getQatarStockTicker, QatarFeedRequestError } from "../services/qatarFeeds";
+import type { NewsArticleItem, QatarEventItem, StockQuoteItem } from "../services/qatarFeeds";
 import { Listing } from "../types/listing";
 import { MarketplaceAccountMenu, MarketplacePostAction, ModernMarketplaceFooter, PostingNudge } from "./ModernMarketplace";
 
@@ -46,24 +50,6 @@ const heroSlides = [
   { id: "vehicles", imageUrl: categoryVisuals.vehicles.image, imageAlt: categoryVisuals.vehicles.imageAlt },
   { id: "accommodations", imageUrl: categoryVisuals.accommodations.image, imageAlt: categoryVisuals.accommodations.imageAlt },
   { id: "restaurants", imageUrl: categoryVisuals.restaurants.image, imageAlt: categoryVisuals.restaurants.imageAlt },
-];
-
-const demoNews = [
-  { section: "Community", headline: "Local Qatar headlines and community updates", summary: "A preview of the latest stories from across Qatar.", image: "/images/doha-hero.png", imageAlt: "Doha skyline at sunset" },
-  { section: "Business", headline: "Business and market updates from Doha", summary: "Business news will appear here when a news feed is connected.", image: "/images/jobs.png", imageAlt: "Professional working at a laptop" },
-  { section: "Culture", headline: "Culture, lifestyle, and events around Qatar", summary: "Discover what is happening in the local community.", image: "/images/chef.jpg", imageAlt: "Chef preparing a meal" },
-];
-
-const demoStocks = [
-  { symbol: "QNBK", name: "QNB Group", price: "QAR 1.00", change: "+0.0%" },
-  { symbol: "QIBK", name: "Qatar Islamic Bank", price: "QAR 1.00", change: "+0.0%" },
-  { symbol: "QEWS", name: "Qatar Electricity & Water", price: "QAR 1.00", change: "+0.0%" },
-];
-
-const demoEvents = [
-  { category: "Community", title: "Doha Community Market", location: "Doha, Qatar" },
-  { category: "Family", title: "Family Activities Around Qatar", location: "Qatar" },
-  { category: "Arts & Culture", title: "Local Arts and Culture Weekend", location: "Doha, Qatar" },
 ];
 
 type WeatherSummary = {
@@ -115,6 +101,23 @@ function formatPrayerTime(minutes: number) {
   return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${suffix}`;
 }
 
+function formatFeedDate(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? ""
+    : new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(date);
+}
+
+function isHttpUrl(value: string | undefined): value is string {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 function getWeatherInfo(code: number, isDay: boolean) {
   if (code === 0) return { label: "Clear sky", icon: isDay ? Sun : Moon };
   if (code <= 3) return { label: "Partly cloudy", icon: isDay ? CloudSun : Cloud };
@@ -125,6 +128,11 @@ function getWeatherInfo(code: number, isDay: boolean) {
   if (code >= 95) return { label: "Thunderstorm", icon: CloudLightning };
   return { label: "Current conditions", icon: Cloud };
 }
+
+const STOCKS_PER_PAGE = 5;
+const STOCK_ROTATION_INTERVAL_MS = 5000;
+const EVENT_CARDS_PER_PAGE = 3;
+const EVENT_ROTATION_INTERVAL_MS = 5000;
 
 export default function BrowseQatarHomeV2() {
   const navigate = useNavigate();
@@ -142,6 +150,19 @@ export default function BrowseQatarHomeV2() {
   const [latestListings, setLatestListings] = useState<HomeListing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsError, setListingsError] = useState("");
+  const [news, setNews] = useState<NewsArticleItem[]>([]);
+  const [newsIndex, setNewsIndex] = useState(0);
+  const [newsLoading, setNewsLoading] = useState(true);
+  const [newsError, setNewsError] = useState("");
+  const [stocks, setStocks] = useState<StockQuoteItem[]>([]);
+  const [stockPageIndex, setStockPageIndex] = useState(0);
+  const [stocksRefreshing, setStocksRefreshing] = useState(false);
+  const [stocksLoading, setStocksLoading] = useState(true);
+  const [stocksError, setStocksError] = useState("");
+  const [events, setEvents] = useState<QatarEventItem[]>([]);
+  const [eventIndex, setEventIndex] = useState(0);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsError, setEventsError] = useState("");
   const categories = useMemo(() => Object.values(verticalConfig)
     .filter((vertical) => vertical.enabled && categoryVisuals[vertical.id])
     .map((vertical) => ({ ...vertical, ...categoryVisuals[vertical.id] })), []);
@@ -149,6 +170,49 @@ export default function BrowseQatarHomeV2() {
   const visibleCategories = normalizedSearch
     ? categories.filter((category) => `${category.name} ${category.description}`.toLowerCase().includes(normalizedSearch))
     : categories;
+  const visibleNews = useMemo(() => news.length <= 3
+    ? news
+    : Array.from({ length: 3 }, (_, offset) => news[(newsIndex + offset) % news.length]), [news, newsIndex]);
+  const visibleEvents = useMemo(() => events.length <= EVENT_CARDS_PER_PAGE
+    ? events
+    : Array.from({ length: EVENT_CARDS_PER_PAGE }, (_, offset) => events[(eventIndex + offset) % events.length]), [events, eventIndex]);
+  const visibleStocks = useMemo(() => {
+    const pageCount = Math.ceil(stocks.length / STOCKS_PER_PAGE);
+    if (pageCount === 0) return [];
+    const pageIndex = stockPageIndex % pageCount;
+    const firstItemIndex = (pageIndex * STOCKS_PER_PAGE) % stocks.length;
+    return Array.from(
+      { length: Math.min(STOCKS_PER_PAGE, stocks.length) },
+      (_, offset) => stocks[(firstItemIndex + offset) % stocks.length],
+    );
+  }, [stocks, stockPageIndex]);
+  useEffect(() => {
+    if (news.length <= 3) {
+      setNewsIndex(0);
+      return;
+    }
+    const interval = window.setInterval(() => {
+      setNewsIndex((current) => (current + 1) % news.length);
+    }, 5000);
+    return () => window.clearInterval(interval);
+  }, [news.length]);
+  useEffect(() => {
+    const pageCount = Math.ceil(stocks.length / STOCKS_PER_PAGE);
+    setStockPageIndex(0);
+    if (pageCount <= 1) return;
+    const interval = window.setInterval(() => {
+      setStockPageIndex((current) => (current + 1) % pageCount);
+    }, STOCK_ROTATION_INTERVAL_MS);
+    return () => window.clearInterval(interval);
+  }, [stocks.length]);
+  useEffect(() => {
+    setEventIndex(0);
+    if (events.length <= EVENT_CARDS_PER_PAGE) return;
+    const interval = window.setInterval(() => {
+      setEventIndex((current) => (current + 1) % events.length);
+    }, EVENT_ROTATION_INTERVAL_MS);
+    return () => window.clearInterval(interval);
+  }, [events.length]);
   useEffect(() => {
     const interval = window.setInterval(() => {
       setActiveHeroSlide((current) => (current + 1) % heroSlides.length);
@@ -264,6 +328,84 @@ export default function BrowseQatarHomeV2() {
     void loadListings();
     return () => {
       active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    let stockPollTimeout: number | undefined;
+    const scheduleStockPoll = (delayMs: number) => {
+      if (!active) return;
+      if (stockPollTimeout !== undefined) window.clearTimeout(stockPollTimeout);
+      stockPollTimeout = window.setTimeout(() => {
+        stockPollTimeout = undefined;
+        void loadStocks();
+      }, Math.max(1000, delayMs));
+    };
+    const loadNews = async () => {
+      try {
+        const items = await getQatarNewsList({ language: "en", limit: 15 });
+        if (active) {
+          setNews(items);
+          setNewsIndex(0);
+          setNewsError("");
+        }
+      } catch (error) {
+        console.error("[BrowseQatarHomeV2] Failed to load Qatar news:", error);
+        if (active) {
+          setNews([]);
+          setNewsError("Qatar news is temporarily unavailable.");
+        }
+      } finally {
+        if (active) setNewsLoading(false);
+      }
+    };
+    const loadStocks = async () => {
+      try {
+        const result = await getQatarStockTicker();
+        if (active) {
+          setStocks(result.items);
+          setStocksRefreshing(result.refreshInProgress);
+          setStocksError("");
+          scheduleStockPoll(result.nextPollMs);
+        }
+      } catch (error) {
+        console.error("[BrowseQatarHomeV2] Failed to load Qatar stock quotes:", error);
+        if (active) {
+          setStocksRefreshing(false);
+          setStocksError("Qatar stock quotes are temporarily unavailable.");
+          const retryAfterMs = error instanceof QatarFeedRequestError
+            ? error.retryAfterMs
+            : undefined;
+          scheduleStockPoll(retryAfterMs ?? 15 * 60 * 1000);
+        }
+      } finally {
+        if (active) setStocksLoading(false);
+      }
+    };
+    const loadEvents = async () => {
+      try {
+        const items = await getQatarEventList({ queryText: "events in Qatar" });
+        if (active) {
+          setEvents(items);
+          setEventsError("");
+        }
+      } catch (error) {
+        console.error("[BrowseQatarHomeV2] Failed to load Qatar events:", error);
+        if (active) {
+          setEvents([]);
+          setEventsError("Qatar events are temporarily unavailable.");
+        }
+      } finally {
+        if (active) setEventsLoading(false);
+      }
+    };
+    void loadNews();
+    void loadStocks();
+    void loadEvents();
+    return () => {
+      active = false;
+      if (stockPollTimeout !== undefined) window.clearTimeout(stockPollTimeout);
     };
   }, []);
 
@@ -406,7 +548,13 @@ export default function BrowseQatarHomeV2() {
       <section id="interests" aria-label="Browse categories and latest listings" className="pb-8 pt-3 sm:pt-4 lg:pt-4">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-6 2xl:gap-10">
           <div>
-            <h2 id="v2-interests-heading" className="mb-4 text-left text-xl font-black text-[#8c1534] sm:text-2xl xl:text-3xl">BROWSE BY INTEREST</h2>
+            <div className="mb-4 flex items-center gap-3 border-b border-[#ead9ca] pb-3">
+              <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#8c1534] text-[#fff0c7] shadow-sm ring-4 ring-[#fff0c7]/60"><LayoutGrid className="size-5" aria-hidden="true" /></span>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#941333]">Explore Qatar</p>
+                <h2 id="v2-interests-heading" className="mt-0.5 text-xl font-black tracking-tight text-[#30252a] sm:text-2xl xl:text-3xl">Browse by Interest</h2>
+              </div>
+            </div>
             {visibleCategories.length > 0 ? <div className="grid grid-cols-1 gap-3 min-[300px]:grid-cols-2">
               {visibleCategories.map(({ id, name, description, icon: Icon, image, imageAlt }) => <Link key={id} to={categoryPath(id)} className="group relative isolate box-border aspect-[1.5/1] w-full min-w-0 overflow-hidden rounded-[18px] bg-[#e8ded1] shadow-sm min-[300px]:aspect-[1.1/1] sm:aspect-[1.65/1] lg:aspect-[1.4/1] lg:min-h-[145px] 2xl:aspect-[1.65/1]">
                 <img src={image} alt={imageAlt} loading="lazy" className="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.04]" />
@@ -418,9 +566,15 @@ export default function BrowseQatarHomeV2() {
           </div>
 
           <div>
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-xl font-black text-[#8c1534] sm:text-2xl xl:text-3xl">LATEST LISTINGS</h2>
-              <Link to="/marketplace" className="shrink-0 text-sm font-semibold text-[#941333] hover:underline">View all <ArrowRight className="inline size-4" aria-hidden="true" /></Link>
+            <div className="mb-4 flex items-center justify-between gap-3 border-b border-[#ead9ca] pb-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#8c1534] text-[#fff0c7] shadow-sm ring-4 ring-[#fff0c7]/60"><Sparkles className="size-5" aria-hidden="true" /></span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#941333]">Fresh Finds</p>
+                  <h2 className="mt-0.5 text-xl font-black tracking-tight text-[#30252a] sm:text-2xl xl:text-3xl">Latest Listings</h2>
+                </div>
+              </div>
+              <Link to="/marketplace" className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#f0dfc8] bg-[#fff7e6] px-3 py-2 text-xs font-bold text-[#8c1534] transition hover:bg-[#fff0c7] sm:text-sm">View all <ArrowRight className="size-4" aria-hidden="true" /></Link>
             </div>
             {listingsLoading ? <p role="status" className="rounded-2xl border border-[#f1e4d6] bg-white px-5 py-8 text-center text-sm text-[#6c5d61]">Loading latest listings…</p>
               : listingsError ? <p role="status" className="rounded-2xl border border-[#f1e4d6] bg-white px-5 py-8 text-center text-sm text-[#6c5d61]">{listingsError}</p>
@@ -456,19 +610,40 @@ export default function BrowseQatarHomeV2() {
                 <h2 className="mt-0.5 text-xl font-black tracking-tight text-[#30252a] sm:text-2xl">Latest News</h2>
               </div>
             </div>
-            <span className="rounded-full border border-[#f0dfc8] bg-[#fff7e6] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#8c1534]">Demo content</span>
+            <div className="flex items-center gap-2">
+              {news.length > 3 && !newsLoading && !newsError && <div className="flex items-center gap-1 text-xs text-[#6b5157]">
+                <span className="mr-1 tabular-nums">{newsIndex + 1} / {news.length}</span>
+                <button type="button" aria-label="Previous news stories" onClick={() => setNewsIndex((current) => (current - 1 + news.length) % news.length)} className="grid size-8 place-items-center rounded-full border border-[#ead9ca] bg-white text-[#8c1534] transition hover:bg-[#fff7e6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8c1534]">
+                  <ChevronLeft className="size-4" aria-hidden="true" />
+                </button>
+                <button type="button" aria-label="Next news stories" onClick={() => setNewsIndex((current) => (current + 1) % news.length)} className="grid size-8 place-items-center rounded-full border border-[#ead9ca] bg-white text-[#8c1534] transition hover:bg-[#fff7e6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8c1534]">
+                  <ChevronRight className="size-4" aria-hidden="true" />
+                </button>
+              </div>}
+              <span className="rounded-full border border-[#f0dfc8] bg-[#fff7e6] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#8c1534]">{newsLoading ? "Loading" : newsError ? "Feed unavailable" : "Qatar news feed"}</span>
+            </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {demoNews.map((item) => <article key={item.section} className="overflow-hidden rounded-xl bg-[#fffdfa]">
-              <img src={item.image} alt={item.imageAlt} loading="lazy" className="h-32 w-full bg-[#f7efe5] object-cover" />
-              <div className="p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-[#941333]">{item.section}</p>
-                <h3 className="mt-2 text-base font-bold leading-snug text-[#30252a]">{item.headline}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#6b5157]">{item.summary}</p>
-              </div>
-            </article>)}
-          </div>
-          <p className="mt-3 text-xs text-[#6b5157]">Sample headlines only; connect a Qatar news feed for live stories.</p>
+          {newsLoading ? <p role="status" className="rounded-xl bg-[#fffdfa] px-4 py-8 text-center text-sm text-[#6b5157]">Loading Qatar news…</p>
+            : newsError ? <p role="status" className="rounded-xl bg-[#fffdfa] px-4 py-8 text-center text-sm text-[#6b5157]">{newsError}</p>
+              : news.length > 0 ? <div className="grid gap-3 sm:grid-cols-3">
+                {visibleNews.map((item) => {
+                  const articleUrl = isHttpUrl(item.url) ? item.url : undefined;
+                  const imageUrl = isHttpUrl(item.imageUrl) ? item.imageUrl : undefined;
+                  const publishedDate = formatFeedDate(item.publishedAt);
+                  return <article key={item.id} className="overflow-hidden rounded-xl bg-[#fffdfa]">
+                    {imageUrl ? <img src={imageUrl} alt="" loading="lazy" className="h-32 w-full bg-[#f7efe5] object-cover" />
+                      : <div className="grid h-32 place-items-center bg-[#f7efe5] text-[#941333]"><Newspaper className="size-8" aria-hidden="true" /></div>}
+                    <div className="p-4">
+                      <p className="text-xs font-bold uppercase tracking-wide text-[#941333]">{item.source}</p>
+                      <h3 className="mt-2 text-base font-bold leading-snug text-[#30252a]">
+                        {articleUrl ? <a href={articleUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#941333]">{item.title}</a> : item.title}
+                      </h3>
+                      {publishedDate && <p className="mt-2 text-xs text-[#6b5157]">{publishedDate}</p>}
+                    </div>
+                  </article>;
+                })}
+              </div> : <p className="rounded-xl bg-[#fffdfa] px-4 py-8 text-center text-sm text-[#6b5157]">No Qatar news stories are available right now.</p>}
+          <p className="mt-3 text-xs text-[#6b5157]">Qatar headlines · cached for up to 24 hours</p>
         </div>
 
         <div className="rounded-2xl border border-[#f1e4d6] bg-white p-4 shadow-sm sm:p-5">
@@ -477,18 +652,25 @@ export default function BrowseQatarHomeV2() {
               <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#8c1534] text-[#fff0c7] shadow-sm ring-4 ring-[#fff0c7]/60"><TrendingUp className="size-5" aria-hidden="true" /></span>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#941333]">Market snapshot</p>
-                <h2 className="mt-0.5 text-xl font-black tracking-tight text-[#30252a] sm:text-2xl">Qatar Stock Update</h2>
+                <h2 className="mt-0.5 text-xl font-black tracking-tight text-[#30252a] sm:text-2xl">Stocks Prices</h2>
               </div>
             </div>
-            <span className="rounded-full border border-[#f0dfc8] bg-[#fff7e6] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#8c1534]">Not live</span>
+            {(stocksLoading || stocksError) && <span className="rounded-full border border-[#f0dfc8] bg-[#fff7e6] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#8c1534]">{stocksLoading ? "Loading" : "Feed unavailable"}</span>}
           </div>
           <div className="divide-y divide-[#f1e4d6]">
-            {demoStocks.map((stock) => <div key={stock.symbol} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-              <div className="min-w-0"><p className="text-sm font-bold text-[#30252a]">{stock.symbol}</p><p className="truncate text-xs text-[#6b5157]">{stock.name}</p></div>
-              <div className="shrink-0 text-right"><p className="text-sm font-semibold text-[#30252a]">{stock.price}</p><p className="text-xs font-semibold text-emerald-700">{stock.change}</p></div>
-            </div>)}
+            {stocksLoading ? <p role="status" className="py-6 text-center text-sm text-[#6b5157]">Loading Qatar stock quotes…</p>
+              : stocksError && stocks.length === 0 ? <p role="status" className="py-6 text-center text-sm text-[#6b5157]">{stocksError}</p>
+                : stocks.length > 0 ? visibleStocks.map((stock) => {
+                  const changeColor = stock.percentChange > 0 ? "text-emerald-700" : stock.percentChange < 0 ? "text-rose-700" : "text-[#6b5157]";
+                  const changeText = `${stock.percentChange > 0 ? "+" : ""}${stock.percentChange.toFixed(2)}%`;
+                  return <div key={stock.symbol} className="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
+                    <div className="min-w-0"><p className="text-sm font-bold text-[#30252a]">{stock.symbol}</p><p className="truncate text-xs text-[#6b5157]">{stock.name}</p></div>
+                    <div className="shrink-0 text-right"><p className="text-sm font-semibold text-[#30252a]">{stock.currency} {stock.price.toFixed(2)}</p><p className={`text-xs font-semibold ${changeColor}`}>{changeText}</p></div>
+                  </div>;
+                }) : stocksRefreshing ? <p role="status" className="py-6 text-center text-sm text-[#6b5157]">Loading Qatar stock quotes…</p>
+                  : <p className="py-6 text-center text-sm text-[#6b5157]">No Qatar stock quotes are available right now.</p>}
           </div>
-          <p className="mt-4 text-xs text-[#6b5157]">Demo values for layout only—not investment data.</p>
+          <p className="mt-4 border-t border-[#f1e4d6] pt-3 text-xs leading-relaxed text-[#6b5157]"><span className="font-bold text-[#8c1534]">Price disclosure:</span> Indicative prices based on the last available market data, not live quotes. Contact your broker for the latest prices before trading.</p>
         </div>
       </section>
 
@@ -498,19 +680,46 @@ export default function BrowseQatarHomeV2() {
             <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#8c1534] text-[#fff0c7] shadow-sm ring-4 ring-[#fff0c7]/60"><CalendarDays className="size-6" aria-hidden="true" /></span>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#941333]">What&apos;s on</p>
-              <h2 id="v2-events-heading" className="mt-0.5 text-xl font-black tracking-tight text-[#30252a] sm:text-2xl xl:text-3xl">Events in Qatar</h2>
+              <h2 id="v2-events-heading" className="mt-0.5 text-xl font-black tracking-tight text-[#30252a] sm:text-2xl xl:text-3xl">Events</h2>
             </div>
           </div>
-          <span className="rounded-full border border-[#f0dfc8] bg-[#fff7e6] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#8c1534]">Demo events</span>
+          <div className="flex items-center gap-2">
+            {events.length > EVENT_CARDS_PER_PAGE && !eventsLoading && !eventsError && <div className="flex items-center gap-1 text-xs text-[#6b5157]">
+              <span className="mr-1 tabular-nums">{eventIndex + 1} / {events.length}</span>
+              <button type="button" aria-label="Previous events" onClick={() => setEventIndex((current) => (current - 1 + events.length) % events.length)} className="grid size-8 place-items-center rounded-full border border-[#ead9ca] bg-white text-[#8c1534] transition hover:bg-[#fff7e6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8c1534]">
+                <ChevronLeft className="size-4" aria-hidden="true" />
+              </button>
+              <button type="button" aria-label="Next events" onClick={() => setEventIndex((current) => (current + 1) % events.length)} className="grid size-8 place-items-center rounded-full border border-[#ead9ca] bg-white text-[#8c1534] transition hover:bg-[#fff7e6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8c1534]">
+                <ChevronRight className="size-4" aria-hidden="true" />
+              </button>
+            </div>}
+            <span className="rounded-full border border-[#f0dfc8] bg-[#fff7e6] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#8c1534]">{eventsLoading ? "Loading" : eventsError ? "Feed unavailable" : "Qatar events"}</span>
+          </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {demoEvents.map((event) => <article key={event.title} className="rounded-2xl border border-[#f1e4d6] bg-white p-4 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-wide text-[#941333]">{event.category}</p>
-            <h3 className="mt-2 text-lg font-bold text-[#30252a]">{event.title}</h3>
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-[#6b5157]"><MapPin className="size-4" />{event.location}</p>
-            <p className="mt-3 text-xs text-[#6b5157]">Sample event · live event feed not connected</p>
-          </article>)}
-        </div>
+        {eventsLoading ? <p role="status" className="rounded-xl border border-[#f1e4d6] bg-white px-4 py-8 text-center text-sm text-[#6b5157]">Loading events in Qatar…</p>
+          : eventsError ? <p role="status" className="rounded-xl border border-[#f1e4d6] bg-white px-4 py-8 text-center text-sm text-[#6b5157]">{eventsError}</p>
+            : events.length > 0 ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {visibleEvents.map((event) => {
+                const eventUrl = isHttpUrl(event.url) ? event.url : undefined;
+                const eventImageUrl = isHttpUrl(event.imageUrl)
+                  ? event.imageUrl
+                  : isHttpUrl(event.thumbnail) ? event.thumbnail : undefined;
+                return <article key={event.id} className="rounded-2xl border border-[#f1e4d6] bg-white p-4 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    {eventImageUrl && <img src={eventImageUrl} alt="" loading="lazy" className="size-14 shrink-0 rounded-lg bg-[#f7efe5] object-cover" />}
+                    <div className="min-w-0 flex-1">
+                      {event.source && <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#941333]">{event.source}</p>}
+                      <h3 className="text-lg font-bold text-[#30252a]">
+                        {eventUrl ? <a href={eventUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#941333]">{event.title}</a> : event.title}
+                      </h3>
+                    </div>
+                  </div>
+                  {event.description && <p className="mt-2 text-sm leading-5 text-[#6b5157]">{event.description}</p>}
+                  <p className="mt-2 flex items-center gap-1.5 text-sm text-[#6b5157]"><CalendarDays className="size-4 shrink-0" aria-hidden="true" />{event.dateText}</p>
+                  <p className="mt-2 flex items-center gap-1.5 text-sm text-[#6b5157]"><MapPin className="size-4 shrink-0" aria-hidden="true" />{event.venue}</p>
+                </article>;
+              })}
+            </div> : <p className="rounded-xl border border-[#f1e4d6] bg-white px-4 py-8 text-center text-sm text-[#6b5157]">No upcoming Qatar events were found.</p>}
       </section>
     </div>
     <ModernMarketplaceFooter variant="v2" />

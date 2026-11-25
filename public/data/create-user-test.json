@@ -1,0 +1,132 @@
+{
+  "description": "Test JSON bodies for POST /api/auth/create-user endpoint",
+  "baseUrl": "http://localhost:5000",
+  "endpoint": "/api/auth/create-user or /api/auth/createbyadmin or update-role",
+  "method": "POST",
+  "headers": {
+    "Authorization": "Bearer <your-firebase-id-token>",
+    "Content-Type": "application/json"
+  },
+  "testCases": [
+    {
+      "name": "Valid user creation - regular user",
+      "body": {
+        "name": "John Doe",
+        "username": "johndoe",
+        "email": "john.doe@example.com",
+        "role": "user"
+      },
+      "expectedStatus": 201,
+      "expectedResponse": {
+        "success": true,
+        "message": "User created successfully",
+        "userId": "uuid-here",
+        "user": {
+          "id": "uuid-here",
+          "name": "John Doe",
+          "username": "johndoe",
+          "email": "john.doe@example.com",
+          "role": "user",
+          "createdAt": "2025-12-13T10:30:00Z"
+        }
+      }
+    },
+    {
+      "uid": "zTLnPfgdfhdfhdhfdbJaQs32",
+      "name": "Najeeb",
+      "username": "najeeb6769",
+      "email": "najeeb6769@gmail.com",
+      "role": "restaurant_owner"
+    },
+    {
+      "name": "Valid user creation - admin role",
+      "body": {
+        "name": "Admin User",
+        "username": "adminuser",
+        "email": "admin@example.com",
+        "role": "admin"
+      },
+      "expectedStatus": 201,
+      "expectedResponse": {
+        "success": true,
+        "message": "User created successfully",
+        "userId": "uuid-here",
+        "user": {
+          "id": "uuid-here",
+          "name": "Admin User",
+          "username": "adminuser",
+          "email": "admin@example.com",
+          "role": "admin",
+          "createdAt": "2025-12-13T10:30:00Z"
+        }
+      }
+    },
+    {
+      "name": "Invalid - missing required fields",
+      "body": {
+        "name": "Incomplete User",
+        "email": "incomplete@example.com"
+      },
+      "expectedStatus": 400,
+      "expectedResponse": {
+        "success": false,
+        "error": "Missing required fields: username, role"
+      }
+    },
+    {
+      "name": "Invalid - duplicate username",
+      "body": {
+        "name": "Duplicate User",
+        "username": "johndoe",
+        "email": "duplicate@example.com",
+        "role": "user"
+      },
+      "expectedStatus": 409,
+      "expectedResponse": {
+        "success": false,
+        "error": "Username already exists"
+      }
+    },
+    {
+      "name": "Invalid - duplicate email",
+      "body": {
+        "name": "Another User",
+        "username": "anotheruser",
+        "email": "john.doe@example.com",
+        "role": "user"
+      },
+      "expectedStatus": 409,
+      "expectedResponse": {
+        "success": false,
+        "error": "Email already exists"
+      }
+    },
+    {
+      "name": "Unauthorized - missing token",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "name": "Test User",
+        "username": "testuser",
+        "email": "test@example.com",
+        "role": "user"
+      },
+      "expectedStatus": 401,
+      "expectedResponse": {
+        "success": false,
+        "error": "Missing or invalid authorization token"
+      }
+    }
+  ],
+  "curlExamples": [
+    {
+      "description": "Create a regular user",
+      "command": "curl -X POST http://localhost:5000/api/auth/create-user \\\n  -H 'Authorization: Bearer YOUR_TOKEN_HERE' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"name\": \"John Doe\",\n    \"username\": \"johndoe\",\n    \"email\": \"john.doe@example.com\",\n    \"role\": \"user\"\n  }'"
+    },
+    {
+      "description": "Create an admin user",
+      "command": "curl -X POST http://localhost:5000/api/auth/create-user \\\n  -H 'Authorization: Bearer YOUR_TOKEN_HERE' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"name\": \"Admin User\",\n    \"username\": \"adminuser\",\n    \"email\": \"admin@example.com\",\n    \"role\": \"admin\"\n  }'"
+    }
+  ]
+}
